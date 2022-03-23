@@ -64,6 +64,7 @@ func Init() {
 	}
 	if conf.App.Orm.OrmSync {
 		err := db.Sync2(
+			
 		)
 		if err != nil {
 			zlog.Fatal().Msgf("数据库 sync失败.err:%s", err.Error())
