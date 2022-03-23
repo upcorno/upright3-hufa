@@ -29,7 +29,7 @@ type ConsultationRecord struct {
 	Type            string    `xorm:"not null comment('回复内容类型，文本，图片') VARCHAR(20)" json:"type"`
 	Content         string    `xorm:"comment('回复内容') LONGTEXT" json:"content"`
 	CreateTime      int       `xorm:"INT(10)" json:"create_time"`
-	UpdateTime      time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP" json:"update_time"`
+	UpdateTime      time.Time `xorm:"not null updated DateTime" json:"update_time"`
 }
 
 type Favorites struct {
