@@ -23,6 +23,7 @@ type Config struct {
 	Rpc       *rpcConf       `mapstructure:"rpc"`
 	Ristretto *ristrettoConf `mapstructure:"ristretto"`
 	Oss       *oss           `mapstructure:"oss"`
+	WxApp     *wxApp         `mapstructure:"wx_app"`
 }
 
 func NewConfig() *Config {
@@ -136,4 +137,9 @@ type oss struct {
 	RoleArn         string `mapstructure:"role_arn"`
 	BucketName      string `mapstructure:"bucket_name"`
 	Host            string `mapstructure:"host"`
+}
+
+type wxApp struct {
+	Appid  string `mapstructure:"appid"`
+	Secret string `mapstructure:"secret"`
 }
