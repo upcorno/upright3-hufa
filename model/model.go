@@ -64,12 +64,16 @@ func Init() {
 	}
 	if conf.App.Orm.OrmSync {
 		err := db.Sync2(
-			
+
 		)
 		if err != nil {
 			zlog.Fatal().Msgf("数据库 sync失败.err:%s", err.Error())
 		}
 	}
+	// _, err = db.Exec("ALTER TABLE legal_issue ADD FULLTEXT INDEX title_2 (title, issue_text) WITH PARSER ngram")
+	// if err != nil {
+	// 	zlog.Fatal().Msgf("创建全文索引失败：.err:%s", err.Error())
+	// }
 	Db = db
 	zlog.Info().Msg("model init")
 }
