@@ -4,6 +4,7 @@ import (
 	"law/enum"
 	"law/model"
 	"law/utils"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -26,4 +27,18 @@ func ConsultationCreate(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("法律咨询生成失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consul.Id}))
+}
+
+//咨询设置状态
+func ConsultationStatusSet(ctx echo.Context) error {
+	consultationIdStr := ctx.QueryParam("consultation_id")
+	consultationId, err := strconv.Atoi(consultationIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
+	}
+	status := ctx.QueryParam("status")
+	if err := model.ConsultationStatusSet(consultationId, status); err != nil {
+		return ctx.JSON(utils.ErrIpt("法律咨询状态设置失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consultationId}))
 }
