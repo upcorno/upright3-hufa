@@ -26,7 +26,7 @@ type ConsultationRecord struct {
 	Id              int       `xorm:"not null pk autoincr UNSIGNED INT(10)" json:"id"`
 	ConsultationId  int       `xorm:"not null comment('咨询id') index UNSIGNED INT(10)" json:"consultation_id"`
 	CommunicatorUid int       `xorm:"not null comment('沟通人uid') UNSIGNED INT(10)" json:"communicator_uid"`
-	Type            string    `xorm:"not null comment('回复内容类型，文本，图片') VARCHAR(20)" json:"type"`
+	Type            string    `xorm:"not null comment('回复类型，answer,query') VARCHAR(20)" json:"type"`
 	Content         string    `xorm:"comment('回复内容') LONGTEXT" json:"content"`
 	CreateTime      int       `xorm:"INT(10)" json:"create_time"`
 	UpdateTime      time.Time `xorm:"not null updated DateTime" json:"update_time"`

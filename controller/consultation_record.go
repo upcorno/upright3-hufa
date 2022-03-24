@@ -23,9 +23,6 @@ func ConsultationRecordCreate(ctx echo.Context) error {
 	record.ConsultationId = consultationId
 	uid := ctx.Get("uid").(int)
 	record.CommunicatorUid = uid
-	if record.Type == "" {
-		record.Type = "text"
-	}
 	record.CreateTime = int(time.Now().Unix())
 	if err := ctx.Validate(record); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
