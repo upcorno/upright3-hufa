@@ -37,7 +37,7 @@ type Favorites struct {
 	UserId     int       `xorm:"not null comment('用户id') index UNSIGNED INT(10)" json:"user_id"`
 	IssueId    int       `xorm:"not null comment('普法知识问题id') index UNSIGNED INT(10)" json:"issue_id"`
 	CreateTime int       `xorm:"INT(10)" json:"create_time"`
-	UpdateTime time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP" json:"update_time"`
+	UpdateTime time.Time `xorm:"not null updated DateTime" json:"update_time"`
 }
 
 type LegalIssue struct {
