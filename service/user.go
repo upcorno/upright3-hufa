@@ -80,12 +80,12 @@ func SetNameAndAvatarUrl(uid int, nickName string, avatarUrl string) (err error)
 }
 
 func wxLogin(code string) (*weapp.LoginResponse, error) {
-	sdk := weapp.NewClient(conf.App.WxApp.Appid, conf.App.WxApp.Appid)
+	sdk := weapp.NewClient(conf.App.WxApp.Appid, conf.App.WxApp.Secret)
 	return sdk.Login(code)
 }
 
 func getPhoneNumber(code string) (*phonenumber.GetPhoneNumberResponse, error) {
-	sdk := weapp.NewClient(conf.App.WxApp.Appid, conf.App.WxApp.Appid)
+	sdk := weapp.NewClient(conf.App.WxApp.Appid, conf.App.WxApp.Secret)
 	cli := sdk.NewPhonenumber()
 	return cli.GetPhoneNumber(&phonenumber.GetPhoneNumberRequest{Code: code})
 }
