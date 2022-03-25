@@ -15,7 +15,7 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodPost, "/user/login", controller.Login)
 	r.Add(http.MethodPost, "/user/set_phone", controller.SetPhone)
 	r.Add(http.MethodPost, "/user/set_name_and_avatar_url", controller.SetNameAndAvatarUrl)
-	r.Add(http.MethodPost, "/user/get_user_info", controller.GetUserInfo)
+	r.Add(http.MethodGet, "/user/get_user_info", controller.GetUserInfo)
 	r.Add(http.MethodPost, "/consultation_status/set", controller.ConsultationStatusSet)
 	r.Add(http.MethodGet, "/legal_issue/get", controller.LegalIssueGet)
 	r.Add(http.MethodPost, "/favorites/add", controller.FavoritesAdd)
