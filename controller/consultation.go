@@ -42,3 +42,13 @@ func ConsultationStatusSet(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consultationId}))
 }
+
+//用户历史咨询记录
+func ConsultationList(ctx echo.Context) error {
+	uid := ctx.Get("uid").(int)
+	consultationList, err := model.ConsultationList(uid)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取历史咨询列表失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", consultationList))
+}

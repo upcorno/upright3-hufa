@@ -15,3 +15,12 @@ func ConsultationStatusSet(consultationId int, status string) error {
 	_, err := Db.Cols("status").Update(&Consultation{Status: status}, &Consultation{Id: consultationId})
 	return err
 }
+
+//用户历史咨询记录列表
+func ConsultationList(uid int) ([]Consultation, error) {
+	consultationList := []Consultation{}
+	err := Db.Table("consultation").
+	Where("consultation.consultant_uid = ?", uid).
+	Find(&consultationList)
+	return consultationList, err
+}

@@ -22,4 +22,5 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodPost,"/favorites/cancel", controller.FavoritesCancel)
 	r.Add(http.MethodGet, "/favorites/get", controller.IssueIsFavorites)
 	r.Add(http.MethodGet, "/favorites/list", controller.FavoritesList)
+	r.Add(http.MethodGet, "/consultation/list", controller.ConsultationList)
 }
