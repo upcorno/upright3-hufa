@@ -59,5 +59,15 @@ func IssueIsFavorites(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("查询普法问题收藏失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success",map[string]bool{"is_favorites": has}))
+	return ctx.JSON(utils.Succ("success", map[string]bool{"is_favorites": has}))
+}
+
+//用户收藏列表
+func FavoritesList(ctx echo.Context) error {
+	uid := ctx.Get("uid").(int)
+	favorites, err := model.FavoritesList(uid)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取普法问题收藏列表失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", favorites))
 }

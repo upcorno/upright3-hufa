@@ -27,3 +27,13 @@ func IssueIsFavorites(uid int, issueId int) (bool, error) {
 	})
 	return has, err
 }
+
+//用户收藏列表
+func FavoritesList(uid int) ([]LegalIssue, error) {
+	legalIssueList := []LegalIssue{}
+	err := Db.Table("legal_issue").
+	Join("INNER", "favorites", "favorites.issue_id = legal_issue.id").
+	Where("favorites.user_id = ?", uid).
+	Find(&legalIssueList)
+	return legalIssueList, err
+}
