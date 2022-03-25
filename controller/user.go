@@ -42,8 +42,8 @@ func SetPhone(ctx echo.Context) error {
 }
 
 type nameAndAvatarUrl struct {
-	NickName  string `json:"nickName"`
-	AvatarUrl string `json:"avatarUrl"`
+	NickName  string `json:"nick_name"` 
+	AvatarUrl string `json:"avatar_url"`
 }
 
 func SetNameAndAvatarUrl(ctx echo.Context) error {
