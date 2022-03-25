@@ -46,3 +46,18 @@ func FavoritesCancel(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success"))
 }
+
+//普法问题是否收藏
+func IssueIsFavorites(ctx echo.Context) error {
+	issueIdStr := ctx.QueryParam("issue_id")
+	issueId, err := strconv.Atoi(issueIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
+	}
+	uid := ctx.Get("uid").(int)
+	has, err := model.IssueIsFavorites(uid, issueId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("查询普法问题收藏失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success",map[string]bool{"is_favorites": has}))
+}
