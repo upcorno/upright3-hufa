@@ -17,11 +17,11 @@ func Login(code string) (uid int, err error) {
 	if err = res.GetResponseError(); err != nil {
 		return
 	}
-	return getUid(res.OpenID)
+	return getUid(res.OpenID, res.UnionID)
 }
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
-func getUid(openid string) (uid int, err error) {
+func getUid(openid string, unionID string) (uid int, err error) {
 	user := model.User{Openid: openid}
 	has, err := user.Get()
 	if err != nil {
@@ -29,9 +29,14 @@ func getUid(openid string) (uid int, err error) {
 	}
 	if has {
 		uid = user.Id
+		if user.Unionid != unionID {
+			//更新 unionid, unionid 可能从 null 变为由内容
+			err = user.Update()
+		}
 		return
 	}
 	user.AppId = conf.App.WxApp.Appid
+	user.Unionid = unionID
 	if err = user.Insert(); err != nil {
 		return
 	}
