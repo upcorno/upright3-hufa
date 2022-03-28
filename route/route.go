@@ -23,4 +23,6 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodGet, "/favorite/get", controller.IssueIsFavorite)
 	r.Add(http.MethodGet, "/favorite/list", controller.FavoriteList)
 	r.Add(http.MethodGet, "/consultation/list", controller.ConsultationList)
+	r.Add(http.MethodGet, "/consultation/file_upload_auth", controller.ConsultationFileUploadAuth)
+	r.Add(http.MethodGet, "/consultation_record/file_upload_auth", controller.ConsultationRecordFileUploadAuth)
 }

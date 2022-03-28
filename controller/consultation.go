@@ -52,3 +52,12 @@ func ConsultationList(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success", consultationList))
 }
+
+//咨询文件上传
+func ConsultationFileUploadAuth(ctx echo.Context) error {
+	fileUploadConfInfo, err := utils.FileUploadAuthSTS("consultation")
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取文件上传配置信息失败", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", fileUploadConfInfo))
+}
