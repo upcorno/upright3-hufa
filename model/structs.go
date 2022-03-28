@@ -32,7 +32,7 @@ type ConsultationRecord struct {
 	UpdateTime      time.Time `xorm:"not null updated DateTime" json:"update_time"`
 }
 
-type Favorites struct {
+type Favorite struct {
 	Id         int       `xorm:"not null pk autoincr UNSIGNED INT(10)" json:"id"`
 	UserId     int       `xorm:"not null comment('用户id') index UNSIGNED INT(10)" json:"user_id"`
 	IssueId    int       `xorm:"not null comment('普法知识问题id') index UNSIGNED INT(10)" json:"issue_id"`
@@ -45,6 +45,7 @@ type LegalIssue struct {
 	CreatorUid int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT(10)" json:"creator_uid"`
 	CategoryId int       `xorm:"not null comment('类别id') index UNSIGNED INT(10)" json:"category_id"`
 	Title      string    `xorm:"not null comment('标题') index index VARCHAR(60)" json:"title"`
+	Imgs       string    `xorm:"comment('普法问题关联图片') TEXT" json:"imgs"`
 	IssueText  string    `xorm:"comment('内容') LONGTEXT" json:"issue_text"`
 	CreateTime int       `xorm:"INT(10)" json:"create_time"`
 	UpdateTime time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP" json:"update_time"`
