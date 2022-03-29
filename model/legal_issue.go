@@ -4,7 +4,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-
 //获取普法问题详情
 func LegalIssueGet(legalIssueId int) (LegalIssue, error) {
 	issue := LegalIssue{}

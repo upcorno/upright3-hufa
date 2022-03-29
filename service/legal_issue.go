@@ -9,7 +9,7 @@ import (
 )
 
 type LegalIssueSearch struct {
-	SearchText         string   `json:"search_text" form:"search_text" query:"search_text"`
+	SearchText string `json:"search_text" form:"search_text" query:"search_text"`
 }
 
 //法律知识搜索

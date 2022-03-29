@@ -19,7 +19,7 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodPost, "/consultation_status/set", controller.ConsultationStatusSet)
 	r.Add(http.MethodGet, "/legal_issue/get", controller.LegalIssueGet)
 	r.Add(http.MethodPost, "/favorite/add", controller.FavoriteAdd)
-	r.Add(http.MethodPost,"/favorite/cancel", controller.FavoriteCancel)
+	r.Add(http.MethodPost, "/favorite/cancel", controller.FavoriteCancel)
 	r.Add(http.MethodGet, "/favorite/get", controller.IssueIsFavorite)
 	r.Add(http.MethodGet, "/favorite/list", controller.FavoriteList)
 	r.Add(http.MethodGet, "/consultation/list", controller.ConsultationList)

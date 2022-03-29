@@ -20,7 +20,7 @@ func ConsultationStatusSet(consultationId int, status string) error {
 func ConsultationList(uid int) ([]Consultation, error) {
 	consultationList := []Consultation{}
 	err := Db.Table("consultation").
-	Where("consultation.consultant_uid = ?", uid).
-	Find(&consultationList)
+		Where("consultation.consultant_uid = ?", uid).
+		Find(&consultationList)
 	return consultationList, err
 }

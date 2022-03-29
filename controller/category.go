@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 //获取当前分类子级分类
 func CategoryListGet(ctx echo.Context) error {
 	categoryIdStr := ctx.QueryParam("category_id")
