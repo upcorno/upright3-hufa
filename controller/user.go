@@ -42,7 +42,7 @@ func SetPhone(ctx echo.Context) error {
 }
 
 type nameAndAvatarUrl struct {
-	NickName  string `json:"nick_name"` 
+	NickName  string `json:"nick_name"`
 	AvatarUrl string `json:"avatar_url"`
 }
 
@@ -66,7 +66,7 @@ func GetUserInfo(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取用户信息失败！", err.Error()))
 	}
-	if has {
+	if !has {
 		return ctx.JSON(utils.ErrIpt("用户 id 不存在！", uid))
 	}
 	return ctx.JSON(utils.Succ("success", user))
