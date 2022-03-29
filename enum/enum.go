@@ -8,3 +8,9 @@ const (
 	DONE     = "已完成"  
 
 )
+
+//咨询交流记录类型
+const (
+	QUERY  = "query"
+	ANSWER = "answer"
+)

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"law/enum"
 	"law/model"
 	"law/utils"
@@ -25,6 +26,20 @@ func ConsultationCreate(ctx echo.Context) error {
 	}
 	if err := model.ConsultationCreate(consul); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询生成失败！", err.Error()))
+	}
+	consultationData, err := json.Marshal(map[string]string{"question":consul.Question, "imgs":consul.Imgs})
+	if err != nil {
+		return ctx.JSON(utils.ErrOpt("consultation info序列化失败", err.Error()))
+	}
+	record := &model.ConsultationRecord{
+		ConsultationId: consul.Id,
+		CommunicatorUid: uid,
+		Type: enum.QUERY,
+		Content: string(consultationData),
+		CreateTime: int(time.Now().Unix()),
+	}
+	if err := model.ConsultationRecordCreate(record); err != nil {
+		return ctx.JSON(utils.ErrIpt("法律咨询记录生成失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consul.Id}))
 }
