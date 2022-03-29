@@ -45,3 +45,17 @@ func LegalIssueGet(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success", issue))
 }
+
+//获取改分类查询下面的普法问题
+func LegalIssueListByCategory(ctx echo.Context) error {
+	categoryIdStr := ctx.QueryParam("category_id")
+	categoryId, err := strconv.Atoi(categoryIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取category_id失败！", err.Error()))
+	}
+	legalIssueList, err := model.LegalIssueListByCategory(categoryId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取legal_issue_list失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", legalIssueList))
+}

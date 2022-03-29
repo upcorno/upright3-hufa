@@ -26,4 +26,5 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodGet, "/consultation/file_upload_auth", controller.ConsultationFileUploadAuth)
 	r.Add(http.MethodGet, "/consultation_record/file_upload_auth", controller.ConsultationRecordFileUploadAuth)
 	r.Add(http.MethodGet, "/category_list/get", controller.CategoryListGet)
+	r.Add(http.MethodGet, "/legal_issue_list/by_category", controller.LegalIssueListByCategory)
 }

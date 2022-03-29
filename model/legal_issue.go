@@ -11,3 +11,10 @@ func LegalIssueGet(legalIssueId int) (LegalIssue, error) {
 	_, err := Db.Table("legal_issue").Where("id=?", legalIssueId).Get(&issue)
 	return issue, err
 }
+
+////获取改分类查询下面的普法问题
+func LegalIssueListByCategory(categoryId int) ([]LegalIssue, error) {
+	legalIssueList := []LegalIssue{}
+	err := Db.Table("legal_issue").Where("category_id=?", categoryId).Find(&legalIssueList)
+	return legalIssueList, err
+}
