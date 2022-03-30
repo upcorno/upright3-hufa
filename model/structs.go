@@ -62,3 +62,48 @@ type User struct {
 	AddTime    int       `xorm:"INT(10)" json:"add_time"`
 	UpdateTime time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP" json:"update_time"`
 }
+
+type InfringementDetection struct {
+	Id           int       `xorm:"not null pk autoincr UNSIGNED INT(10)" json:"id"`
+	CreatorUid   int       `xorm:"not null comment('创建人id') index UNSIGNED INT(10)" json:"creator_uid"`
+	Name         string    `xorm:"not null comment('姓名') VARCHAR(16)" json:"name"`
+	Phone        string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone"`
+	Organization string    `xorm:"comment('组织机构') VARCHAR(60)" json:"organization"`
+	Description  string    `xorm:"comment('侵权监测描述') TEXT" json:"description"`
+	Resume       string    `xorm:"comment('权利概要') TEXT" json:"resume"`
+	CreateTime   int       `xorm:"INT(10)" json:"create_time"`
+	UpdateTime   time.Time `xorm:"not null updated DateTime" json:"update_time"`
+}
+
+type DetectionReturnVisit struct {
+	Id              int       `xorm:"not null pk autoincr UNSIGNED INT(10)" json:"id"`
+	CreatorUid      int       `xorm:"not null comment('创建人id') index UNSIGNED INT(10)" json:"creator_uid"`
+	DetectionId     int       `xorm:"not null comment('监测id') UNSIGNED INT(10)" json:"detection_id"`
+	Classification  string    `xorm:"not null comment('类别') VARCHAR(10)" json:"classification"`
+	CustomerAddress string    `xorm:"not null comment('客户地址') VARCHAR(50)" json:"customer_address"`
+	Remark          string    `xorm:"comment('备注') TEXT" json:"remark"`
+	CreateTime      int       `xorm:"INT(10)" json:"create_time"`
+	UpdateTime      time.Time `xorm:"not null updated DateTime" json:"update_time"`
+}
+type RightsProtection struct {
+	Id           int       `xorm:"not null pk autoincr UNSIGNED INT(10)" json:"id"`
+	CreatorUid   int       `xorm:"not null comment('创建人id') index UNSIGNED INT(10)" json:"creator_uid"`
+	Name         string    `xorm:"not null comment('姓名') VARCHAR(16)" json:"name"`
+	Phone        string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone"`
+	Organization string    `xorm:"comment('组织结构') VARCHAR(60)" json:"organization"`
+	Description  string    `xorm:"comment('维权意向描述') TEXT" json:"description"`
+	Resume       string    `xorm:"comment('权利概要') TEXT" json:"resume"`
+	CreateTime   int       `xorm:"INT(10)" json:"create_time"`
+	UpdateTime   time.Time `xorm:"not null updated DateTime" json:"update_time"`
+}
+
+type ProtectionReturnVisit struct {
+	Id              int       `xorm:"not null pk autoincr UNSIGNED INT(10)" json:"id"`
+	CreatorUid      int       `xorm:"not null comment('创建人id') index UNSIGNED INT(10)" json:"creator_uid"`
+	ProtectionId    int       `xorm:"not null comment('维权id') UNSIGNED INT(10)" json:"protection_id"`
+	Classification  string    `xorm:"not null comment('类别') VARCHAR(10)" json:"classification"`
+	CustomerAddress string    `xorm:"not null comment('客户地址') VARCHAR(50)" json:"customer_address"`
+	Remark          string    `xorm:"comment('备注') TEXT" json:"remark"`
+	CreateTime      int       `xorm:"INT(10)" json:"create_time"`
+	UpdateTime      time.Time `xorm:"not null updated DateTime" json:"update_time"`
+}
