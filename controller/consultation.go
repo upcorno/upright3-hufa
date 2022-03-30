@@ -76,3 +76,17 @@ func ConsultationFileUploadAuth(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success", fileUploadConfInfo))
 }
+
+//获取咨询信息
+func ConsultationGet(ctx echo.Context) error {
+	consultationIdStr := ctx.QueryParam("consultation_id")
+	consultationId, err := strconv.Atoi(consultationIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
+	}
+	consultation, err := model.ConsultationGet(consultationId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", consultation))
+}

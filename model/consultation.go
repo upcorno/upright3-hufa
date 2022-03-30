@@ -24,3 +24,10 @@ func ConsultationList(uid int) ([]Consultation, error) {
 		Find(&consultationList)
 	return consultationList, err
 }
+
+//获取咨询信息
+func ConsultationGet(consultationId int) (Consultation, error) {
+	consultation := Consultation{}
+	_, err := Db.Table("consultation").Where("id=?", consultationId).Get(&consultation)
+	return consultation, err
+}
