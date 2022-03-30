@@ -41,12 +41,12 @@ func LegalIssueGet(ctx echo.Context) error {
 	}
 	issue, err := model.LegalIssueGet(legalIssueId)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("法律咨询状态设置失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取普法问题失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", issue))
 }
 
-//获取改分类查询下面的普法问题
+//获取该分类查询下面的普法问题
 func LegalIssueListByCategory(ctx echo.Context) error {
 	categoryIdStr := ctx.QueryParam("category_id")
 	categoryId, err := strconv.Atoi(categoryIdStr)

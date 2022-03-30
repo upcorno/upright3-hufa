@@ -11,7 +11,7 @@ func LegalIssueGet(legalIssueId int) (LegalIssue, error) {
 	return issue, err
 }
 
-////获取改分类查询下面的普法问题
+//获取该分类查询下面的普法问题
 func LegalIssueListByCategory(categoryId int) ([]LegalIssue, error) {
 	legalIssueList := []LegalIssue{}
 	err := Db.Table("legal_issue").Where("category_id=?", categoryId).Find(&legalIssueList)
