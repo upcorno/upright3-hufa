@@ -14,3 +14,11 @@ const (
 	QUERY  = "query"
 	ANSWER = "answer"
 )
+
+//回访记录状态
+const (
+	NORETURN      = "未回访"
+	HAVEINTENTION = "有合作意向"
+	NOINTENTION   = "无合作意向"
+	COOPERATED    = "已合作"
+)

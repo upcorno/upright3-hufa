@@ -28,4 +28,5 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodGet, "/category_list/get", controller.CategoryListGet)
 	r.Add(http.MethodGet, "/legal_issue_list/by_category", controller.LegalIssueListByCategory)
 	r.Add(http.MethodGet, "/consultation/get", controller.ConsultationGet)
+	r.Add(http.MethodPost, "/infringement_detection/add", controller.InfringementDetectionAdd)
 }
