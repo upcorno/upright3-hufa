@@ -24,6 +24,7 @@ func ConsultationCreate(ctx echo.Context) error {
 	if err := ctx.Validate(consul); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
 	}
+	//创建 a 在创建 b，类似带业务规则的建议放在 service 层
 	if err := model.ConsultationCreate(consul); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询生成失败！", err.Error()))
 	}
@@ -89,4 +90,4 @@ func ConsultationGet(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", consultation))
-}
+} //TODO:代码格式化， go fmt 要经常用   go fmt ./... 可做整个项目 格式化

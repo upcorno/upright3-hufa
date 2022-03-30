@@ -47,6 +47,7 @@ func LegalIssueGet(ctx echo.Context) error {
 }
 
 //获取该分类查询下面的普法问题
+//考虑是否可以与 LegalIssueList 合并，多个检索条件而已，目前本接口不支持分页
 func LegalIssueListByCategory(ctx echo.Context) error {
 	categoryIdStr := ctx.QueryParam("category_id")
 	categoryId, err := strconv.Atoi(categoryIdStr)

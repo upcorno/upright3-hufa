@@ -36,7 +36,7 @@ func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
 	if search.SearchText != "" {
 		var seachMode string
 		if regexp.MustCompile(`(\s[\+,\-,\~,\>,\<])|(^[\+,\-,\~,\>,\<])|(\S\*)`).MatchString(search.SearchText) {
-			seachMode = "IN BOOLEAN MODE"
+			seachMode = "IN BOOLEAN MODE" //这种模式目前业务中应当是用不到的，可以考虑统一走下面自然语言模式
 		} else {
 			seachMode = "IN NATURAL LANGUAGE MODE"
 		}

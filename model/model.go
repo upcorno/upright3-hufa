@@ -19,7 +19,7 @@ import (
 
 // Db 数据库操作句柄
 var Db *xorm.Engine
-var Db1 *xorm.Engine
+var Db1 *xorm.Engine  //TODO:Db1 做什么的，应该去掉吧
 
 // MySQL链接字符串
 func Dsn(config *conf.Config) string {
@@ -74,6 +74,7 @@ type Page struct {
 }
 
 //处理分页及排序逻辑,page如:map[item_num:[8] order[]:[asc-assent_count asc-reply_count] page_index:[1]]
+//condiBean
 func (page *Page) GetResults(sess *xorm.Session, modsPtr interface{}, condiBean ...interface{}) (*PageResult, error) {
 	defer sess.Close()
 	sess.Limit(page.ItemNum, (page.PageIndex-1)*page.ItemNum) //分页

@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func InitRouter(r *echo.Router) {
+func InitRouter(r *echo.Router) {//可以考虑分组
 	r.Add(http.MethodPost, "/consultation/create", controller.ConsultationCreate)
 	r.Add(http.MethodPost, "/consultation_record/create", controller.ConsultationRecordCreate)
 	r.Add(http.MethodGet, "/consultation_record_list/get", controller.ConsultationRecordListGet)

@@ -1,3 +1,5 @@
+//TODO: 脚本生成的于目前文件不一致，检查下具体问题
+
 package model
 
 import (

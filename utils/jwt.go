@@ -17,6 +17,6 @@ func ParseToken(tokenStr string, claims jwt.Claims, jwtKey string) (jwt.Claims, 
 	if err != nil {
 		return nil, err
 	}
-	// fmt.Println("token=",token)
+	// fmt.Println("token=",token) //TODO: 类似这种注释建议删除
 	return token.Claims, nil
 }
