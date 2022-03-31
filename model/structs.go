@@ -60,7 +60,7 @@ type User struct {
 	AvatarUrl  string    `xorm:"comment('头像地址') TEXT" json:"avatar_url"`
 	Phone      string    `xorm:"comment('电话号码') CHAR(20)" json:"phone"`
 	AddTime    int       `xorm:"INT(10)" json:"add_time"`
-	UpdateTime time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP" json:"update_time"`
+	UpdateTime time.Time `xorm:"not null default CURRENT_TIMESTAMP TIMESTAMP updated" json:"update_time"`
 }
 
 type InfringementDetection struct {
