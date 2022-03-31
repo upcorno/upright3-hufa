@@ -15,3 +15,10 @@ func DetectionRetureVisitUpdate(detectionReturnVisit *DetectionReturnVisit) erro
 	_, err := Db.Update(detectionReturnVisit, &DetectionReturnVisit{DetectionId: detectionReturnVisit.DetectionId})
 	return err
 }
+
+//获取回访记录
+func DetectionReturnVisitGet(detectionId int) (DetectionReturnVisit, error) {
+	returnVisit := DetectionReturnVisit{}
+	_, err := Db.Table("detection_return_visit").Where("detection_id=?", detectionId).Get(&returnVisit)
+	return returnVisit, err
+}

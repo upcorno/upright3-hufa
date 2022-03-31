@@ -28,3 +28,17 @@ func DetectionReturnVisitUpdate(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success"))
 }
+
+//获取回访记录
+func DetectionReturnVisitGet(ctx echo.Context) error {
+	detectionIdStr := ctx.QueryParam("detection_id")
+	detectionId, err := strconv.Atoi(detectionIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取detection_id失败！", err.Error()))
+	}
+	returnVisit, err := model.DetectionReturnVisitGet(detectionId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取侵权监测回访记录失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", returnVisit))
+}
