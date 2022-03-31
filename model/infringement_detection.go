@@ -21,3 +21,10 @@ func InfringementDetectionAdd(infringementDetection *InfringementDetection) erro
 		return err
 	}
 }
+
+//获取侵权监测详情
+func InfringementDetectionGet(detectionId int) (InfringementDetection, error) {
+	infringementDetection := InfringementDetection{}
+	_, err := Db.Table("infringement_detection").Where("id=?", detectionId).Get(&infringementDetection)
+	return infringementDetection, err
+}
