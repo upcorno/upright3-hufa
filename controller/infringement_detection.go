@@ -3,6 +3,7 @@ package controller
 import (
 	"law/enum"
 	"law/model"
+	"law/service"
 	"law/utils"
 	"strconv"
 	"time"
@@ -47,4 +48,27 @@ func InfringementDetectionGet(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", infringementDetection))
+}
+
+//侵权监测列表检索
+func InfringementDetectionList(ctx echo.Context) error {
+	page := &model.Page{PageIndex: 1, ItemNum: 10}
+	if err := ctx.Bind(page); err != nil {
+		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
+	}
+	if err := ctx.Validate(page); err != nil {
+		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
+	}
+	search := &service.InfringementDetectionSearch{}
+	if err := ctx.Bind(search); err != nil {
+		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
+	}
+	if err := ctx.Validate(search); err != nil {
+		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
+	}
+	detections, err := service.InfringementDetectionList(page, search)
+	if err != nil {
+		return ctx.JSON(utils.ErrSvr("获取infringement_detection list失败", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", detections))
 }
