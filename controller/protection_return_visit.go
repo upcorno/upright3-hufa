@@ -28,3 +28,17 @@ func ProtectionReturnVisitUpdate(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success"))
 }
+
+//获取回访记录
+func ProtectionReturnVisitGet(ctx echo.Context) error {
+	protectionIdStr := ctx.QueryParam("protection_id")
+	protectionId, err := strconv.Atoi(protectionIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取detection_id失败！", err.Error()))
+	}
+	returnVisit, err := model.ProtectionReturnVisitGet(protectionId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取维权意向回访记录失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", returnVisit))
+}

@@ -15,3 +15,10 @@ func ProtectionRetureVisitUpdate(protectionReturnVisit *ProtectionReturnVisit) e
 	_, err := Db.Update(protectionReturnVisit, &ProtectionReturnVisit{ProtectionId: protectionReturnVisit.ProtectionId})
 	return err
 }
+
+//获取回访记录
+func ProtectionReturnVisitGet(protectionId int) (ProtectionReturnVisit, error) {
+	returnVisit := ProtectionReturnVisit{}
+	_, err := Db.Table("protection_return_visit").Where("protection_id=?", protectionId).Get(&returnVisit)
+	return returnVisit, err
+}
