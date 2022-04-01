@@ -21,3 +21,10 @@ func RightsProtectionAdd(rightsProtection *RightsProtection) error {
 		return err
 	}
 }
+
+//获取维权意向详情
+func RightsProtectionGet(protectionId int) (RightsProtection, error) {
+	rightsProtection := RightsProtection{}
+	_, err := Db.Table("rights_protection").Where("id=?", protectionId).Get(&rightsProtection)
+	return rightsProtection, err
+}

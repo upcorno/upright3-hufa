@@ -5,6 +5,7 @@ import (
 	"law/model"
 	"law/service"
 	"law/utils"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -33,6 +34,20 @@ func RightsProtectionAdd(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("添加默认回访失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"rights_protection_id": rightsProtection.Id}))
+}
+
+//获取维权意向
+func RightsProtectionGet(ctx echo.Context) error {
+	protectionIdStr := ctx.QueryParam("protection_id")
+	protectionId, err := strconv.Atoi(protectionIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取protection_id失败！", err.Error()))
+	}
+	rightsProtection, err := model.RightsProtectionGet(protectionId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取维权意向失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", rightsProtection))
 }
 
 //侵权监测列表检索
