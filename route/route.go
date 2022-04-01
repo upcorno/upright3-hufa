@@ -34,4 +34,5 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodGet, "/detection_return_visit/get", controller.DetectionReturnVisitGet)
 	r.Add(http.MethodGet, "/infringement_detection/get", controller.InfringementDetectionGet)
 	r.Add(http.MethodGet, "/infringement_detection/list", controller.InfringementDetectionList)
+	r.Add(http.MethodPost, "/protection_return_visit/update", controller.ProtectionReturnVisitUpdate)
 }
