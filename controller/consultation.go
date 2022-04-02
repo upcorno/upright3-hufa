@@ -85,11 +85,11 @@ func ConsultationGet(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	consultation, err := model.ConsultationGet(consultationId)
+	consultationInfo, err := model.ConsultationInfoGet(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", consultation))
+	return ctx.JSON(utils.Succ("success", consultationInfo))
 }
 
 //咨询后台列表检索
