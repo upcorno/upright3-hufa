@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"law/enum"
 	"law/model"
+	"law/service"
 	"law/utils"
 	"strconv"
 	"time"
@@ -89,4 +90,27 @@ func ConsultationGet(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", consultation))
+}
+
+//咨询后台列表检索
+func ConsultationSearchList(ctx echo.Context) error {
+	page := &model.Page{PageIndex: 1, ItemNum: 10}
+	if err := ctx.Bind(page); err != nil {
+		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
+	}
+	if err := ctx.Validate(page); err != nil {
+		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
+	}
+	search := &service.ConsultationSearch{}
+	if err := ctx.Bind(search); err != nil {
+		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
+	}
+	if err := ctx.Validate(search); err != nil {
+		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
+	}
+	consultations, err := service.ConsultationSearchList(page, search)
+	if err != nil {
+		return ctx.JSON(utils.ErrSvr("获取consultation list失败", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", consultations))
 }

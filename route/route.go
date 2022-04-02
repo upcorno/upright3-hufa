@@ -38,4 +38,5 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodGet, "/protection_return_visit/get", controller.ProtectionReturnVisitGet)
 	r.Add(http.MethodGet, "/rights_protection/get", controller.RightsProtectionGet)
 	r.Add(http.MethodGet, "/rights_protection/list", controller.RightsProtectionList)
+	r.Add(http.MethodGet, "/consultation_search/list", controller.ConsultationSearchList)
 }
