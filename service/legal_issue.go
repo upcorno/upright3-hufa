@@ -22,13 +22,22 @@ func LegalIssueList(page *model.Page, search *LegalIssueSearch) (*model.PageResu
 	if err != nil {
 		return nil, err
 	}
-	//todo
-	// legalIssueRes := pageResult.Rows.(*[]model.LegalIssue)
-	// if len(*legalIssueRes) < page.ItemNum {
-	// 	fmt.Println("++++", legalIssueRes)
-	// 		智能填充数据
 
-	// }
+	legalIssueRes, ok  := pageResult.Rows.(*[]model.LegalIssue)
+	if !ok {
+		addRes, err := model.LegalIssueListByRand((page.ItemNum))
+		if err != nil {
+			return nil, err
+		}
+		return &model.PageResult{Rows: addRes, Total: 0}, nil
+	}
+	if len(*legalIssueRes) < page.ItemNum {
+		addRes, err := model.LegalIssueListByRand((page.ItemNum-len(*legalIssueRes)))
+		if err != nil {
+			return nil, err
+		}
+		*legalIssueRes = append(*legalIssueRes, addRes...)
+	}
 	return pageResult, err
 }
 
