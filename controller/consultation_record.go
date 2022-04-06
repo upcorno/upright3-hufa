@@ -40,11 +40,11 @@ func ConsultationRecordListGet(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	recordList, err := model.ConsultationRecordList(consultationId)
+	recordListInfo, err := model.ConsultationRecordList(consultationId)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取consultation_record_list失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取consultation_record_info list失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", recordList))
+	return ctx.JSON(utils.Succ("success", recordListInfo))
 }
 
 //咨询记录文件上传
