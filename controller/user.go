@@ -71,3 +71,26 @@ func GetUserInfo(ctx echo.Context) error {
 	}
 	return ctx.JSON(utils.Succ("success", user))
 }
+
+func BackgroundLogin(ctx echo.Context) error {
+	accountAndPassWord := &AccountAndPassWord{}
+	if err := ctx.Bind(accountAndPassWord); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
+	}
+	if accountAndPassWord.Account != "youshangjiaoceshi" {
+		return ctx.JSON(utils.ErrIpt("账号输入错误！", nil))
+	}
+	if accountAndPassWord.Password != "1234567890" {
+		return ctx.JSON(utils.ErrIpt("密码输入错误！", nil))
+	}
+	token, err := utils.CreateAuthToken(2078, ctx.RealIP())
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("token 生成失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", map[string]string{"token": token}))
+}
+
+type AccountAndPassWord struct {
+	Account string  `json:"account"`
+	Password string `json:"password"`
+}

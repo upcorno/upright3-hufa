@@ -80,10 +80,11 @@ func fileExist(path string) bool {
 
 // jwt config
 type jwtConf struct {
-	LoginKey     string `mapstructure:"login_key"`
-	LoginPath    string `mapstructure:"login_path"`
-	AuthKey      string `mapstructure:"auth_key"`
-	AuthLifetime int    `mapstructure:"auth_lifetime"`
+	LoginKey       string `mapstructure:"login_key"`
+	LoginPath      string `mapstructure:"login_path"`
+	BackgroundPath string `mapstructure:"background_path"`
+	AuthKey        string `mapstructure:"auth_key"`
+	AuthLifetime   int    `mapstructure:"auth_lifetime"`
 }
 
 // http config
