@@ -24,6 +24,7 @@ type Config struct {
 	Ristretto *ristrettoConf `mapstructure:"ristretto"`
 	Oss       *oss           `mapstructure:"oss"`
 	WxApp     *wxApp         `mapstructure:"wx_app"`
+	Account   *accountConf   `mapstructure:"account"`
 }
 
 func NewConfig() *Config {
@@ -143,4 +144,9 @@ type oss struct {
 type wxApp struct {
 	Appid  string `mapstructure:"appid"`
 	Secret string `mapstructure:"secret"`
+}
+
+type accountConf struct {
+	Account  string `mapstructure:"account"`
+	Password string `mapstructure:"password"`
 }

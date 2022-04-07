@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"law/conf"
 	"law/model"
 	"law/service"
 	"law/utils"
@@ -77,10 +78,10 @@ func BackgroundLogin(ctx echo.Context) error {
 	if err := ctx.Bind(accountAndPassWord); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
-	if accountAndPassWord.Account != "youshangjiaoceshi" {
+	if accountAndPassWord.Account != conf.App.Account.Account {
 		return ctx.JSON(utils.ErrIpt("账号输入错误！", nil))
 	}
-	if accountAndPassWord.Password != "1234567890" {
+	if accountAndPassWord.Password != conf.App.Account.Password {
 		return ctx.JSON(utils.ErrIpt("密码输入错误！", nil))
 	}
 	token, err := utils.CreateAuthToken(2078, ctx.RealIP())
