@@ -2,7 +2,6 @@ package conf
 
 import (
 	"flag"
-	"os"
 	"time"
 
 	zlog "github.com/rs/zerolog/log"
@@ -44,14 +43,11 @@ func NewConfig() *Config {
 	}
 }
 
-func Init(c chan<- os.Signal) {
+func Init() {
 	var cfgFile string
 	// 从启动命令中读取配置文件路径
 	flag.StringVar(&cfgFile, "c", defConfigFile, "path of config file.")
 	flag.Parse()
-	if cfgFile == defConfigFile && fileExist(acmConfigFile) {
-		getAndListenConfig(c)
-	}
 	if cfgFile == "" {
 		viper.AddConfigPath(".")
 		viper.SetConfigName("config")
@@ -73,10 +69,6 @@ func (app *Config) IsProd() bool {
 }
 func (app *Config) IsDev() bool {
 	return app.Mode == "dev"
-}
-func fileExist(path string) bool {
-	_, err := os.Lstat(path)
-	return !os.IsNotExist(err)
 }
 
 // jwt config

@@ -23,7 +23,7 @@ import (
 func StartServer() {
 	initTimezone()
 	c := make(chan os.Signal, 1)
-	conf.Init(c)
+	conf.Init()
 	service.InitCacheManager()
 	utils.InitLogger()
 	defer utils.FlushLog()

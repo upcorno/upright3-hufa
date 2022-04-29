@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"law/conf"
 	"io"
+	"law/conf"
 	"os"
 
 	"github.com/rs/zerolog"
