@@ -29,7 +29,7 @@ func LegalIssueList(page *model.Page, search *LegalIssueSearch) (*model.PageResu
 		if err != nil {
 			return nil, err
 		}
-		return &model.PageResult{Rows: addRes, Total: 0}, nil
+		return &model.PageResult{Rows: addRes, RelatedNum: 0}, nil
 	}
 	if len(*legalIssueRes) < page.ItemNum {
 		addRes, err := model.LegalIssueListByRand((page.ItemNum-len(*legalIssueRes)))

@@ -102,10 +102,10 @@ func (page *Page) GetResults(sess *xorm.Session, modsPtr interface{}, condiBean 
 	if count == 0 {
 		modsPtr = &[0]int{}
 	}
-	return &PageResult{Rows: modsPtr, Total: count}, nil
+	return &PageResult{Rows: modsPtr, RelatedNum: count}, nil
 }
 
 type PageResult struct {
-	Rows  interface{} `json:"rows"`
-	Total int64       `json:"total"`
+	Rows       interface{} `json:"rows"`
+	RelatedNum int64       `json:"related_num"`
 }
