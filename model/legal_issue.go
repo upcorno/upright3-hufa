@@ -21,8 +21,8 @@ func LegalIssueListByCategory(categoryId int) ([]LegalIssue, error) {
 }
 
 //随机获取普法问题
-func LegalIssueListByRand(num int) ([]LegalIssue, error) {
+func LegalIssueListByRand(num int, exceptArr []int) ([]LegalIssue, error) {
 	legalIssueList := []LegalIssue{}
-	err := Db.Table("legal_issue").In("id", utils.RandSlice(num)).Find(&legalIssueList)
+	err := Db.Table("legal_issue").In("id", utils.RandSlice(num, exceptArr)).Find(&legalIssueList)
 	return legalIssueList, err
 }

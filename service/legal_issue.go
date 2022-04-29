@@ -23,16 +23,20 @@ func LegalIssueList(page *model.Page, search *LegalIssueSearch) (*model.PageResu
 		return nil, err
 	}
 
-	legalIssueRes, ok  := pageResult.Rows.(*[]model.LegalIssue)
+	legalIssueRes, ok := pageResult.Rows.(*[]model.LegalIssue)
 	if !ok {
-		addRes, err := model.LegalIssueListByRand((page.ItemNum))
+		addRes, err := model.LegalIssueListByRand((page.ItemNum), []int{})
 		if err != nil {
 			return nil, err
 		}
 		return &model.PageResult{Rows: addRes, RelatedNum: 0}, nil
 	}
 	if len(*legalIssueRes) < page.ItemNum {
-		addRes, err := model.LegalIssueListByRand((page.ItemNum-len(*legalIssueRes)))
+		issueIds := []int{}
+		for _, v := range *legalIssueRes {
+			issueIds = append(issueIds, v.Id)
+		}
+		addRes, err := model.LegalIssueListByRand((page.ItemNum - len(*legalIssueRes)), issueIds)
 		if err != nil {
 			return nil, err
 		}
