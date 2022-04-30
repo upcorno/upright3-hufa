@@ -2,7 +2,6 @@ package controller
 
 import (
 	"law/model"
-	"law/service"
 	"law/utils"
 	"strconv"
 
@@ -18,14 +17,14 @@ func LegalIssueList(ctx echo.Context) error {
 	if err := ctx.Validate(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
 	}
-	search := &service.LegalIssueSearch{}
+	search := &model.LegalIssueSearch{}
 	if err := ctx.Bind(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	issues, err := service.LegalIssueList(page, search)
+	issues, err := model.LegalIssueList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取legal_issue list失败！", err.Error()))
 	}
@@ -46,16 +45,53 @@ func LegalIssueGet(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", issue))
 }
 
-//获取该分类查询下面的普法问题
-func LegalIssueListByCategory(ctx echo.Context) error {
-	categoryIdStr := ctx.QueryParam("category_id")
-	categoryId, err := strconv.Atoi(categoryIdStr)
+func LegalIssueCategoryList(ctx echo.Context) error {
+	categoryList, err := model.IssueCategoryList()
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取category_id失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取问题分类列表失败！", err.Error()))
 	}
-	legalIssueList, err := model.LegalIssueListByCategory(categoryId)
+	return ctx.JSON(utils.Succ("success", categoryList))
+}
+
+//收藏普法问题
+func LegalIssueFavorite(ctx echo.Context) error {
+	issueIdStr := ctx.QueryParam("issue_id")
+	issueId, err := strconv.Atoi(issueIdStr)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取legal_issue_list失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", legalIssueList))
+	uid := ctx.Get("uid").(int)
+	if err := model.FavoriteAdd(uid, issueId); err != nil {
+		return ctx.JSON(utils.ErrIpt("添加收藏失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
+}
+
+//取消收藏普法问题
+func LegalIssueCancelFavorite(ctx echo.Context) error {
+	issueIdStr := ctx.QueryParam("issue_id")
+	issueId, err := strconv.Atoi(issueIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
+	}
+	uid := ctx.Get("uid").(int)
+	if err := model.FavoriteCancel(uid, issueId); err != nil {
+		return ctx.JSON(utils.ErrIpt("取消收藏失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
+}
+
+//普法问题是否收藏
+func LegalIssueIsFavorite(ctx echo.Context) error {
+	issueIdStr := ctx.QueryParam("issue_id")
+	issueId, err := strconv.Atoi(issueIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
+	}
+	uid := ctx.Get("uid").(int)
+	has, err := model.IssueIsFavorite(uid, issueId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("查询普法问题收藏失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", has))
 }

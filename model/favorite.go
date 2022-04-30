@@ -7,7 +7,10 @@ import (
 )
 
 //收藏普法问题
-func FavoriteAdd(favorite *Favorite) error {
+func FavoriteAdd(uid int, issueId int) error {
+	favorite := &Favorite{}
+	favorite.IssueId = issueId
+	favorite.UserId = uid
 	has, err := Db.Exist(&Favorite{
 		UserId:  favorite.UserId,
 		IssueId: favorite.IssueId,
@@ -39,14 +42,4 @@ func IssueIsFavorite(uid int, issueId int) (bool, error) {
 		IssueId: issueId,
 	})
 	return has, err
-}
-
-//用户收藏列表
-func FavoriteList(uid int) ([]LegalIssue, error) {
-	legalIssueList := []LegalIssue{}
-	err := Db.Table("legal_issue").
-		Join("INNER", "favorite", "favorite.issue_id = legal_issue.id").
-		Where("favorite.user_id = ?", uid).
-		Find(&legalIssueList)
-	return legalIssueList, err
 }

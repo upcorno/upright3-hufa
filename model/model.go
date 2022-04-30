@@ -1,8 +1,8 @@
 package model
 
 import (
-	"law/conf"
 	"fmt"
+	"law/conf"
 	"log"
 	"regexp"
 	"strings"
@@ -62,6 +62,20 @@ func Init() {
 		cacher := caches.NewLRUCacher(caches.NewMemoryStore(), conf.App.Orm.OrmCacheSize)
 		db.SetDefaultCacher(cacher)
 	}
+	if conf.App.Orm.OrmSync {
+		err := db.Sync2(
+			// new(User),
+			new(LegalIssue),
+			// new(Favorite),
+		)
+		if err != nil {
+			zlog.Fatal().Msgf("数据库 sync失败.err:%s", err.Error())
+		}
+	}
+	_, err = db.Exec("ALTER TABLE legal_issue ADD FULLTEXT INDEX search_text (search_text) WITH PARSER ngram")
+	if err != nil {
+		zlog.Fatal().Msgf("创建全文索引失败：.err:%s", err.Error())
+	}
 	Db = db
 	zlog.Info().Msg("model init")
 }
@@ -94,7 +108,6 @@ func (page *Page) GetResults(sess *xorm.Session, modsPtr interface{}, condiBean 
 			sess.Desc(arr[1])
 		}
 	}
-	sess.Desc("create_time")
 	count, err := sess.FindAndCount(modsPtr)
 	if err != nil {
 		return nil, err
@@ -102,10 +115,10 @@ func (page *Page) GetResults(sess *xorm.Session, modsPtr interface{}, condiBean 
 	if count == 0 {
 		modsPtr = &[0]int{}
 	}
-	return &PageResult{Rows: modsPtr, RelatedNum: count}, nil
+	return &PageResult{Rows: modsPtr, Total: count}, nil
 }
 
 type PageResult struct {
-	Rows       interface{} `json:"rows"`
-	RelatedNum int64       `json:"related_num"`
+	Rows  interface{} `json:"rows"`
+	Total int64       `json:"total"`
 }
