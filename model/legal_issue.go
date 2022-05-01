@@ -20,8 +20,9 @@ type LegalIssueSearch struct {
 	FirstCategory  string `json:"first_category" form:"first_category" query:"first_category"`
 	SecondCategory string `json:"second_category" form:"second_category" query:"second_category"`
 	//FavoriteUid本来是数字，查询时为了方便直接定义为字符串
-	FavoriteUid string `json:"favorite_uid" form:"favorite_uid" query:"favorite_uid"`
-	InSummary   bool   `json:"in_summary" form:"in_summary" query:"in_summary"`
+	FavoriteUid int
+	IsFavorite  bool `json:"is_favorite" form:"is_favorite" query:"is_favorite"`
+	InSummary   bool `json:"in_summary" form:"in_summary" query:"in_summary"`
 }
 
 func LegalIssueList(page *Page, search *LegalIssueSearch) (*PageResult, error) {
@@ -57,10 +58,10 @@ func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
 	if search.SecondCategory != "" {
 		sess.Where("second_category = ?", search.SecondCategory)
 	}
-	if search.FavoriteUid != "" {
+	if search.IsFavorite == true {
 		sess.
-			Join("INNER", "favorite", "favorite.issue_id = legal_issue.id").
-			Where("favorite.user_id = ?", search.FavoriteUid)
+			Join("INNER", "legal_issue_favorite", "legal_issue_favorite.issue_id = legal_issue.id").
+			Where("legal_issue_favorite.user_id = ?", search.FavoriteUid)
 	}
 }
 
