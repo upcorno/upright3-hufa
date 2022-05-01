@@ -61,7 +61,7 @@ func LegalIssueFavorite(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	if err := model.FavoriteAdd(uid, issueId); err != nil {
+	if err := model.LegalIssueFavorite(uid, issueId); err != nil {
 		return ctx.JSON(utils.ErrIpt("添加收藏失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
@@ -75,7 +75,7 @@ func LegalIssueCancelFavorite(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	if err := model.FavoriteCancel(uid, issueId); err != nil {
+	if err := model.LegalIssueCancelFavorite(uid, issueId); err != nil {
 		return ctx.JSON(utils.ErrIpt("取消收藏失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
@@ -89,7 +89,7 @@ func LegalIssueIsFavorite(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	has, err := model.IssueIsFavorite(uid, issueId)
+	has, err := model.LegalIssueIsFavorite(uid, issueId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("查询普法问题收藏失败！", err.Error()))
 	}

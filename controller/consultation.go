@@ -32,28 +32,28 @@ func ConsultationCreate(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrOpt("consultation info序列化失败", err.Error()))
 	}
-	record := &model.ConsultationRecord{
+	record := &model.ConsultationReply{
 		ConsultationId:  consul.Id,
 		CommunicatorUid: uid,
 		Type:            enum.QUERY,
 		Content:         string(consultationData),
 		CreateTime:      int(time.Now().Unix()),
 	}
-	if err := model.ConsultationRecordCreate(record); err != nil {
+	if err := model.ConsultationAddReply(record); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询记录生成失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consul.Id}))
 }
 
 //咨询设置状态
-func ConsultationStatusSet(ctx echo.Context) error {
+func ConsultationSetStatus(ctx echo.Context) error {
 	consultationIdStr := ctx.QueryParam("consultation_id")
 	consultationId, err := strconv.Atoi(consultationIdStr)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
 	status := ctx.QueryParam("status")
-	if err := model.ConsultationStatusSet(consultationId, status); err != nil {
+	if err := model.ConsultationSetStatus(consultationId, status); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询状态设置失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consultationId}))
@@ -69,15 +69,6 @@ func ConsultationList(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", consultationList))
 }
 
-//咨询文件上传
-func ConsultationFileUploadAuth(ctx echo.Context) error {
-	fileUploadConfInfo, err := utils.FileUploadAuthSTS("consultation")
-	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取文件上传配置信息失败", err.Error()))
-	}
-	return ctx.JSON(utils.Succ("success", fileUploadConfInfo))
-}
-
 //获取咨询信息
 func ConsultationGet(ctx echo.Context) error {
 	consultationIdStr := ctx.QueryParam("consultation_id")
@@ -85,7 +76,7 @@ func ConsultationGet(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	consultationInfo, err := model.ConsultationInfoGet(consultationId)
+	consultationInfo, err := model.ConsultationGet(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
 	}
@@ -93,7 +84,7 @@ func ConsultationGet(ctx echo.Context) error {
 }
 
 //咨询后台列表检索
-func ConsultationSearchList(ctx echo.Context) error {
+func ConsultationBackendList(ctx echo.Context) error {
 	page := &model.Page{PageIndex: 1, ItemNum: 10}
 	if err := ctx.Bind(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
@@ -113,4 +104,60 @@ func ConsultationSearchList(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrSvr("获取consultation list失败", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", consultations))
+}
+
+//创建咨询回复记录
+func ConsultationAddReply(ctx echo.Context) error {
+	consultationIdStr := ctx.QueryParam("consultation_id")
+	consultationId, err := strconv.Atoi(consultationIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
+	}
+	record := &model.ConsultationReply{}
+	if err := ctx.Bind(record); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
+	}
+	record.ConsultationId = consultationId
+	uid := ctx.Get("uid").(int)
+	record.CommunicatorUid = uid
+	record.CreateTime = int(time.Now().Unix())
+	if err := ctx.Validate(record); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
+	}
+	if err := model.ConsultationAddReply(record); err != nil {
+		return ctx.JSON(utils.ErrIpt("法律咨询记录生成失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
+}
+
+//获取咨询回复记录
+func ConsultationListReply(ctx echo.Context) error {
+	consultationIdStr := ctx.QueryParam("consultation_id")
+	consultationId, err := strconv.Atoi(consultationIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
+	}
+	recordListInfo, err := model.ConsultationListReply(consultationId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", recordListInfo))
+}
+
+//咨询回复文件上传
+func ConsultationReplyFileUploadAuth(ctx echo.Context) error {
+	fileUploadConfInfo, err := utils.FileUploadAuthSTS("consultation_reply")
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取文件上传配置信息失败", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", fileUploadConfInfo))
+}
+
+//咨询文件上传
+func ConsultationFileUploadAuth(ctx echo.Context) error {
+	fileUploadConfInfo, err := utils.FileUploadAuthSTS("consultation")
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取文件上传配置信息失败", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", fileUploadConfInfo))
 }

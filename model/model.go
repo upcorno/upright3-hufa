@@ -64,9 +64,11 @@ func Init() {
 	}
 	if conf.App.Orm.OrmSync {
 		err := db.Sync2(
-			// new(User),
+			new(User),
 			new(LegalIssue),
-			// new(Favorite),
+			new(Favorite),
+			new(Consultation),
+			new(ConsultationReply),
 		)
 		if err != nil {
 			zlog.Fatal().Msgf("数据库 sync失败.err:%s", err.Error())

@@ -1,23 +1,8 @@
 package model
 
 import (
-	"time"
-
 	_ "github.com/go-sql-driver/mysql"
 )
-
-type ConsultationInfo struct {
-	Id            int       `json:"id"`
-	Question      string    `json:"question"`
-	Imgs          string    `json:"imgs"`
-	ConsultantUid int       `json:"consultant_uid"`
-	NickName      string    `json:"nick_name"`
-	AvatarUrl     string    `json:"avatar_url"`
-	Phone         string    `json:"phone"`
-	Status        string    `json:"status"`
-	CreateTime    int       `json:"create_time"`
-	UpdateTime    time.Time `json:"update_time"`
-}
 
 //创建咨询
 func ConsultationCreate(consul *Consultation) error {
@@ -26,7 +11,7 @@ func ConsultationCreate(consul *Consultation) error {
 }
 
 //设置咨询状态
-func ConsultationStatusSet(consultationId int, status string) error {
+func ConsultationSetStatus(consultationId int, status string) error {
 	_, err := Db.Cols("status").Update(&Consultation{Status: status}, &Consultation{Id: consultationId})
 	return err
 }
@@ -41,8 +26,8 @@ func ConsultationList(uid int) ([]Consultation, error) {
 }
 
 //获取咨询信息
-func ConsultationInfoGet(consultationId int) (ConsultationInfo, error) {
-	consultationInfo := ConsultationInfo{}
+func ConsultationGet(consultationId int) (map[string]string, error) {
+	consultationInfo := map[string]string{}
 	_, err := Db.Table("consultation").
 		Join("INNER", "user", "user.id = consultation.consultant_uid").
 		Where("consultation.id=?", consultationId).
@@ -50,14 +35,42 @@ func ConsultationInfoGet(consultationId int) (ConsultationInfo, error) {
 			"consultation.id",
 			"consultation.question",
 			"consultation.imgs",
+			"consultation.status",
+			"consultation.create_time",
+			"consultation.update_time",
 			"consultation.consultant_uid",
 			"user.nick_name",
 			"user.avatar_url",
 			"user.phone",
-			"consultation.status",
-			"consultation.create_time",
-			"consultation.update_time",
 		).
 		Get(&consultationInfo)
 	return consultationInfo, err
+}
+
+//创建咨询记录
+func ConsultationAddReply(record *ConsultationReply) error {
+	_, err := Db.InsertOne(record)
+	return err
+}
+
+//获取咨询沟通记录表
+func ConsultationListReply(consultationId int) ([]map[string]string, error) {
+	recordInfoList := []map[string]string{}
+	err := Db.Table("consultation_reply").
+		Join("INNER", "user", "user.id = consultation_reply.communicator_uid").
+		Where("consultation_id=?", consultationId).
+		Cols(
+			"consultation_reply.id",
+			"consultation_id",
+			"communicator_uid",
+			"type",
+			"content",
+			"nick_name",
+			"avatar_url",
+			"phone",
+			"create_time",
+		).
+		Asc("create_time").
+		Find(&recordInfoList)
+	return recordInfoList, err
 }
