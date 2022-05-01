@@ -15,7 +15,7 @@ type LegalIssue struct {
 	Imgs           string    `xorm:"comment('普法问题关联图片') TEXT" json:"imgs"`
 	Content        string    `xorm:"comment('内容') LONGTEXT" json:"content"`
 	SearchText     string    `xorm:"comment('全文检索字段') LONGTEXT" json:"-"`
-	CreatedAt      time.Time `xorm:"not null created DateTime default('2022-04-30 00:00:01')" json:"-"`
+	CreateTime     int       `xorm:"not null UNSIGNED INT default(1651383059)" json:"create_time"`
 	UpdateTime     time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
