@@ -68,9 +68,9 @@ func ConsultationListReply(consultationId int) ([]map[string]string, error) {
 			"nick_name",
 			"avatar_url",
 			"phone",
-			"create_time",
+			"consultation_reply.create_time",
 		).
-		Asc("create_time").
+		Asc("consultation_reply.create_time").
 		Find(&recordInfoList)
 	return recordInfoList, err
 }

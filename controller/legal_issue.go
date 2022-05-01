@@ -61,7 +61,7 @@ func LegalIssueFavorite(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取issue_id失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	if err := model.LegalIssueFavorite(uid, issueId); err != nil {
+	if err := model.LegalIssueAddFavorite(uid, issueId); err != nil {
 		return ctx.JSON(utils.ErrIpt("添加收藏失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))

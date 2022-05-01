@@ -6,24 +6,24 @@ import (
 	"xorm.io/xorm"
 )
 
-type RightsProtectionDealInfo struct {
+type InfringementMonitorDealInfo struct {
 	Id              int    `json:"id" form:"id" query:"id" validate:"required,gt=0"`
 	DealResult      string `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
 	CustomerAddress string `json:"customer_address" form:"customer_address" query:"customer_address"`
 	DealRemark      string `json:"deal_remark" form:"deal_remark" query:"deal_remark"`
 }
 
-func RightsProtectionSetDealInfo(dealInfo *RightsProtectionDealInfo) error {
-	protection := &model.RightsProtection{
+func InfringementMonitorSetDealInfo(dealInfo *InfringementMonitorDealInfo) error {
+	monitor := &model.InfringementMonitor{
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: dealInfo.CustomerAddress,
 		DealRemark:      dealInfo.DealRemark,
 	}
-	_, err := model.Db.Update(protection, &model.RightsProtection{Id: dealInfo.Id})
+	_, err := model.Db.Update(monitor, &model.InfringementMonitor{Id: dealInfo.Id})
 	return err
 }
 
-type RightsProtectionSearch struct {
+type InfringementMonitorSearch struct {
 	DealResult      string `json:"deal_result" query:"deal_result"`
 	DealRemark      string `json:"deal_remark" query:"deal_remark"`
 	CustomerAddress string `json:"customer_address" query:"customer_address"`
@@ -31,7 +31,7 @@ type RightsProtectionSearch struct {
 	CreateTimeMax   int    `json:"create_time_max" query:"create_time_max"`
 }
 
-type RightsProtectionInfo struct {
+type InfringemetMonitorInfo struct {
 	Id         int    `json:"id"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
@@ -40,10 +40,10 @@ type RightsProtectionInfo struct {
 }
 
 //侵权监测列表搜索
-func RightsProtectionBackendList(page *model.Page, search *RightsProtectionSearch) (*model.PageResult, error) {
-	protectionInfo := []RightsProtectionInfo{}
+func InfringementMonitorBackendList(page *model.Page, search *InfringementMonitorSearch) (*model.PageResult, error) {
+	detectionInfo := []InfringemetMonitorInfo{}
 	sess := model.Db.NewSession()
-	sess.Table("rights_protection")
+	sess.Table("infringement_monitor")
 	sess.Cols(
 		"id",
 		"name",
@@ -51,15 +51,15 @@ func RightsProtectionBackendList(page *model.Page, search *RightsProtectionSearc
 		"create_time",
 		"deal_result",
 	)
-	dealProtectionSearch(sess, search)
-	pageResult, err := page.GetResults(sess, &protectionInfo)
+	dealDetectionSearch(sess, search)
+	pageResult, err := page.GetResults(sess, &detectionInfo)
 	if err != nil {
 		return nil, err
 	}
 	return pageResult, err
 }
 
-func dealProtectionSearch(sess *xorm.Session, search *RightsProtectionSearch) {
+func dealDetectionSearch(sess *xorm.Session, search *InfringementMonitorSearch) {
 	if search.DealResult != "" {
 		sess.Where("deal_result = ?", search.DealResult)
 	}

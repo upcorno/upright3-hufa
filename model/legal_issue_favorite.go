@@ -5,11 +5,11 @@ import (
 )
 
 //收藏普法问题
-func LegalIssueFavorite(uid int, issueId int) error {
-	favorite := &Favorite{}
+func LegalIssueAddFavorite(uid int, issueId int) error {
+	favorite := &LegalIssueFavorite{}
 	favorite.IssueId = issueId
 	favorite.UserId = uid
-	has, err := Db.Exist(&Favorite{
+	has, err := Db.Exist(&LegalIssueFavorite{
 		UserId:  favorite.UserId,
 		IssueId: favorite.IssueId,
 	})
@@ -25,7 +25,7 @@ func LegalIssueFavorite(uid int, issueId int) error {
 
 //取消收藏普法问题
 func LegalIssueCancelFavorite(uid int, issueId int) error {
-	_, err := Db.Delete(&Favorite{
+	_, err := Db.Delete(&LegalIssueFavorite{
 		UserId:  uid,
 		IssueId: issueId,
 	})
@@ -34,7 +34,7 @@ func LegalIssueCancelFavorite(uid int, issueId int) error {
 
 //问题是否收藏
 func LegalIssueIsFavorite(uid int, issueId int) (bool, error) {
-	has, err := Db.Exist(&Favorite{
+	has, err := Db.Exist(&LegalIssueFavorite{
 		UserId:  uid,
 		IssueId: issueId,
 	})

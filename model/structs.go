@@ -20,7 +20,7 @@ type LegalIssue struct {
 }
 
 //用户收藏
-type Favorite struct {
+type LegalIssueFavorite struct {
 	Id         int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
 	UserId     int       `xorm:"not null comment('用户id') index UNSIGNED INT" json:"user_id"`
 	IssueId    int       `xorm:"not null comment('普法知识问题id') index UNSIGNED INT" json:"issue_id"`
@@ -51,54 +51,37 @@ type ConsultationReply struct {
 }
 
 //“侵权监测”提交信息
-type InfringementDetection struct {
-	Id           int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
-	CreatorUid   int       `xorm:"not null comment('创建人id') index UNSIGNED INT" json:"creator_uid"`
-	Name         string    `xorm:"not null comment('姓名') VARCHAR(16)" json:"name" validate:"required"`
-	Phone        string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone" validate:"required"`
-	Organization string    `xorm:"comment('组织机构') VARCHAR(60)" json:"organization"`
-	Description  string    `xorm:"comment('侵权监测描述') TEXT" json:"description"`
-	Resume       string    `xorm:"comment('权利概要') TEXT" json:"resume"`
-	CreateTime   int       `xorm:"not null UNSIGNED INT" json:"create_time"`
-	UpdateTime   time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
-}
-
-//“侵权监测”处理信息
-type DetectionReturnVisit struct {
+type InfringementMonitor struct {
 	Id              int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
-	CreatorUid      int       `xorm:"not null comment('创建人id') index UNSIGNED INT" json:"creator_uid" validate:"required"`
-	DetectionId     int       `xorm:"not null comment('监测id') UNSIGNED INT" json:"detection_id" validate:"required"`
-	Classification  string    `xorm:"not null comment('类别') VARCHAR(10)" json:"classification" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
-	CustomerAddress string    `xorm:"not null comment('客户地址') VARCHAR(50)" json:"customer_address"`
-	Remark          string    `xorm:"comment('备注') TEXT" json:"remark"`
+	Name            string    `xorm:"not null comment('姓名') VARCHAR(16)" json:"name" validate:"required"`
+	Phone           string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone" validate:"required"`
+	Organization    string    `xorm:"comment('组织机构') VARCHAR(60)" json:"organization"`
+	Description     string    `xorm:"comment('侵权监测描述') TEXT" json:"description"`
+	Resume          string    `xorm:"comment('权利概要') TEXT" json:"resume"`
+	DealResult      string    `xorm:"not null comment('处理状态:未回访 有合作意向 无合作意向 已合作') VARCHAR(10) default('未回访')" json:"deal_result"`
+	CustomerAddress string    `xorm:"not null comment('回访时记录客户地址') VARCHAR(50)" json:"customer_address"`
+	DealRemark      string    `xorm:"comment('回访时备注') TEXT" json:"deal_remark"`
+	CreatorUid      int       `xorm:"not null comment('创建人id') index UNSIGNED INT" json:"creator_uid"`
 	CreateTime      int       `xorm:"not null UNSIGNED INT" json:"create_time"`
 	UpdateTime      time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
 //“我要维权”用户提交信息
 type RightsProtection struct {
-	Id           int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
-	CreatorUid   int       `xorm:"not null comment('创建人id') index UNSIGNED INT" json:"creator_uid"`
-	Name         string    `xorm:"not null comment('姓名') VARCHAR(16)" json:"name" validate:"required"`
-	Phone        string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone" validate:"required"`
-	Organization string    `xorm:"comment('组织结构') VARCHAR(60)" json:"organization"`
-	Description  string    `xorm:"comment('维权意向描述') TEXT" json:"description"`
-	Resume       string    `xorm:"comment('权利概要') TEXT" json:"resume"`
-	CreateTime   int       `xorm:"not null UNSIGNED INT" json:"create_time"`
-	UpdateTime   time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
-}
-
-//“我要维权”后台处理信息
-type ProtectionReturnVisit struct {
 	Id              int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
-	CreatorUid      int       `xorm:"not null comment('创建人id') index UNSIGNED INT" json:"creator_uid" validate:"required"`
-	ProtectionId    int       `xorm:"not null comment('维权id') UNSIGNED INT" json:"protection_id" validate:"required"`
-	Classification  string    `xorm:"not null comment('类别') VARCHAR(10)" json:"classification" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
-	CustomerAddress string    `xorm:"not null comment('客户地址') VARCHAR(50)" json:"customer_address"`
-	Remark          string    `xorm:"comment('备注') TEXT" json:"remark"`
+	Name            string    `xorm:"not null comment('姓名') VARCHAR(16)" json:"name" validate:"required"`
+	Phone           string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone" validate:"required"`
+	Organization    string    `xorm:"comment('组织结构') VARCHAR(60)" json:"organization"`
+	Description     string    `xorm:"comment('维权意向描述') TEXT" json:"description"`
+	Resume          string    `xorm:"comment('权利概要') TEXT" json:"resume"`
+	DealResult      string    `xorm:"not null comment('处理状态:未回访 有合作意向 无合作意向 已合作') VARCHAR(10) default('未回访')" json:"deal_result"`
+	CustomerAddress string    `xorm:"not null comment('回访时记录客户地址') VARCHAR(50)" json:"customer_address"`
+	DealRemark      string    `xorm:"comment('回访时备注') TEXT" json:"deal_remark"`
+	CreatorUid      int       `xorm:"not null comment('创建人id') index UNSIGNED INT" json:"creator_uid"`
 	CreateTime      int       `xorm:"not null UNSIGNED INT" json:"create_time"`
 	UpdateTime      time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
+
 type User struct {
 	Id         int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
 	AppId      string    `xorm:"not null comment('公众号/小程序标识') unique(app_id) CHAR(20)" json:"app_id"`
@@ -107,6 +90,6 @@ type User struct {
 	NickName   string    `xorm:"comment('用户微信昵称') VARCHAR(16)" json:"nick_name"`
 	AvatarUrl  string    `xorm:"comment('头像地址') TEXT" json:"avatar_url"`
 	Phone      string    `xorm:"comment('电话号码') CHAR(20)" json:"phone"`
-	CreatedAt  time.Time `xorm:"not null created DateTime default('2022-04-30 00:00:01')" json:"-"`
+	CreateTime int       `xorm:"not null UNSIGNED INT" json:"create_time"`
 	UpdateTime time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }

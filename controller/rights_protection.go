@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"law/enum"
 	"law/model"
 	"law/service"
 	"law/utils"
@@ -24,34 +23,43 @@ func RightsProtectionAdd(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("添加维权意向失败！", err.Error()))
 	}
-	err = model.ProtectionRetureVisitAdd(&model.ProtectionReturnVisit{
-		CreatorUid: uid,
-		ProtectionId: rightsProtection.Id,
-		Classification: enum.NORETURN,
-		CreateTime: int(time.Now().Unix()),
-	})
-	if err != nil {
-		return ctx.JSON(utils.ErrIpt("添加默认回访失败！", err.Error()))
-	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"rights_protection_id": rightsProtection.Id}))
 }
 
 //获取维权意向
 func RightsProtectionGet(ctx echo.Context) error {
-	protectionIdStr := ctx.QueryParam("protection_id")
+	protectionIdStr := ctx.QueryParam("id")
 	protectionId, err := strconv.Atoi(protectionIdStr)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取protection_id失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取id失败！", err.Error()))
 	}
-	rightsProtection, err := model.RightsProtectionGet(protectionId)
+	protection, err := model.RightsProtectionGet(protectionId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取维权意向失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", rightsProtection))
+	return ctx.JSON(utils.Succ("success", protection))
+}
+func RightsProtectionSetDealInfo(ctx echo.Context) error {
+	protectionIdStr := ctx.QueryParam("id")
+	protectionId, err := strconv.Atoi(protectionIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取id失败！", err.Error()))
+	}
+	dealInfo := &service.RightsProtectionDealInfo{Id: protectionId}
+	if err := ctx.Bind(dealInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
+	}
+	if err := ctx.Validate(dealInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
+	}
+	if err := service.RightsProtectionSetDealInfo(dealInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("设置回访记录失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
 }
 
 //侵权监测列表检索
-func RightsProtectionList(ctx echo.Context) error {
+func RightsProtectionBackendList(ctx echo.Context) error {
 	page := &model.Page{PageIndex: 1, ItemNum: 10}
 	if err := ctx.Bind(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
@@ -66,7 +74,7 @@ func RightsProtectionList(ctx echo.Context) error {
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	protections, err := service.RightsProtectionList(page, search)
+	protections, err := service.RightsProtectionBackendList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrSvr("获取rights_protection list失败", err.Error()))
 	}
