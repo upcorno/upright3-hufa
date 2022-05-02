@@ -14,16 +14,16 @@ var (
 )
 
 type Config struct {
-	Mode      string         `mapstructure:"mode"`
-	Jwt       *jwtConf       `mapstructure:"jwt"`
-	Http      *httpConf      `mapstructure:"http"`
-	Orm       *ormConf       `mapstructure:"orm"`
-	Db        *dbConf        `mapstructure:"db"`
-	Rpc       *rpcConf       `mapstructure:"rpc"`
-	Ristretto *ristrettoConf `mapstructure:"ristretto"`
-	Oss       *oss           `mapstructure:"oss"`
-	WxApp     *wxApp         `mapstructure:"wx_app"`
-	Account   *accountConf   `mapstructure:"account"`
+	Mode       string         `mapstructure:"mode"`
+	Jwt        *jwtConf       `mapstructure:"jwt"`
+	Http       *httpConf      `mapstructure:"http"`
+	Orm        *ormConf       `mapstructure:"orm"`
+	Db         *dbConf        `mapstructure:"db"`
+	Rpc        *rpcConf       `mapstructure:"rpc"`
+	Ristretto  *ristrettoConf `mapstructure:"ristretto"`
+	Oss        *oss           `mapstructure:"oss"`
+	WxApp      *wxApp         `mapstructure:"wx_app"`
+	BgAccounts *[]bgAccount   `mapstructure:"bg_account"`
 }
 
 func NewConfig() *Config {
@@ -138,7 +138,8 @@ type wxApp struct {
 	Secret string `mapstructure:"secret"`
 }
 
-type accountConf struct {
+type bgAccount struct {
 	Account  string `mapstructure:"account"`
 	Password string `mapstructure:"password"`
+	Uid      int    `mapstructure:"uid"`
 }

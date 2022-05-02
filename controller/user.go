@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"law/conf"
 	"law/model"
 	"law/service"
 	"law/utils"
@@ -9,33 +8,35 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type wxCredential struct {
+	Code string `json:"code" form:"code" query:"code" validate:"required"`
+}
+
 func Login(ctx echo.Context) error {
-	code := &wxCode{}
-	if err := ctx.Bind(code); err != nil {
+	credential := &wxCredential{}
+	if err := ctx.Bind(credential); err != nil {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
 	}
-	uid, err := service.Login(code.Code)
+	if err := ctx.Validate(credential); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
+	}
+	token, err := service.Login(credential.Code, ctx.RealIP())
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("登录失败！", err.Error()))
-	}
-	token, err := utils.CreateAuthToken(uid, ctx.RealIP())
-	if err != nil {
-		return ctx.JSON(utils.ErrIpt("token 生成失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]string{"token": token}))
 }
 
-type wxCode struct {
-	Code string `json:"code"`
-}
-
 func SetPhone(ctx echo.Context) error {
-	code := &wxCode{}
-	if err := ctx.Bind(code); err != nil {
+	credential := &wxCredential{}
+	if err := ctx.Bind(credential); err != nil {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
 	}
+	if err := ctx.Validate(credential); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
+	}
 	uid := ctx.Get("uid").(int)
-	err := service.SetPhone(uid, code.Code)
+	err := service.SetPhone(uid, credential.Code)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("设置手机号失败！", err.Error()))
 	}
@@ -43,14 +44,17 @@ func SetPhone(ctx echo.Context) error {
 }
 
 type nameAndAvatarUrl struct {
-	NickName  string `json:"nick_name"`
-	AvatarUrl string `json:"avatar_url"`
+	NickName  string `json:"nick_name" form:"nick_name" query:"nick_name" validate:"required"`
+	AvatarUrl string `json:"avatar_url" form:"avatar_url" query:"avatar_url" validate:"required,url"`
 }
 
 func SetNameAndAvatarUrl(ctx echo.Context) error {
 	nameAndUrl := &nameAndAvatarUrl{}
 	if err := ctx.Bind(nameAndUrl); err != nil {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
+	}
+	if err := ctx.Validate(nameAndUrl); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
 	err := service.SetNameAndAvatarUrl(uid, nameAndUrl.NickName, nameAndUrl.AvatarUrl)
@@ -73,25 +77,22 @@ func GetUserInfo(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", user))
 }
 
+type accountAndPassWord struct {
+	Account  string `json:"account" form:"account" query:"account" validate:"required"`
+	Password string `json:"password" form:"password" query:"password" validate:"required"`
+}
+
 func BackgroundLogin(ctx echo.Context) error {
-	accountAndPassWord := &AccountAndPassWord{}
+	accountAndPassWord := &accountAndPassWord{}
 	if err := ctx.Bind(accountAndPassWord); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
-	if accountAndPassWord.Account != conf.App.Account.Account {
-		return ctx.JSON(utils.ErrIpt("账号输入错误！", nil))
+	if err := ctx.Validate(accountAndPassWord); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
 	}
-	if accountAndPassWord.Password != conf.App.Account.Password {
-		return ctx.JSON(utils.ErrIpt("密码输入错误！", nil))
-	}
-	token, err := utils.CreateAuthToken(2078, ctx.RealIP())
+	token, err := service.BackgroundLogin(accountAndPassWord.Account, accountAndPassWord.Password, ctx.RealIP())
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("token 生成失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("登录失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]string{"token": token}))
-}
-
-type AccountAndPassWord struct {
-	Account string  `json:"account"`
-	Password string `json:"password"`
 }

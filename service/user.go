@@ -1,15 +1,18 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"law/conf"
 	"law/model"
+	"law/utils"
+	"time"
 
 	"github.com/medivhzhan/weapp/v3"
 	"github.com/medivhzhan/weapp/v3/phonenumber"
 )
 
-func Login(code string) (uid int, err error) {
+func Login(code string, ip string) (token string, err error) {
 	res, err := wxLogin(code)
 	if err != nil {
 		return
@@ -17,7 +20,11 @@ func Login(code string) (uid int, err error) {
 	if err = res.GetResponseError(); err != nil {
 		return
 	}
-	return getUid(res.OpenID, res.UnionID)
+	uid, err := getUid(res.OpenID, res.UnionID)
+	if err != nil {
+		return
+	}
+	return utils.CreateAuthToken(uid, ip)
 }
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
@@ -37,6 +44,7 @@ func getUid(openid string, unionID string) (uid int, err error) {
 	}
 	user.AppId = conf.App.WxApp.Appid
 	user.Unionid = unionID
+	user.CreateTime = int(time.Now().Unix())
 	if err = user.Insert(); err != nil {
 		return
 	}
@@ -82,6 +90,20 @@ func SetNameAndAvatarUrl(uid int, nickName string, avatarUrl string) (err error)
 		return
 	}
 	return
+}
+
+func BackgroundLogin(account string, password string, ip string) (string, error) {
+	for _, bgAccountInfo := range *conf.App.BgAccounts {
+		if account != bgAccountInfo.Account || password != bgAccountInfo.Password {
+			continue
+		}
+		token, err := utils.CreateAuthToken(bgAccountInfo.Uid, ip)
+		if err != nil {
+			return "", err
+		}
+		return token, nil
+	}
+	return "", errors.New("帐号或密码错误")
 }
 
 func wxLogin(code string) (*weapp.LoginResponse, error) {
