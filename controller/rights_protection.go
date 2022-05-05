@@ -5,60 +5,68 @@ import (
 	"law/service"
 	"law/utils"
 	"strconv"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
 
-//添加维权意向
 func RightsProtectionAdd(ctx echo.Context) error {
-	rightsProtection := &model.RightsProtection{}
-	if err := ctx.Bind(rightsProtection); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
+	baseInfo := &service.RightsProtectionBaseInfo{}
+	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	rightsProtection.CreatorUid = uid
-	rightsProtection.CreateTime = int(time.Now().Unix())
-	err := model.RightsProtectionAdd(rightsProtection)
+	beanId, err := service.RightsProtectionAdd(baseInfo, uid)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("添加维权意向失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("添加侵权监测失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", map[string]int{"rights_protection_id": rightsProtection.Id}))
+	return ctx.JSON(utils.Succ("success", map[string]int{"rights_protection_id": beanId}))
 }
 
-//获取维权意向
 func RightsProtectionGet(ctx echo.Context) error {
-	protectionIdStr := ctx.QueryParam("id")
-	protectionId, err := strconv.Atoi(protectionIdStr)
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取id失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取id失败", err.Error()))
 	}
-	protection, err := model.RightsProtectionGet(protectionId)
+	bean, err := service.RightsProtectionGet(beanId)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取维权意向失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", protection))
+	return ctx.JSON(utils.Succ("success", bean))
 }
+
 func RightsProtectionSetDealInfo(ctx echo.Context) error {
-	protectionIdStr := ctx.QueryParam("id")
-	protectionId, err := strconv.Atoi(protectionIdStr)
-	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取id失败！", err.Error()))
+	dealInfo := &service.RightsProtectionDealInfo{}
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
+	if err == nil {
+		dealInfo.Id = beanId
 	}
-	dealInfo := &service.RightsProtectionDealInfo{Id: protectionId}
-	if err := ctx.Bind(dealInfo); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
+	if err := utils.BindAndValidate(ctx, dealInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
-	if err := ctx.Validate(dealInfo); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
-	}
-	if err := service.RightsProtectionSetDealInfo(dealInfo); err != nil {
+	if err := service.RightsProtectionSetDealInfo(dealInfo.Id, dealInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("设置回访记录失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
 }
 
-//侵权监测列表检索
+func RightsProtectionUpdateBaseInfo(ctx echo.Context) error {
+	baseInfo := &service.RightsProtectionBaseInfo{}
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
+	if err == nil {
+		baseInfo.Id = beanId
+	}
+	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
+	}
+	if err := service.RightsProtectionUpdateBaseInfo(baseInfo.Id, baseInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("修改基础信息失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
+}
+
 func RightsProtectionBackendList(ctx echo.Context) error {
 	page := &model.Page{PageIndex: 1, ItemNum: 10}
 	if err := ctx.Bind(page); err != nil {
@@ -74,9 +82,9 @@ func RightsProtectionBackendList(ctx echo.Context) error {
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	protections, err := service.RightsProtectionBackendList(page, search)
+	beans, err := service.RightsProtectionBackendList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrSvr("获取rights_protection list失败", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", protections))
+	return ctx.JSON(utils.Succ("success", beans))
 }

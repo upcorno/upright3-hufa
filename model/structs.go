@@ -6,7 +6,7 @@ import (
 
 //常见知产问题
 type LegalIssue struct {
-	Id             int       `xorm:"pk autoincr INT(11)" json:"id"`
+	Id             int       `xorm:"pk autoincr INT" json:"id"`
 	CreatorUid     int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid"`
 	FirstCategory  string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category"`
 	SecondCategory string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category"`

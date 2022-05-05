@@ -5,59 +5,66 @@ import (
 	"law/service"
 	"law/utils"
 	"strconv"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
 
 //添加侵权监测
 func InfringementMonitorAdd(ctx echo.Context) error {
-	infringementMonitor := &model.InfringementMonitor{}
-	if err := ctx.Bind(infringementMonitor); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
-	}
-	if err := ctx.Validate(infringementMonitor); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
+	baseInfo := &service.InfringementMonitorBaseInfo{}
+	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	infringementMonitor.CreatorUid = uid
-	infringementMonitor.CreateTime = int(time.Now().Unix())
-	err := model.InfringementMonitorAdd(infringementMonitor)
+	beanId, err := service.InfringementMonitorAdd(baseInfo, uid)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("添加侵权监测失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", map[string]int{"infringement_monitor_id": infringementMonitor.Id}))
+	return ctx.JSON(utils.Succ("success", map[string]int{"infringement_monitor_id": beanId}))
 }
 
 //获取侵权监测
 func InfringementMonitorGet(ctx echo.Context) error {
-	monitorIdStr := ctx.QueryParam("id")
-	monitorId, err := strconv.Atoi(monitorIdStr)
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取id失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("获取id失败", err.Error()))
 	}
-	monitor, err := model.InfringementMonitorGet(monitorId)
+	bean, err := service.InfringementMonitorGet(beanId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", monitor))
+	return ctx.JSON(utils.Succ("success", bean))
 }
 
 func InfringementMonitorSetDealInfo(ctx echo.Context) error {
-	idStr := ctx.QueryParam("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取id失败！", err.Error()))
+	dealInfo := &service.InfringementMonitorDealInfo{}
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
+	if err == nil {
+		dealInfo.Id = beanId
 	}
-	dealInfo := &service.InfringementMonitorDealInfo{Id: id}
-	if err := ctx.Bind(dealInfo); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
+	if err := utils.BindAndValidate(ctx, dealInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
-	if err := ctx.Validate(dealInfo); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
-	}
-	if err := service.InfringementMonitorSetDealInfo(dealInfo); err != nil {
+	if err := service.InfringementMonitorSetDealInfo(dealInfo.Id, dealInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("设置回访记录失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
+}
+
+func InfringementMonitorUpdateBaseInfo(ctx echo.Context) error {
+	baseInfo := &service.InfringementMonitorBaseInfo{}
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
+	if err == nil {
+		baseInfo.Id = beanId
+	}
+	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
+	}
+	if err := service.InfringementMonitorUpdateBaseInfo(baseInfo.Id, baseInfo); err != nil {
+		return ctx.JSON(utils.ErrIpt("修改基础信息失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
 }
@@ -78,9 +85,9 @@ func InfringementMonitorBackendList(ctx echo.Context) error {
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	monitors, err := service.InfringementMonitorBackendList(page, search)
+	beans, err := service.InfringementMonitorBackendList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrSvr("获取infringement_monitor list失败", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", monitors))
+	return ctx.JSON(utils.Succ("success", beans))
 }

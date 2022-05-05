@@ -31,12 +31,14 @@ func InitRouter(r *echo.Router) {
 	r.Add(http.MethodPost, "/infringement_monitor/add", controller.InfringementMonitorAdd)
 	r.Add(http.MethodGet, "/infringement_monitor/get", controller.InfringementMonitorGet)
 	r.Add(http.MethodPost, "/infringement_monitor/set_deal_info", controller.InfringementMonitorSetDealInfo)
+	r.Add(http.MethodPost, "/infringement_monitor/update_base_info", controller.InfringementMonitorUpdateBaseInfo)
 	r.Add(http.MethodGet, "/infringement_monitor/backend_list", controller.InfringementMonitorBackendList)
 	///
 	///我要维权
 	r.Add(http.MethodPost, "/rights_protection/add", controller.RightsProtectionAdd)
 	r.Add(http.MethodGet, "/rights_protection/get", controller.RightsProtectionGet)
 	r.Add(http.MethodPost, "/rights_protection/set_deal_info", controller.RightsProtectionSetDealInfo)
+	r.Add(http.MethodPost, "/rights_protection/update_base_info", controller.RightsProtectionUpdateBaseInfo)
 	r.Add(http.MethodGet, "/rights_protection/backend_list", controller.RightsProtectionBackendList)
 	///
 	///用户

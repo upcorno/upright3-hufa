@@ -58,7 +58,7 @@ func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
 	if search.SecondCategory != "" {
 		sess.Where("second_category = ?", search.SecondCategory)
 	}
-	if search.IsFavorite == true {
+	if search.IsFavorite {
 		sess.
 			Join("INNER", "legal_issue_favorite", "legal_issue_favorite.issue_id = legal_issue.id").
 			Where("legal_issue_favorite.user_id = ?", search.FavoriteUid)
