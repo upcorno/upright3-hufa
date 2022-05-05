@@ -91,13 +91,14 @@ type httpConf struct {
 
 // orm config
 type ormConf struct {
-	OrmIdle      int  `mapstructure:"orm_idle"`       //
-	OrmOpen      int  `mapstructure:"orm_open"`       //
-	OrmShow      bool `mapstructure:"orm_show"`       //显示sql
-	OrmSync      bool `mapstructure:"orm_sync"`       //同步表结构
-	OrmCacheUse  bool `mapstructure:"orm_cache_use"`  //是否使用缓存
-	OrmCacheSize int  `mapstructure:"orm_cache_size"` //缓存数量
-	OrmHijackLog bool `mapstructure:"orm_hijack_log"` //劫持日志
+	OrmIdle            int  `mapstructure:"orm_idle"`              //
+	OrmOpen            int  `mapstructure:"orm_open"`              //
+	OrmShow            bool `mapstructure:"orm_show"`              //显示sql
+	OrmSync            bool `mapstructure:"orm_sync"`              //同步表结构
+	OrmCacheUse        bool `mapstructure:"orm_cache_use"`         //是否使用缓存
+	OrmCacheSize       int  `mapstructure:"orm_cache_size"`        //缓存数量
+	OrmHijackLog       bool `mapstructure:"orm_hijack_log"`        //劫持日志
+	OrmConnMaxLifetime int  `mapstructure:"orm_conn_max_lifetime"` //链接最大有效期
 }
 
 // db config

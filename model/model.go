@@ -57,6 +57,7 @@ func Init() {
 	db.TZLocation = time.Local
 	db.SetMaxIdleConns(conf.App.Orm.OrmIdle)
 	db.SetMaxOpenConns(conf.App.Orm.OrmOpen)
+	db.SetConnMaxLifetime(time.Duration(conf.App.Orm.OrmConnMaxLifetime) * time.Second)
 	db.ShowSQL(conf.App.Orm.OrmShow)
 	if conf.App.Orm.OrmCacheUse {
 		cacher := caches.NewLRUCacher(caches.NewMemoryStore(), conf.App.Orm.OrmCacheSize)
