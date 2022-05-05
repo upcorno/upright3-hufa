@@ -82,7 +82,7 @@ type accountAndPassWord struct {
 	Password string `json:"password" form:"password" query:"password" validate:"required"`
 }
 
-func BackgroundLogin(ctx echo.Context) error {
+func BackendLogin(ctx echo.Context) error {
 	accountAndPassWord := &accountAndPassWord{}
 	if err := ctx.Bind(accountAndPassWord); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))

@@ -9,38 +9,38 @@ import (
 )
 
 type InfringementMonitorDealInfo struct {
-	Id              int    `json:"id" query:"id" form:"id" validate:"required,gt=0"`
-	DealResult      string `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
-	CustomerAddress string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"required"`
-	DealRemark      string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"required"`
+	Id              int     `json:"id" query:"id" form:"id" validate:"required,gt=0"`
+	DealResult      string  `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
+	CustomerAddress *string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"min=0,max=50"`
+	DealRemark      *string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"required"`
 }
 
 func InfringementMonitorSetDealInfo(id int, dealInfo *InfringementMonitorDealInfo) error {
 	bean := &model.InfringementMonitor{
 		DealResult:      dealInfo.DealResult,
-		CustomerAddress: dealInfo.CustomerAddress,
-		DealRemark:      dealInfo.DealRemark,
+		CustomerAddress: *dealInfo.CustomerAddress,
+		DealRemark:      *dealInfo.DealRemark,
 	}
 	_, err := model.Db.Cols("deal_result", "customer_address", "deal_remark").Update(bean, &model.InfringementMonitor{Id: id})
 	return err
 }
 
 type InfringementMonitorBaseInfo struct {
-	Id           int    `json:"id" query:"id" form:"id"`
-	Name         string `json:"name" form:"name" query:"name" validate:"required"`
-	Phone        string `json:"phone" form:"phone" query:"phone" validate:"required"`
-	Organization string `json:"organization" form:"organization" query:"organization" validate:"required"`
-	Description  string `json:"description" form:"description" query:"description" validate:"required"`
-	Resume       string `json:"resume" form:"resume" query:"resume" validate:"required"`
+	Id           int     `json:"id" query:"id" form:"id"`
+	Name         string  `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
+	Phone        string  `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
+	Organization *string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
+	Description  *string `json:"description" form:"description" query:"description" validate:"min=0"`
+	Resume       *string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
 func InfringementMonitorUpdateBaseInfo(id int, baseInfo *InfringementMonitorBaseInfo) error {
 	bean := &model.InfringementMonitor{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
-		Organization: baseInfo.Organization,
-		Description:  baseInfo.Description,
-		Resume:       baseInfo.Resume,
+		Organization: *baseInfo.Organization,
+		Description:  *baseInfo.Description,
+		Resume:       *baseInfo.Resume,
 	}
 	_, err := model.Db.Cols("name", "phone", "organization", "description", "resume").Update(bean, &model.InfringementMonitor{Id: id})
 	return err
@@ -60,9 +60,9 @@ func InfringementMonitorAdd(baseInfo *InfringementMonitorBaseInfo, creatorUid in
 	bean := model.InfringementMonitor{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
-		Organization: baseInfo.Organization,
-		Description:  baseInfo.Description,
-		Resume:       baseInfo.Resume,
+		Organization: *baseInfo.Organization,
+		Description:  *baseInfo.Description,
+		Resume:       *baseInfo.Resume,
 		CreatorUid:   creatorUid,
 		CreateTime:   int(time.Now().Unix()),
 	}
@@ -71,9 +71,15 @@ func InfringementMonitorAdd(baseInfo *InfringementMonitorBaseInfo, creatorUid in
 	return
 }
 
-func InfringementMonitorGet(beanId int) (model.InfringementMonitor, error) {
+func InfringementMonitorBgGet(beanId int) (model.InfringementMonitor, error) {
 	bean := model.InfringementMonitor{}
 	_, err := model.Db.Table("infringement_monitor").Where("id=?", beanId).Get(&bean)
+	return bean, err
+}
+
+func InfringementMonitorGet(creatorUid int) (model.InfringementMonitor, error) {
+	bean := model.InfringementMonitor{}
+	_, err := model.Db.Table("infringement_monitor").Where("creator_uid=?", creatorUid).Get(&bean)
 	return bean, err
 }
 

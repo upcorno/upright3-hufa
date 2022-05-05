@@ -23,14 +23,22 @@ func InfringementMonitorAdd(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", map[string]int{"infringement_monitor_id": beanId}))
 }
 
-//获取侵权监测
 func InfringementMonitorGet(ctx echo.Context) error {
+	uid := ctx.Get("uid").(int)
+	bean, err := service.InfringementMonitorGet(uid)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", bean))
+}
+
+func InfringementMonitorBgGet(ctx echo.Context) error {
 	beanIdStr := ctx.QueryParam("id")
 	beanId, err := strconv.Atoi(beanIdStr)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取id失败", err.Error()))
 	}
-	bean, err := service.InfringementMonitorGet(beanId)
+	bean, err := service.InfringementMonitorBgGet(beanId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
 	}

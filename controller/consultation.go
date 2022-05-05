@@ -144,16 +144,16 @@ func ConsultationListReply(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", recordListInfo))
 }
 
-//咨询回复文件上传
-func ConsultationReplyFileUploadAuth(ctx echo.Context) error {
-	fileUploadConfInfo, err := utils.FileUploadAuthSTS("consultation_reply")
+//后台咨询回复文件上传
+func ConsultationBackendFileUploadAuth(ctx echo.Context) error {
+	fileUploadConfInfo, err := utils.FileUploadAuthSTS("consultation_backend")
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取文件上传配置信息失败", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", fileUploadConfInfo))
 }
 
-//咨询文件上传
+//用户咨询文件上传
 func ConsultationFileUploadAuth(ctx echo.Context) error {
 	fileUploadConfInfo, err := utils.FileUploadAuthSTS("consultation")
 	if err != nil {

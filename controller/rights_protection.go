@@ -22,13 +22,22 @@ func RightsProtectionAdd(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", map[string]int{"rights_protection_id": beanId}))
 }
 
-func RightsProtectionGet(ctx echo.Context) error {
+func RightsProtectionBgGet(ctx echo.Context) error {
 	beanIdStr := ctx.QueryParam("id")
 	beanId, err := strconv.Atoi(beanIdStr)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取id失败", err.Error()))
 	}
-	bean, err := service.RightsProtectionGet(beanId)
+	bean, err := service.RightsProtectionBgGet(beanId)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", bean))
+}
+
+func RightsProtectionGet(ctx echo.Context) error {
+	uid := ctx.Get("uid").(int)
+	bean, err := service.RightsProtectionGet(uid)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
 	}
