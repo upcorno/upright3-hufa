@@ -26,7 +26,6 @@ func InfringementMonitorSetDealInfo(id int, dealInfo *InfringementMonitorDealInf
 }
 
 type InfringementMonitorBaseInfo struct {
-	Id           int     `json:"id" query:"id" form:"id"`
 	Name         string  `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
 	Phone        string  `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
 	Organization *string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
@@ -34,7 +33,7 @@ type InfringementMonitorBaseInfo struct {
 	Resume       *string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func InfringementMonitorUpdateBaseInfo(id int, baseInfo *InfringementMonitorBaseInfo) error {
+func InfringementMonitorUpdateBaseInfo(uid int, baseInfo *InfringementMonitorBaseInfo) error {
 	bean := &model.InfringementMonitor{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
@@ -42,7 +41,7 @@ func InfringementMonitorUpdateBaseInfo(id int, baseInfo *InfringementMonitorBase
 		Description:  *baseInfo.Description,
 		Resume:       *baseInfo.Resume,
 	}
-	_, err := model.Db.Cols("name", "phone", "organization", "description", "resume").Update(bean, &model.InfringementMonitor{Id: id})
+	_, err := model.Db.Cols("name", "phone", "organization", "description", "resume").Update(bean, &model.InfringementMonitor{CreatorUid: uid})
 	return err
 }
 

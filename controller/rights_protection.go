@@ -62,15 +62,11 @@ func RightsProtectionSetDealInfo(ctx echo.Context) error {
 
 func RightsProtectionUpdateBaseInfo(ctx echo.Context) error {
 	baseInfo := &service.RightsProtectionBaseInfo{}
-	beanIdStr := ctx.QueryParam("id")
-	beanId, err := strconv.Atoi(beanIdStr)
-	if err == nil {
-		baseInfo.Id = beanId
-	}
 	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
-	if err := service.RightsProtectionUpdateBaseInfo(baseInfo.Id, baseInfo); err != nil {
+	uid := ctx.Get("uid").(int)
+	if err := service.RightsProtectionUpdateBaseInfo(uid, baseInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("修改基础信息失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))

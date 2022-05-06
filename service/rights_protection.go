@@ -26,7 +26,6 @@ func RightsProtectionSetDealInfo(id int, dealInfo *RightsProtectionDealInfo) err
 }
 
 type RightsProtectionBaseInfo struct {
-	Id           int     `json:"id" query:"id" form:"id"`
 	Name         string  `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
 	Phone        string  `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
 	Organization *string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
@@ -34,7 +33,7 @@ type RightsProtectionBaseInfo struct {
 	Resume       *string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func RightsProtectionUpdateBaseInfo(id int, baseInfo *RightsProtectionBaseInfo) error {
+func RightsProtectionUpdateBaseInfo(uid int, baseInfo *RightsProtectionBaseInfo) error {
 	bean := &model.RightsProtection{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
@@ -42,7 +41,7 @@ func RightsProtectionUpdateBaseInfo(id int, baseInfo *RightsProtectionBaseInfo) 
 		Description:  *baseInfo.Description,
 		Resume:       *baseInfo.Resume,
 	}
-	_, err := model.Db.Cols("name", "phone", "organization", "description", "resume").Update(bean, &model.RightsProtection{Id: id})
+	_, err := model.Db.Cols("name", "phone", "organization", "description", "resume").Update(bean, &model.RightsProtection{CreatorUid: uid})
 	return err
 }
 

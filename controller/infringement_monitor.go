@@ -63,15 +63,11 @@ func InfringementMonitorSetDealInfo(ctx echo.Context) error {
 
 func InfringementMonitorUpdateBaseInfo(ctx echo.Context) error {
 	baseInfo := &service.InfringementMonitorBaseInfo{}
-	beanIdStr := ctx.QueryParam("id")
-	beanId, err := strconv.Atoi(beanIdStr)
-	if err == nil {
-		baseInfo.Id = beanId
-	}
 	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
-	if err := service.InfringementMonitorUpdateBaseInfo(baseInfo.Id, baseInfo); err != nil {
+	uid := ctx.Get("uid").(int)
+	if err := service.InfringementMonitorUpdateBaseInfo(uid, baseInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("修改基础信息失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
