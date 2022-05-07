@@ -35,7 +35,7 @@ func StartServer() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{Output: log.Logger, Format: format}))
 	e.Use(utils.MidAuth)
 	e.HTTPErrorHandler = customHTTPErrorHandler
-	route.InitRouter(e.Router())
+	route.InitRouter(e)
 	go func() {
 		if err := e.Start(conf.App.Http.Address); err != nil {
 			println(err.Error())

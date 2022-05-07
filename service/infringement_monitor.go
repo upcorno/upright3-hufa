@@ -8,14 +8,18 @@ import (
 	"xorm.io/xorm"
 )
 
-type InfringementMonitorDealInfo struct {
+type monitor struct{}
+
+var Monitor = &monitor{}
+
+type InfringemetMonitorDealInfo struct {
 	Id              int     `json:"id" query:"id" form:"id" validate:"required,gt=0"`
 	DealResult      string  `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
 	CustomerAddress *string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"min=0,max=50"`
 	DealRemark      *string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"required"`
 }
 
-func InfringementMonitorSetDealInfo(id int, dealInfo *InfringementMonitorDealInfo) error {
+func (m *monitor) SetDealInfo(id int, dealInfo *InfringemetMonitorDealInfo) error {
 	bean := &model.InfringementMonitor{
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: *dealInfo.CustomerAddress,
@@ -25,7 +29,7 @@ func InfringementMonitorSetDealInfo(id int, dealInfo *InfringementMonitorDealInf
 	return err
 }
 
-type InfringementMonitorBaseInfo struct {
+type InfringemetMonitorBaseInfo struct {
 	Name         string  `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
 	Phone        string  `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
 	Organization *string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
@@ -33,7 +37,7 @@ type InfringementMonitorBaseInfo struct {
 	Resume       *string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func InfringementMonitorUpdateBaseInfo(uid int, baseInfo *InfringementMonitorBaseInfo) error {
+func (m *monitor) UpdateBaseInfo(uid int, baseInfo *InfringemetMonitorBaseInfo) error {
 	bean := &model.InfringementMonitor{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
@@ -45,7 +49,7 @@ func InfringementMonitorUpdateBaseInfo(uid int, baseInfo *InfringementMonitorBas
 	return err
 }
 
-func InfringementMonitorAdd(baseInfo *InfringementMonitorBaseInfo, creatorUid int) (id int, err error) {
+func (m *monitor) Add(baseInfo *InfringemetMonitorBaseInfo, creatorUid int) (id int, err error) {
 	has, err := model.Db.Exist(&model.InfringementMonitor{
 		CreatorUid: creatorUid,
 	})
@@ -70,19 +74,19 @@ func InfringementMonitorAdd(baseInfo *InfringementMonitorBaseInfo, creatorUid in
 	return
 }
 
-func InfringementMonitorBgGet(beanId int) (model.InfringementMonitor, error) {
+func (m *monitor) BgGet(beanId int) (model.InfringementMonitor, error) {
 	bean := model.InfringementMonitor{}
 	_, err := model.Db.Table("infringement_monitor").Where("id=?", beanId).Get(&bean)
 	return bean, err
 }
 
-func InfringementMonitorGet(creatorUid int) (model.InfringementMonitor, error) {
+func (m *monitor) Get(creatorUid int) (model.InfringementMonitor, error) {
 	bean := model.InfringementMonitor{}
 	_, err := model.Db.Table("infringement_monitor").Where("creator_uid=?", creatorUid).Get(&bean)
 	return bean, err
 }
 
-type InfringementMonitorSearch struct {
+type InfringemetMonitorSearchParams struct {
 	DealResult      string `json:"deal_result" query:"deal_result"`
 	DealRemark      string `json:"deal_remark" query:"deal_remark"`
 	CustomerAddress string `json:"customer_address" query:"customer_address"`
@@ -90,7 +94,7 @@ type InfringementMonitorSearch struct {
 	CreateTimeMax   int    `json:"create_time_max" query:"create_time_max"`
 }
 
-type InfringemetMonitorInfo struct {
+type infringemetMonitorInfo struct {
 	Id         int    `json:"id"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
@@ -98,8 +102,8 @@ type InfringemetMonitorInfo struct {
 	DealResult string `json:"deal_result"`
 }
 
-func InfringementMonitorBackendList(page *model.Page, search *InfringementMonitorSearch) (*model.PageResult, error) {
-	searchInfo := []InfringemetMonitorInfo{}
+func (m *monitor) BackendList(page *model.Page, search *InfringemetMonitorSearchParams) (*model.PageResult, error) {
+	searchInfo := []infringemetMonitorInfo{}
 	sess := model.Db.NewSession()
 	sess.Table("infringement_monitor")
 	sess.Cols(
@@ -109,7 +113,7 @@ func InfringementMonitorBackendList(page *model.Page, search *InfringementMonito
 		"create_time",
 		"deal_result",
 	)
-	dealInfringementMonitorSearch(sess, search)
+	m.dealSearch(sess, search)
 	pageResult, err := page.GetResults(sess, &searchInfo)
 	if err != nil {
 		return nil, err
@@ -117,7 +121,7 @@ func InfringementMonitorBackendList(page *model.Page, search *InfringementMonito
 	return pageResult, err
 }
 
-func dealInfringementMonitorSearch(sess *xorm.Session, search *InfringementMonitorSearch) {
+func (m *monitor) dealSearch(sess *xorm.Session, search *InfringemetMonitorSearchParams) {
 	if search.DealResult != "" {
 		sess.Where("deal_result = ?", search.DealResult)
 	}

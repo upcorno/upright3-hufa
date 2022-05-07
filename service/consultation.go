@@ -6,23 +6,27 @@ import (
 	"xorm.io/xorm"
 )
 
-type ConsultationSearch struct {
-	Status  string `json:"status" query:"status"`
-	CreateTimeMin   int    `json:"create_time_min" query:"create_time_min"`
-	CreateTimeMax   int    `json:"create_time_max" query:"create_time_max"`
+type consultationSrv struct {
 }
 
-type ConsultationInfo struct {
-	Id       int    `json:"id"`
-	Question string `json:"question"`   
-	NickName string `json:"nick_name"`
-	Phone    string `json:"phone"`
-	Status   string `json:"status"`
+var Consultation = &consultationSrv{}
+
+type ConsultationSearchParams struct {
+	Status        string `json:"status" query:"status"`
+	CreateTimeMin int    `json:"create_time_min" query:"create_time_min"`
+	CreateTimeMax int    `json:"create_time_max" query:"create_time_max"`
 }
 
 //侵权监测列表搜索
-func ConsultationSearchList(page *model.Page, search *ConsultationSearch) (*model.PageResult, error) {
-	consultationInfo := []ConsultationInfo{}
+func (c *consultationSrv) List(page *model.Page, search *ConsultationSearchParams) (*model.PageResult, error) {
+	type listInfo struct {
+		Id       int    `json:"id"`
+		Question string `json:"question"`
+		NickName string `json:"nick_name"`
+		Phone    string `json:"phone"`
+		Status   string `json:"status"`
+	}
+	consultationInfo := []listInfo{}
 	sess := model.Db.NewSession()
 	sess.Table("consultation")
 	sess.Join("INNER", "user", "user.id = consultation.consultant_uid")
@@ -33,7 +37,7 @@ func ConsultationSearchList(page *model.Page, search *ConsultationSearch) (*mode
 		"user.phone",
 		"consultation.status",
 	)
-	dealConsultationSearch(sess, search)
+	c.dealSearch(sess, search)
 	pageResult, err := page.GetResults(sess, &consultationInfo)
 	if err != nil {
 		return nil, err
@@ -41,7 +45,7 @@ func ConsultationSearchList(page *model.Page, search *ConsultationSearch) (*mode
 	return pageResult, err
 }
 
-func dealConsultationSearch(sess *xorm.Session, search *ConsultationSearch) {
+func (c *consultationSrv) dealSearch(sess *xorm.Session, search *ConsultationSearchParams) {
 	if search.Status != "" {
 		sess.Where("consultation.status = ?", search.Status)
 	}

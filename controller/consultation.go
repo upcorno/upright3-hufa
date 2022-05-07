@@ -92,14 +92,14 @@ func ConsultationBackendList(ctx echo.Context) error {
 	if err := ctx.Validate(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
 	}
-	search := &service.ConsultationSearch{}
+	search := &service.ConsultationSearchParams{}
 	if err := ctx.Bind(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	consultations, err := service.ConsultationSearchList(page, search)
+	consultations, err := service.Consultation.List(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrSvr("获取consultation list失败", err.Error()))
 	}

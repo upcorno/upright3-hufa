@@ -8,6 +8,10 @@ import (
 	"xorm.io/xorm"
 )
 
+type protection struct{}
+
+var Protection = &protection{}
+
 type RightsProtectionDealInfo struct {
 	Id              int     `json:"id" query:"id" form:"id" validate:"required,gt=0"`
 	DealResult      string  `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
@@ -15,7 +19,7 @@ type RightsProtectionDealInfo struct {
 	DealRemark      *string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"min=0"`
 }
 
-func RightsProtectionSetDealInfo(id int, dealInfo *RightsProtectionDealInfo) error {
+func (p *protection) SetDealInfo(id int, dealInfo *RightsProtectionDealInfo) error {
 	bean := &model.RightsProtection{
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: *dealInfo.CustomerAddress,
@@ -33,7 +37,7 @@ type RightsProtectionBaseInfo struct {
 	Resume       *string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func RightsProtectionUpdateBaseInfo(uid int, baseInfo *RightsProtectionBaseInfo) error {
+func (p *protection) UpdateBaseInfo(uid int, baseInfo *RightsProtectionBaseInfo) error {
 	bean := &model.RightsProtection{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
@@ -45,7 +49,7 @@ func RightsProtectionUpdateBaseInfo(uid int, baseInfo *RightsProtectionBaseInfo)
 	return err
 }
 
-func RightsProtectionAdd(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id int, err error) {
+func (p *protection) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id int, err error) {
 	has, err := model.Db.Exist(&model.RightsProtection{
 		CreatorUid: creatorUid,
 	})
@@ -70,19 +74,19 @@ func RightsProtectionAdd(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id
 	return
 }
 
-func RightsProtectionBgGet(beanId int) (model.RightsProtection, error) {
+func (p *protection) BgGet(beanId int) (model.RightsProtection, error) {
 	bean := model.RightsProtection{}
 	_, err := model.Db.Table("rights_protection").Where("id=?", beanId).Get(&bean)
 	return bean, err
 }
 
-func RightsProtectionGet(creatorUid int) (model.RightsProtection, error) {
+func (p *protection) Get(creatorUid int) (model.RightsProtection, error) {
 	bean := model.RightsProtection{}
 	_, err := model.Db.Table("rights_protection").Where("creator_uid=?", creatorUid).Get(&bean)
 	return bean, err
 }
 
-type RightsProtectionSearch struct {
+type RightsProtectionSearchParams struct {
 	DealResult      string `json:"deal_result" query:"deal_result"`
 	DealRemark      string `json:"deal_remark" query:"deal_remark"`
 	CustomerAddress string `json:"customer_address" query:"customer_address"`
@@ -90,7 +94,7 @@ type RightsProtectionSearch struct {
 	CreateTimeMax   int    `json:"create_time_max" query:"create_time_max"`
 }
 
-type rightsProtectionInfo struct {
+type protectionInfo struct {
 	Id         int    `json:"id"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
@@ -98,8 +102,8 @@ type rightsProtectionInfo struct {
 	DealResult string `json:"deal_result"`
 }
 
-func RightsProtectionBackendList(page *model.Page, search *RightsProtectionSearch) (*model.PageResult, error) {
-	searchInfo := []rightsProtectionInfo{}
+func (p *protection) BackendList(page *model.Page, search *RightsProtectionSearchParams) (*model.PageResult, error) {
+	searchInfo := []protectionInfo{}
 	sess := model.Db.NewSession()
 	sess.Table("rights_protection")
 	sess.Cols(
@@ -109,7 +113,7 @@ func RightsProtectionBackendList(page *model.Page, search *RightsProtectionSearc
 		"create_time",
 		"deal_result",
 	)
-	dealRightsProtectionSearch(sess, search)
+	p.dealSearch(sess, search)
 	pageResult, err := page.GetResults(sess, &searchInfo)
 	if err != nil {
 		return nil, err
@@ -117,7 +121,7 @@ func RightsProtectionBackendList(page *model.Page, search *RightsProtectionSearc
 	return pageResult, err
 }
 
-func dealRightsProtectionSearch(sess *xorm.Session, search *RightsProtectionSearch) {
+func (p *protection) dealSearch(sess *xorm.Session, search *RightsProtectionSearchParams) {
 	if search.DealResult != "" {
 		sess.Where("deal_result = ?", search.DealResult)
 	}
