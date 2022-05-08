@@ -69,8 +69,8 @@ func (m *monitor) Add(baseInfo *InfringemetMonitorBaseInfo, creatorUid int) (id 
 		CreatorUid:   creatorUid,
 		CreateTime:   int(time.Now().Unix()),
 	}
-	bId, err := model.Db.InsertOne(bean)
-	id = int(bId)
+	_, err = model.Db.InsertOne(bean)
+	id = bean.Id
 	return
 }
 

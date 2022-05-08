@@ -20,8 +20,7 @@ type Consultation struct {
 
 //创建咨询
 func ConsultationCreate(consul *Consultation) error {
-	id, err := Db.InsertOne(consul)
-	consul.Id = int(id)
+	_, err := Db.InsertOne(consul)
 	return err
 }
 

@@ -1,8 +1,7 @@
 package model
 
 func (user *User) Insert() (err error) {
-	uid, err := Db.InsertOne(user)
-	user.Id = int(uid)
+	_, err = Db.InsertOne(user)
 	return
 }
 
