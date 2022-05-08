@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"law/model"
 	"law/service"
 	"law/utils"
@@ -59,6 +60,9 @@ func ConsultationGet(ctx echo.Context) error {
 	consultationInfo, err := model.ConsultationGetWithUserInfo(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
+	}
+	if consultationInfo == nil {
+		return ctx.JSON(utils.ErrIpt(fmt.Sprintf("不存在此咨询。ID：%d", consultationId)))
 	}
 	return ctx.JSON(utils.Succ("success", consultationInfo))
 }
