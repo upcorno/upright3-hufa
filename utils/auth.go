@@ -11,7 +11,7 @@ import (
 // midAuth 登录认证中间件
 func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		if ctx.Request().URL.Path == conf.App.Jwt.LoginPath || ctx.Request().URL.Path == conf.App.Jwt.BackgroundPath {
+		if ctx.Request().URL.Path == conf.App.Jwt.LoginPath || ctx.Request().URL.Path == conf.App.Jwt.BackendLoginPath {
 			return next(ctx)
 		}
 		tokenRaw := ctx.Request().Header.Get("token")

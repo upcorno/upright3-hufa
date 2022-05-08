@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
-	"law/enum"
 	"law/model"
 	"law/service"
 	"law/utils"
@@ -14,35 +12,16 @@ import (
 
 //创建咨询实例
 func ConsultationCreate(ctx echo.Context) error {
-	consul := &model.Consultation{}
-	if err := ctx.Bind(consul); err != nil {
+	consulCreateInfo := &service.ConsultationCreateInfo{}
+	if err := utils.BindAndValidate(ctx, consulCreateInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	consul.ConsultantUid = uid
-	consul.Status = enum.DOING
-	consul.CreateTime = int(time.Now().Unix())
-	if err := ctx.Validate(consul); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
-	}
-	if err := model.ConsultationCreate(consul); err != nil {
-		return ctx.JSON(utils.ErrIpt("法律咨询生成失败！", err.Error()))
-	}
-	consultationData, err := json.Marshal(map[string]string{"question": consul.Question, "imgs": consul.Imgs})
+	consulId, err := service.Consultation.Create(consulCreateInfo, uid)
 	if err != nil {
-		return ctx.JSON(utils.ErrOpt("consultation info序列化失败", err.Error()))
+		return ctx.JSON(utils.ErrIpt("插入咨询记录失败", err.Error()))
 	}
-	record := &model.ConsultationReply{
-		ConsultationId:  consul.Id,
-		CommunicatorUid: uid,
-		Type:            enum.QUERY,
-		Content:         string(consultationData),
-		CreateTime:      int(time.Now().Unix()),
-	}
-	if err := model.ConsultationAddReply(record); err != nil {
-		return ctx.JSON(utils.ErrIpt("法律咨询记录生成失败！", err.Error()))
-	}
-	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consul.Id}))
+	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consulId}))
 }
 
 //咨询设置状态
@@ -52,8 +31,9 @@ func ConsultationSetStatus(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
+	consul := &model.Consultation{Id: consultationId}
 	status := ctx.QueryParam("status")
-	if err := model.ConsultationSetStatus(consultationId, status); err != nil {
+	if err := consul.SetStatus(status); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询状态设置失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consultationId}))
@@ -76,7 +56,7 @@ func ConsultationGet(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	consultationInfo, err := model.ConsultationGet(consultationId)
+	consultationInfo, err := model.ConsultationGetWithUserInfo(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
 	}
@@ -99,7 +79,7 @@ func ConsultationBackendList(ctx echo.Context) error {
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	consultations, err := service.Consultation.List(page, search)
+	consultations, err := service.Consultation.BackendList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrSvr("获取consultation list失败", err.Error()))
 	}
@@ -117,14 +97,14 @@ func ConsultationAddReply(ctx echo.Context) error {
 	if err := ctx.Bind(record); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
-	record.ConsultationId = consultationId
 	uid := ctx.Get("uid").(int)
 	record.CommunicatorUid = uid
 	record.CreateTime = int(time.Now().Unix())
 	if err := ctx.Validate(record); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
 	}
-	if err := model.ConsultationAddReply(record); err != nil {
+	consul := &model.Consultation{Id: consultationId}
+	if err := consul.AddReply(record); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询记录生成失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
@@ -137,7 +117,8 @@ func ConsultationListReply(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	recordListInfo, err := model.ConsultationListReply(consultationId)
+	consul := &model.Consultation{Id: consultationId}
+	recordListInfo, err := consul.ListReply(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
 	}

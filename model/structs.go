@@ -28,17 +28,6 @@ type LegalIssueFavorite struct {
 	UpdateTime time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
-// 问题“咨询”
-type Consultation struct {
-	Id            int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
-	Question      string    `xorm:"not null comment('咨询问题') TEXT" json:"question" validate:"required"`
-	Imgs          string    `xorm:"comment('描述图片') TEXT" json:"imgs"`
-	ConsultantUid int       `xorm:"not null comment('咨询人uid') index UNSIGNED INT" json:"consultant_uid" validate:"required"`
-	Status        string    `xorm:"not null default '处理中' comment('处理中、待人工咨询、人工咨询中、已完成') VARCHAR(10)" json:"status" validate:"required,oneof=处理中 待人工咨询 人工咨询中 已完成"`
-	CreateTime    int       `xorm:"not null UNSIGNED INT" json:"create_time"`
-	UpdateTime    time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
-}
-
 // “咨询”沟通记录
 type ConsultationReply struct {
 	Id              int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`

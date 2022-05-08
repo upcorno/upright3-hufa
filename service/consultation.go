@@ -1,7 +1,10 @@
 package service
 
 import (
+	"encoding/json"
+	"law/enum"
 	"law/model"
+	"time"
 
 	"xorm.io/xorm"
 )
@@ -9,7 +12,38 @@ import (
 type consultationSrv struct {
 }
 
-var Consultation = &consultationSrv{}
+var Consultation *consultationSrv
+
+type ConsultationCreateInfo struct {
+	Question string `json:"question" validate:"required"`
+	Imgs     string `json:"imgs"`
+}
+
+func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (consultationId int, err error) {
+	consul := &model.Consultation{
+		Question: createInfo.Question,
+		Imgs:     createInfo.Imgs,
+	}
+	consul.ConsultantUid = uid
+	consul.Status = enum.DOING
+	consul.CreateTime = int(time.Now().Unix())
+	if err = model.ConsultationCreate(consul); err != nil {
+		return
+	}
+	consultationId = consul.Id
+	consultationData, err := json.Marshal(createInfo)
+	if err != nil {
+		return
+	}
+	record := &model.ConsultationReply{
+		CommunicatorUid: uid,
+		Type:            enum.QUERY,
+		Content:         string(consultationData),
+		CreateTime:      int(time.Now().Unix()),
+	}
+	err = consul.AddReply(record)
+	return
+}
 
 type ConsultationSearchParams struct {
 	Status        string `json:"status" query:"status"`
@@ -18,7 +52,7 @@ type ConsultationSearchParams struct {
 }
 
 //侵权监测列表搜索
-func (c *consultationSrv) List(page *model.Page, search *ConsultationSearchParams) (*model.PageResult, error) {
+func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSearchParams) (*model.PageResult, error) {
 	type listInfo struct {
 		Id       int    `json:"id"`
 		Question string `json:"question"`

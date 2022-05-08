@@ -73,11 +73,11 @@ func (app *Config) IsDev() bool {
 
 // jwt config
 type jwtConf struct {
-	LoginKey       string `mapstructure:"login_key"`
-	LoginPath      string `mapstructure:"login_path"`
-	BackgroundPath string `mapstructure:"background_path"`
-	AuthKey        string `mapstructure:"auth_key"`
-	AuthLifetime   int    `mapstructure:"auth_lifetime"`
+	LoginKey         string `mapstructure:"login_key"`
+	LoginPath        string `mapstructure:"login_path"`
+	BackendLoginPath string `mapstructure:"backend_login_path"`
+	AuthKey          string `mapstructure:"auth_key"`
+	AuthLifetime     int    `mapstructure:"auth_lifetime"`
 }
 
 // http config
