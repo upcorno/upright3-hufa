@@ -14,13 +14,10 @@ type wxCredential struct {
 
 func Login(ctx echo.Context) error {
 	credential := &wxCredential{}
-	if err := ctx.Bind(credential); err != nil {
+	if err := utils.BindAndValidate(ctx, credential); err != nil {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
 	}
-	if err := ctx.Validate(credential); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
-	}
-	token, err := service.User.Login(credential.Code, ctx.RealIP())
+	token, err := service.User.Login(credential.Code)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("登录失败！", err.Error()))
 	}
@@ -29,11 +26,8 @@ func Login(ctx echo.Context) error {
 
 func SetPhone(ctx echo.Context) error {
 	credential := &wxCredential{}
-	if err := ctx.Bind(credential); err != nil {
+	if err := utils.BindAndValidate(ctx, credential); err != nil {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
-	}
-	if err := ctx.Validate(credential); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
 	err := service.User.SetPhone(uid, credential.Code)
@@ -50,11 +44,8 @@ type nameAndAvatarUrl struct {
 
 func SetNameAndAvatarUrl(ctx echo.Context) error {
 	nameAndUrl := &nameAndAvatarUrl{}
-	if err := ctx.Bind(nameAndUrl); err != nil {
+	if err := utils.BindAndValidate(ctx, nameAndUrl); err != nil {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
-	}
-	if err := ctx.Validate(nameAndUrl); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
 	err := service.User.SetNameAndAvatarUrl(uid, nameAndUrl.NickName, nameAndUrl.AvatarUrl)
@@ -84,13 +75,10 @@ type accountAndPassWord struct {
 
 func BackendLogin(ctx echo.Context) error {
 	accountAndPassWord := &accountAndPassWord{}
-	if err := ctx.Bind(accountAndPassWord); err != nil {
+	if err := utils.BindAndValidate(ctx, accountAndPassWord); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
-	if err := ctx.Validate(accountAndPassWord); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
-	}
-	token, err := service.User.BackendLogin(accountAndPassWord.Account, accountAndPassWord.Password, ctx.RealIP())
+	token, err := service.User.BackendLogin(accountAndPassWord.Account, accountAndPassWord.Password)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("登录失败！", err.Error()))
 	}

@@ -22,26 +22,21 @@ func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return ctx.JSON(ErrJwt("请重新登陆", err.Error()))
 		}
-		if ctx.RealIP() != claims.Ip {
-			return ctx.JSON(ErrJwt("网络变更,请重新登陆"))
-		}
-		ctx.Set("uid", claims.Uid) //存到了store字段里面
+		ctx.Set("uid", claims.Uid)
 		return next(ctx)
 	}
 }
 
 type authClaims struct {
 	Uid int
-	Ip  string
 	jwt.StandardClaims
 }
 
-func CreateAuthToken(uid int, ip string) (string, error) {
+func CreateAuthToken(uid int) (string, error) {
 	nowSecond := int64(time.Now().Unix())
-	expireAtSecond := nowSecond + int64(conf.App.Jwt.AuthLifetime) //加了两小时,conf.App.Jwt.AuthLifetime= 7200
+	expireAtSecond := nowSecond + int64(conf.App.Jwt.AuthLifetime)
 	claims := &authClaims{
 		Uid: uid,
-		Ip:  ip,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireAtSecond,
 			NotBefore: nowSecond,
@@ -58,5 +53,5 @@ func parseAuthToken(tokenStr string) (*authClaims, error) {
 	if claims, ok := claims.(*authClaims); ok {
 		return claims, nil
 	}
-	return nil, err //理论上一定执行不到
+	return nil, err
 }

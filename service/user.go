@@ -15,7 +15,7 @@ type user struct{}
 
 var User *user
 
-func (u *user) Login(code string, ip string) (token string, err error) {
+func (u *user) Login(code string) (token string, err error) {
 	res, err := u.wxLogin(code)
 	if err != nil {
 		return
@@ -27,7 +27,7 @@ func (u *user) Login(code string, ip string) (token string, err error) {
 	if err != nil {
 		return
 	}
-	return utils.CreateAuthToken(uid, ip)
+	return utils.CreateAuthToken(uid)
 }
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
@@ -77,7 +77,7 @@ func (u *user) SetNameAndAvatarUrl(uid int, nickName string, avatarUrl string) (
 	return
 }
 
-func (u *user) BackendLogin(account string, password string, ip string) (token string, err error) {
+func (u *user) BackendLogin(account string, password string) (token string, err error) {
 	for _, bgAccountInfo := range *conf.App.BgAccounts {
 		if account != bgAccountInfo.Account {
 			continue
@@ -85,7 +85,7 @@ func (u *user) BackendLogin(account string, password string, ip string) (token s
 		if password != bgAccountInfo.Password {
 			break
 		}
-		token, err = utils.CreateAuthToken(bgAccountInfo.Uid, ip)
+		token, err = utils.CreateAuthToken(bgAccountInfo.Uid)
 		return
 	}
 	err = errors.New("帐号或密码不正确。")
