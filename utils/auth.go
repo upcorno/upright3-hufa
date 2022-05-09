@@ -22,6 +22,9 @@ func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return ctx.JSON(ErrJwt("请重新登陆", err.Error()))
 		}
+		if err = claims.Valid(); err != nil {
+			return ctx.JSON(ErrJwt("登陆令牌验证失败。", err.Error()))
+		}
 		ctx.Set("uid", claims.Uid)
 		return next(ctx)
 	}
