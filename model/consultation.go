@@ -78,6 +78,7 @@ func ConsultationList(uid int) ([]Consultation, error) {
 	consultationList := []Consultation{}
 	err := Db.Table("consultation").
 		Where("consultation.consultant_uid = ?", uid).
+		Desc("create_time").
 		Find(&consultationList)
 	return consultationList, err
 }
