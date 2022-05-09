@@ -31,11 +31,13 @@ func StartServer() {
 	//以上调用顺序不应随意改变,彼此存在依赖关系
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
+	e.HTTPErrorHandler = customHTTPErrorHandler
 	format := `remote_ip:${remote_ip},host:${host},method:${method},user_agent:${user_agent},status:${status},error:${error},latency_human:${latency_human},uri:${uri}`
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{Output: log.Logger, Format: format}))
 	e.Use(utils.MidAuth)
-	e.HTTPErrorHandler = customHTTPErrorHandler
-	route.InitRouter(e)
+	backendRouteGroup := e.Group("/backend")
+	backendRouteGroup.Use(utils.BackendAuth)
+	route.InitRouter(e, backendRouteGroup)
 	go func() {
 		if err := e.Start(conf.App.Http.Address); err != nil {
 			println(err.Error())

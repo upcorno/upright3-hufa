@@ -27,6 +27,24 @@ func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+//后台接口权限验证
+func BackendAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	bgUids := map[int]bool{}
+	for _, bgAccountInfo := range *conf.App.BgAccounts {
+		bgUids[bgAccountInfo.Uid] = true
+	}
+	return func(ctx echo.Context) error {
+		if ctx.Request().URL.Path == conf.App.Jwt.BackendLoginPath {
+			return next(ctx)
+		}
+		uid := ctx.Get("uid").(int)
+		if _, ok := bgUids[uid]; !ok {
+			return ctx.JSON(ErrJwt("非法访问后台接口。"))
+		}
+		return next(ctx)
+	}
+}
+
 type authClaims struct {
 	Uid int
 	jwt.StandardClaims

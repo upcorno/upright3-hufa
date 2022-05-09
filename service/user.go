@@ -32,7 +32,10 @@ func (u *user) Login(code string) (token string, err error) {
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
 func (u *user) getUid(openid string, unionID string) (uid int, err error) {
-	user := &model.User{Openid: openid}
+	user := &model.User{
+		AppId:  conf.App.WxApp.Appid,
+		Openid: openid,
+	}
 	has, err := user.Get()
 	if err != nil {
 		return
@@ -45,7 +48,6 @@ func (u *user) getUid(openid string, unionID string) (uid int, err error) {
 		}
 		return
 	}
-	user.AppId = conf.App.WxApp.Appid
 	user.Unionid = unionID
 	user.CreateTime = int(time.Now().Unix())
 	if err = user.Insert(); err != nil {

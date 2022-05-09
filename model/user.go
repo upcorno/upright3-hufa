@@ -23,9 +23,11 @@ func (user *User) Insert() (err error) {
 }
 
 func (user *User) Get() (has bool, err error) {
-	if user.Id == 0 || !(user.AppId != "" && user.Openid != "") {
-		err = errors.New("model:查询用户时须指定id值或通过appid、openid获取。")
-		return
+	if user.Id == 0 {
+		if !(user.AppId != "" && user.Openid != "") {
+			err = errors.New("model:查询用户时须指定id值或通过appid、openid获取。")
+			return
+		}
 	}
 	return Db.Get(user)
 }

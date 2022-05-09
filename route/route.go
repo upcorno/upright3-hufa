@@ -7,9 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func InitRouter(e *echo.Echo) {
-	//后台相关接口
-	bg := e.Group("/backend")
+func InitRouter(e *echo.Echo, bg *echo.Group) {
 	///法律问题
 	e.Add(http.MethodGet, "/legal_issue/list", controller.LegalIssueList)
 	e.Add(http.MethodGet, "/legal_issue/category_list", controller.LegalIssueCategoryList)
