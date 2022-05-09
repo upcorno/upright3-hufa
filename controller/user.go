@@ -90,7 +90,7 @@ func BackendLogin(ctx echo.Context) error {
 	if err := ctx.Validate(accountAndPassWord); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
 	}
-	token, err := service.User.BackgroundLogin(accountAndPassWord.Account, accountAndPassWord.Password, ctx.RealIP())
+	token, err := service.User.BackendLogin(accountAndPassWord.Account, accountAndPassWord.Password, ctx.RealIP())
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("登录失败！", err.Error()))
 	}

@@ -122,7 +122,7 @@ func ConsultationListReply(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
 	consul := &model.Consultation{Id: consultationId}
-	recordListInfo, err := consul.ListReply(consultationId)
+	recordListInfo, err := consul.ListReply()
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
 	}

@@ -19,7 +19,7 @@ type Consultation struct {
 }
 
 //创建咨询
-func ConsultationCreate(consul *Consultation) error {
+func (consul *Consultation) Create() error {
 	_, err := Db.InsertOne(consul)
 	return err
 }
@@ -49,14 +49,14 @@ func (consul *Consultation) AddReply(record *ConsultationReply) error {
 }
 
 //获取咨询沟通记录表
-func (consul *Consultation) ListReply(consultationId int) (recordInfoList []map[string]string, err error) {
+func (consul *Consultation) ListReply() (recordInfoList []map[string]string, err error) {
 	if consul.Id == 0 {
 		err = errors.New("model:必须指定id值")
 		return
 	}
 	err = Db.Table("consultation_reply").
 		Join("INNER", "user", "user.id = consultation_reply.communicator_uid").
-		Where("consultation_id=?", consultationId).
+		Where("consultation_id=?", consul.Id).
 		Cols(
 			"consultation_reply.id",
 			"consultation_id",

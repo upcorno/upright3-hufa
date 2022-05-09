@@ -27,7 +27,7 @@ func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (c
 	consul.ConsultantUid = uid
 	consul.Status = enum.DOING
 	consul.CreateTime = int(time.Now().Unix())
-	if err = model.ConsultationCreate(consul); err != nil {
+	if err = consul.Create(); err != nil {
 		return
 	}
 	consultationId = consul.Id
