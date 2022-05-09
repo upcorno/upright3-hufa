@@ -39,7 +39,7 @@ func InitRouter(e *echo.Echo) {
 	e.Add(http.MethodGet, "/infringement_monitor/get", controller.InfringementMonitorGet)
 	e.Add(http.MethodPost, "/infringement_monitor/update_base_info", controller.InfringementMonitorUpdateBaseInfo)
 	//
-	bg.POST("/infringement_monitor/get", controller.InfringementMonitorBgGet)
+	bg.GET("/infringement_monitor/get", controller.InfringementMonitorBgGet)
 	bg.POST("/infringement_monitor/set_deal_info", controller.InfringementMonitorSetDealInfo)
 	bg.GET("/infringement_monitor/list", controller.InfringementMonitorBackendList)
 	///
