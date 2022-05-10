@@ -9,7 +9,7 @@ import (
 )
 
 type wxCredential struct {
-	Code string `json:"code" form:"code" query:"code" validate:"required"`
+	Code string `json:"code" form:"code" query:"code" validate:"required,min=1"`
 }
 
 func Login(ctx echo.Context) error {
