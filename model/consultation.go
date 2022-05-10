@@ -11,11 +11,22 @@ import (
 type Consultation struct {
 	Id            int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
 	Question      string    `xorm:"not null comment('咨询问题') TEXT" json:"question"`
-	Imgs          string    `xorm:"comment('描述图片') TEXT" json:"imgs"`
+	Imgs          string    `xorm:"not null comment('描述图片') TEXT  default('')" json:"imgs"`
 	ConsultantUid int       `xorm:"not null comment('咨询人uid') index UNSIGNED INT" json:"consultant_uid" validate:"required"`
 	Status        string    `xorm:"not null default '处理中' comment('处理中、待人工咨询、人工咨询中、已完成') VARCHAR(10)" json:"status"`
 	CreateTime    int       `xorm:"not null UNSIGNED INT" json:"create_time"`
 	UpdateTime    time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
+}
+
+// “咨询”沟通记录
+type ConsultationReply struct {
+	Id              int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
+	ConsultationId  int       `xorm:"not null comment('咨询id') index UNSIGNED INT" json:"consultation_id"`
+	CommunicatorUid int       `xorm:"not null comment('沟通人uid') UNSIGNED INT" json:"communicator_uid"`
+	Type            string    `xorm:"not null comment('回复类型，answer,query') VARCHAR(20)" json:"type" validate:"required,oneof=answer query"`
+	Content         string    `xorm:"not null comment('回复内容') LONGTEXT" json:"content" validate:"required"`
+	CreateTime      int       `xorm:"not null UNSIGNED INT" json:"create_time"`
+	UpdateTime      time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
 //创建咨询

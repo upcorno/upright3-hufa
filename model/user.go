@@ -9,10 +9,10 @@ type User struct {
 	Id         int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
 	AppId      string    `xorm:"not null comment('公众号/小程序标识') unique(app_id) CHAR(20)" json:"app_id"`
 	Openid     string    `xorm:"not null comment('与appid共同锁定一个用户') unique(app_id) CHAR(30)" json:"openid"`
-	Unionid    string    `xorm:"comment('同一开放平台下，各公众号/小程序具有相同unionid') index CHAR(30)" json:"unionid"`
-	NickName   string    `xorm:"comment('用户微信昵称') VARCHAR(16)" json:"nick_name"`
-	AvatarUrl  string    `xorm:"comment('头像地址') TEXT" json:"avatar_url"`
-	Phone      string    `xorm:"comment('电话号码') CHAR(20)" json:"phone"`
+	Unionid    string    `xorm:"not null comment('同一开放平台下，各公众号/小程序具有相同unionid') index CHAR(30) default('')" json:"unionid"`
+	NickName   string    `xorm:"not null comment('用户微信昵称') VARCHAR(16) default('')" json:"nick_name"`
+	AvatarUrl  string    `xorm:"not null comment('头像地址') TEXT default('')" json:"avatar_url"`
+	Phone      string    `xorm:"not null comment('电话号码') CHAR(20) default('')" json:"phone"`
 	CreateTime int       `xorm:"not null UNSIGNED INT" json:"create_time"`
 	UpdateTime time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
