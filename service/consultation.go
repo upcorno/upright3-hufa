@@ -52,7 +52,7 @@ type ConsultationSearchParams struct {
 }
 
 //侵权监测列表搜索
-func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSearchParams) (*model.PageResult, error) {
+func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSearchParams) (pageResult *model.PageResult, err error) {
 	type listInfo struct {
 		Id       int    `json:"id"`
 		Question string `json:"question"`
@@ -60,7 +60,7 @@ func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSear
 		Phone    string `json:"phone"`
 		Status   string `json:"status"`
 	}
-	consultationInfo := []listInfo{}
+	consultationInfoList := []listInfo{}
 	sess := model.Db.NewSession()
 	sess.Table("consultation")
 	sess.Join("INNER", "user", "user.id = consultation.consultant_uid")
@@ -72,11 +72,8 @@ func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSear
 		"consultation.status",
 	)
 	c.dealSearch(sess, search)
-	pageResult, err := page.GetResults(sess, &consultationInfo)
-	if err != nil {
-		return nil, err
-	}
-	return pageResult, err
+	pageResult, err = page.GetResults(sess, &consultationInfoList)
+	return
 }
 
 func (c *consultationSrv) dealSearch(sess *xorm.Session, search *ConsultationSearchParams) {

@@ -10,10 +10,10 @@ import (
 // 问题“咨询”
 type Consultation struct {
 	Id            int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
-	Question      string    `xorm:"not null comment('咨询问题') TEXT" json:"question" validate:"required"`
+	Question      string    `xorm:"not null comment('咨询问题') TEXT" json:"question"`
 	Imgs          string    `xorm:"comment('描述图片') TEXT" json:"imgs"`
 	ConsultantUid int       `xorm:"not null comment('咨询人uid') index UNSIGNED INT" json:"consultant_uid" validate:"required"`
-	Status        string    `xorm:"not null default '处理中' comment('处理中、待人工咨询、人工咨询中、已完成') VARCHAR(10)" json:"status" validate:"required,oneof=处理中 待人工咨询 人工咨询中 已完成"`
+	Status        string    `xorm:"not null default '处理中' comment('处理中、待人工咨询、人工咨询中、已完成') VARCHAR(10)" json:"status"`
 	CreateTime    int       `xorm:"not null UNSIGNED INT" json:"create_time"`
 	UpdateTime    time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
@@ -21,6 +21,16 @@ type Consultation struct {
 //创建咨询
 func (consul *Consultation) Create() error {
 	_, err := Db.InsertOne(consul)
+	return err
+}
+
+//删除咨询
+func (consul *Consultation) delete() error {
+	if consul.Id == 0 {
+		err := errors.New("model:必须指定id值")
+		return err
+	}
+	_, err := Db.Delete(consul)
 	return err
 }
 
@@ -37,7 +47,7 @@ func (consul *Consultation) SetStatus(status string) error {
 	return err
 }
 
-//创建咨询记录
+//创建咨询回复记录
 func (consul *Consultation) AddReply(record *ConsultationReply) error {
 	if consul.Id == 0 {
 		err := errors.New("model:必须指定id值")
@@ -48,8 +58,31 @@ func (consul *Consultation) AddReply(record *ConsultationReply) error {
 	return err
 }
 
+//删除咨询回复记录
+func (consul *Consultation) deleteReply(record *ConsultationReply) error {
+	if consul.Id == 0 {
+		err := errors.New("model:必须指定id值")
+		return err
+	}
+	record.ConsultationId = consul.Id
+	_, err := Db.Delete(record)
+	return err
+}
+
+type replyInfo struct {
+	Id              int    `json:"id"`
+	ConsultationId  int    `json:"consultation_id"`
+	CommunicatorUid int    `json:"communicator_uid"`
+	Type            string `json:"type"`
+	Content         string `json:"content"`
+	NickName        string `json:"nick_name"`
+	AvatarUrl       string `json:"avatar_url"`
+	Phone           string `json:"phone"`
+	CreateTime      int    `json:"create_time"`
+}
+
 //获取咨询沟通记录表
-func (consul *Consultation) ListReply() (recordInfoList []map[string]interface{}, err error) {
+func (consul *Consultation) ListReply() (replyInfoList []replyInfo, err error) {
 	if consul.Id == 0 {
 		err = errors.New("model:必须指定id值")
 		return
@@ -69,7 +102,7 @@ func (consul *Consultation) ListReply() (recordInfoList []map[string]interface{}
 			"consultation_reply.create_time",
 		).
 		Asc("consultation_reply.create_time").
-		Find(&recordInfoList)
+		Find(&replyInfoList)
 	return
 }
 
@@ -83,9 +116,21 @@ func ConsultationList(uid int) ([]Consultation, error) {
 	return consultationList, err
 }
 
+type consultationWithUserInfo struct {
+	Id            int    `json:"id"`
+	Question      string `json:"question"`
+	Imgs          string `json:"imgs"`
+	Status        string `json:"status"`
+	CreateTime    int    `json:"create_time"`
+	ConsultantUid int    `json:"consultant_uid"`
+	NickName      string `json:"nick_name"`
+	AvatarUrl     string `json:"avatar_url"`
+	Phone         string `json:"phone"`
+}
+
 //获取咨询信息
-func ConsultationGetWithUserInfo(consultationId int) (map[string]string, error) {
-	consultationInfo := map[string]string{}
+func ConsultationGetWithUserInfo(consultationId int) (*consultationWithUserInfo, error) {
+	consultationInfo := &consultationWithUserInfo{}
 	_, err := Db.Table("consultation").
 		Join("INNER", "user", "user.id = consultation.consultant_uid").
 		Where("consultation.id=?", consultationId).
@@ -95,15 +140,14 @@ func ConsultationGetWithUserInfo(consultationId int) (map[string]string, error) 
 			"consultation.imgs",
 			"consultation.status",
 			"consultation.create_time",
-			"consultation.update_time",
 			"consultation.consultant_uid",
 			"user.nick_name",
 			"user.avatar_url",
 			"user.phone",
 		).
-		Get(&consultationInfo)
-	if _, ok := consultationInfo["id"]; !ok {
-		return nil, err
+		Get(consultationInfo)
+	if consultationInfo.Id == 0 {
+		consultationInfo = nil
 	}
 	return consultationInfo, err
 }
