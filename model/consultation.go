@@ -49,7 +49,7 @@ func (consul *Consultation) AddReply(record *ConsultationReply) error {
 }
 
 //获取咨询沟通记录表
-func (consul *Consultation) ListReply() (recordInfoList []map[string]string, err error) {
+func (consul *Consultation) ListReply() (recordInfoList []map[string]interface{}, err error) {
 	if consul.Id == 0 {
 		err = errors.New("model:必须指定id值")
 		return
