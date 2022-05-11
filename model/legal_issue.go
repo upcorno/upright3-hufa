@@ -9,20 +9,19 @@ import (
 )
 
 //获取普法问题详情
-func LegalIssueGet(legalIssueId int) (LegalIssue, error) {
-	issue := LegalIssue{}
-	_, err := Db.Table("legal_issue").Where("id=?", legalIssueId).Get(&issue)
-	return issue, err
+func LegalIssueGet(legalIssueId int) (issue *LegalIssue, err error) {
+	issue = &LegalIssue{Id: legalIssueId}
+	_, err = Db.Get(issue)
+	return
 }
 
 type LegalIssueSearch struct {
 	SearchText     string `json:"search_text" form:"search_text" query:"search_text"`
 	FirstCategory  string `json:"first_category" form:"first_category" query:"first_category"`
 	SecondCategory string `json:"second_category" form:"second_category" query:"second_category"`
-	//FavoriteUid本来是数字，查询时为了方便直接定义为字符串
-	FavoriteUid int
-	IsFavorite  bool `json:"is_favorite" form:"is_favorite" query:"is_favorite"`
-	InSummary   bool `json:"in_summary" form:"in_summary" query:"in_summary"`
+	FavoriteUid    int
+	IsFavorite     bool `json:"is_favorite" form:"is_favorite" query:"is_favorite"`
+	InSummary      bool `json:"in_summary" form:"in_summary" query:"in_summary"`
 }
 
 func LegalIssueList(page *Page, search *LegalIssueSearch) (*PageResult, error) {

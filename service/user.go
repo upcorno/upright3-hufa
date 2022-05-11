@@ -13,7 +13,7 @@ import (
 
 type user struct{}
 
-var User *user
+var User *user = &user{}
 
 func (u *user) Login(code string) (token string, err error) {
 	res, err := u.wxLogin(code)

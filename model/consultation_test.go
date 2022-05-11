@@ -36,27 +36,27 @@ func TestConsultation(t *testing.T) {
 }
 
 func testReply(consultationId int, t *testing.T) {
-	consul := &Consultation{Id: consultationId}
 	reply := &ConsultationReply{
+		ConsultationId:  consultationId,
 		CommunicatorUid: TestUid,
 		Type:            "answer",
 		Content:         "单元测试",
 		CreateTime:      int(time.Now().Unix()),
 	}
-	err := consul.AddReply(reply)
+	err := reply.Insert()
 	if err != nil {
 		t.Fatal(err)
 	}
-	replyInfoList, err := consul.ListReply()
+	replyInfoList, err := ConsultationReplyList(consultationId)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(replyInfoList) != 1 {
 		t.Fatal(errors.New("Consultation应存在回复"))
 	}
-	consul.deleteReply(&ConsultationReply{Id: reply.Id})
+	reply.delete()
 
-	replyInfoList, err = consul.ListReply()
+	replyInfoList, err = ConsultationReplyList(consultationId)
 	if err != nil {
 		t.Fatal(err)
 	}

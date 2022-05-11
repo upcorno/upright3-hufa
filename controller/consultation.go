@@ -6,7 +6,6 @@ import (
 	"law/service"
 	"law/utils"
 	"strconv"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -97,19 +96,15 @@ func ConsultationAddReply(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	record := &model.ConsultationReply{}
-	if err := ctx.Bind(record); err != nil {
+	replyParams := &service.ConsultationReplyParams{
+		ConsultationId: consultationId,
+	}
+	if err := utils.BindAndValidate(ctx, replyParams); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	record.CommunicatorUid = uid
-	record.CreateTime = int(time.Now().Unix())
-	if err := ctx.Validate(record); err != nil {
-		return ctx.JSON(utils.ErrIpt("输入校验失败！", err.Error()))
-	}
-	consul := &model.Consultation{Id: consultationId}
-	if err := consul.AddReply(record); err != nil {
-		return ctx.JSON(utils.ErrIpt("法律咨询记录生成失败！", err.Error()))
+	if err := service.Consultation.AddReply(replyParams, uid); err != nil {
+		return ctx.JSON(utils.ErrIpt("法律咨询回复添加失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
 }
@@ -121,8 +116,7 @@ func ConsultationListReply(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	consul := &model.Consultation{Id: consultationId}
-	recordListInfo, err := consul.ListReply()
+	recordListInfo, err := model.ConsultationReplyList(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
 	}

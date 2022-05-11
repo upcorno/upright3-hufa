@@ -12,7 +12,7 @@ import (
 type consultationSrv struct {
 }
 
-var Consultation *consultationSrv
+var Consultation *consultationSrv = &consultationSrv{}
 
 type ConsultationCreateInfo struct {
 	Question string `json:"question" validate:"required"`
@@ -35,13 +35,32 @@ func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (c
 	if err != nil {
 		return
 	}
-	record := &model.ConsultationReply{
-		CommunicatorUid: uid,
+	reply := &model.ConsultationReply{
+		ConsultationId:  consultationId,
 		Type:            enum.QUERY,
 		Content:         string(consultationData),
+		CommunicatorUid: uid,
 		CreateTime:      int(time.Now().Unix()),
 	}
-	err = consul.AddReply(record)
+	err = reply.Insert()
+	return
+}
+
+type ConsultationReplyParams struct {
+	ConsultationId int    `json:"consultationId" form:"consultationId" query:"consultationId" validate:"required,min=1"`
+	Type           string `json:"type" validate:"required,oneof=answer query"`
+	Content        string `json:"content" validate:"required,min=1"`
+}
+
+func (c *consultationSrv) AddReply(replyParams *ConsultationReplyParams, uid int) (err error) {
+	reply := &model.ConsultationReply{
+		ConsultationId:  replyParams.ConsultationId,
+		Type:            replyParams.Type,
+		Content:         replyParams.Content,
+		CommunicatorUid: uid,
+		CreateTime:      int(time.Now().Unix()),
+	}
+	err = reply.Insert()
 	return
 }
 
@@ -51,7 +70,6 @@ type ConsultationSearchParams struct {
 	CreateTimeMax int    `json:"create_time_max" query:"create_time_max"`
 }
 
-//侵权监测列表搜索
 func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSearchParams) (pageResult *model.PageResult, err error) {
 	type listInfo struct {
 		Id       int    `json:"id"`
