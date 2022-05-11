@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,6 +18,7 @@ func RightsProtectionAdd(rightsProtection *RightsProtection) error {
 	if has {
 		return errors.New("系统已添加您的维权意向，请勿重复添加！")
 	} else {
+		rightsProtection.CreateTime = int(time.Now().Unix())
 		_, err = Db.InsertOne(rightsProtection)
 		return err
 	}

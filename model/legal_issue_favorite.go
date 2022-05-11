@@ -1,42 +1,47 @@
 package model
 
 import (
+	"errors"
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
-//收藏普法问题
-func LegalIssueAddFavorite(uid int, issueId int) error {
-	favorite := &LegalIssueFavorite{}
-	favorite.IssueId = issueId
-	favorite.UserId = uid
-	has, err := Db.Exist(&LegalIssueFavorite{
-		UserId:  favorite.UserId,
-		IssueId: favorite.IssueId,
-	})
-	if err != nil {
-		return err
-	}
-	if has {
-		return nil
-	}
-	_, err = Db.InsertOne(favorite)
-	return err
+//用户收藏
+type LegalIssueFavorite struct {
+	Id         int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
+	UserId     int       `xorm:"not null comment('用户id') index UNSIGNED INT" json:"user_id"`
+	IssueId    int       `xorm:"not null comment('普法知识问题id') index UNSIGNED INT" json:"issue_id"`
+	CreateTime int       `xorm:"not null UNSIGNED INT" json:"create_time"`
+	UpdateTime time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
-//取消收藏普法问题
-func LegalIssueCancelFavorite(uid int, issueId int) error {
-	_, err := Db.Delete(&LegalIssueFavorite{
-		UserId:  uid,
-		IssueId: issueId,
-	})
-	return err
+func (f *LegalIssueFavorite) Insert() (err error) {
+	if f.IssueId == 0 || f.UserId == 0 {
+		err = errors.New("model:IssueId、UserId不可为空")
+		return
+	}
+	f.CreateTime = int(time.Now().Unix())
+	_, err = Db.InsertOne(f)
+	return
 }
 
-//问题是否收藏
-func LegalIssueIsFavorite(uid int, issueId int) (bool, error) {
-	has, err := Db.Exist(&LegalIssueFavorite{
-		UserId:  uid,
-		IssueId: issueId,
-	})
-	return has, err
+func (f *LegalIssueFavorite) Exist() (has bool, err error) {
+	if f.Id == 0 {
+		if f.IssueId == 0 || f.UserId == 0 {
+			err = errors.New("model:Id为空时，IssueId、UserId不能为空")
+			return
+		}
+	}
+	has, err = Db.Exist(f)
+	return
+}
+
+func (f *LegalIssueFavorite) Delete() (err error) {
+	if f.Id == 0 {
+		err = errors.New("model:Id不可为空")
+		return
+	}
+	_, err = Db.Delete(f)
+	return
 }

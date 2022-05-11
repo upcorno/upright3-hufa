@@ -1,18 +1,51 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
+	"time"
+	"unicode/utf8"
 
 	_ "github.com/go-sql-driver/mysql"
 	"xorm.io/xorm"
 )
 
-//获取普法问题详情
-func LegalIssueGet(legalIssueId int) (issue *LegalIssue, err error) {
-	issue = &LegalIssue{Id: legalIssueId}
-	_, err = Db.Get(issue)
+//常见知产问题
+type LegalIssue struct {
+	Id             int       `xorm:"not null pk autoincr INT" json:"id"`
+	CreatorUid     int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid"`
+	FirstCategory  string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category"`
+	SecondCategory string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category"`
+	Tags           string    `xorm:"not null comment('问题标签') index VARCHAR(255) default('')" json:"tags"`
+	Title          string    `xorm:"not null comment('标题') VARCHAR(60)" json:"title"`
+	Imgs           string    `xorm:"not null comment('普法问题关联图片') TEXT default('')" json:"imgs"`
+	Content        string    `xorm:"not null comment('内容') LONGTEXT" json:"content"`
+	SearchText     string    `xorm:"not null comment('全文检索字段') LONGTEXT default('')" json:"-"`
+	CreateTime     int       `xorm:"not null UNSIGNED INT default(1651383059)" json:"create_time"`
+	UpdateTime     time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
+}
+
+func (issue *LegalIssue) Insert() (err error) {
+	if issue.CreatorUid < 1 || issue.FirstCategory == "" || issue.SecondCategory == "" || issue.Title == "" || issue.Content == "" {
+		err = errors.New("CreatorUid、FirstCategory、SecondCategory、Title、Content不可为空")
+		return
+	}
+	if utf8.RuneCountInString(issue.FirstCategory) > 6 || utf8.RuneCountInString(issue.SecondCategory) > 25 || utf8.RuneCountInString(issue.Tags) > 255 || utf8.RuneCountInString(issue.Title) > 60 {
+		err = errors.New("FirstCategory长度不可超过6、SecondCategory长度不可超过25、Tags长度不可超过255、Title长度不可超过60")
+		return
+	}
+	issue.CreateTime = int(time.Now().Unix())
+	_, err = Db.InsertOne(issue)
 	return
+}
+
+func (issue *LegalIssue) Get() (has bool, err error) {
+	if issue.Id < 1 {
+		err = errors.New("model:legal_issue_id must be greater than 1")
+		return
+	}
+	return Db.Get(issue)
 }
 
 type LegalIssueSearch struct {
@@ -20,8 +53,11 @@ type LegalIssueSearch struct {
 	FirstCategory  string `json:"first_category" form:"first_category" query:"first_category"`
 	SecondCategory string `json:"second_category" form:"second_category" query:"second_category"`
 	FavoriteUid    int
-	IsFavorite     bool `json:"is_favorite" form:"is_favorite" query:"is_favorite"`
-	InSummary      bool `json:"in_summary" form:"in_summary" query:"in_summary"`
+	//IsFavorite 命名有点问题。
+	//设计时考虑的语意是：判断是否仅搜索收藏的内容。
+	//而这个命名IsFavorite为false时，有从未收藏中搜索的含义。
+	IsFavorite bool `json:"is_favorite" form:"is_favorite" query:"is_favorite"`
+	InSummary  bool `json:"in_summary" form:"in_summary" query:"in_summary"`
 }
 
 func LegalIssueList(page *Page, search *LegalIssueSearch) (*PageResult, error) {
@@ -64,7 +100,7 @@ func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
 	}
 }
 
-func IssueCategoryList() ([]map[string][]string, error) {
+func LegalIssueCategoryList() ([]map[string][]string, error) {
 	sql := "SELECT distinct second_category,first_category FROM legal_issue order by first_category desc"
 	//希望著作权在前面，所以sql中排了序
 	results, err := Db.QueryString(sql)

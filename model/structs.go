@@ -4,30 +4,6 @@ import (
 	"time"
 )
 
-//常见知产问题
-type LegalIssue struct {
-	Id             int       `xorm:"not null pk autoincr INT" json:"id"`
-	CreatorUid     int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid"`
-	FirstCategory  string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category"`
-	SecondCategory string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category"`
-	Tags           string    `xorm:"not null comment('问题标签') index VARCHAR(255) default('')" json:"tags"`
-	Title          string    `xorm:"not null comment('标题') VARCHAR(60)" json:"title"`
-	Imgs           string    `xorm:"not null comment('普法问题关联图片') TEXT default('')" json:"imgs"`
-	Content        string    `xorm:"not null comment('内容') LONGTEXT" json:"content"`
-	SearchText     string    `xorm:"not null comment('全文检索字段') LONGTEXT default('')" json:"-"`
-	CreateTime     int       `xorm:"not null UNSIGNED INT default(1651383059)" json:"create_time"`
-	UpdateTime     time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
-}
-
-//用户收藏
-type LegalIssueFavorite struct {
-	Id         int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
-	UserId     int       `xorm:"not null comment('用户id') index UNSIGNED INT" json:"user_id"`
-	IssueId    int       `xorm:"not null comment('普法知识问题id') index UNSIGNED INT" json:"issue_id"`
-	CreateTime int       `xorm:"not null UNSIGNED INT" json:"create_time"`
-	UpdateTime time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
-}
-
 //“侵权监测”提交信息
 type InfringementMonitor struct {
 	Id              int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
