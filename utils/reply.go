@@ -1,5 +1,9 @@
 package utils
 
+import (
+	zlog "github.com/rs/zerolog/log"
+)
+
 // Reply  format
 type Reply struct {
 	Code int         `json:"code"`
@@ -29,16 +33,18 @@ const (
 )
 
 func newReply(code int, msg string, data ...interface{}) (int, Reply) {
+	if code != stSucc {
+		zlog.Info().Msgf("msg:%s\ndetail:%v", msg, data)
+		zlog.Warn().Msgf("msg:%s\ndetail:%v", msg, data)
+		//当返回值不正常时主动将日志刷新至文件,以便分析
+		FlushLog()
+	}
 	if len(data) > 0 {
 		return 200, Reply{
 			Code: code,
 			Msg:  msg,
 			Data: data[0],
 		}
-	}
-	if code != stSucc {
-		//当返回值不正常时主动将日志刷新至文件,以便分析
-		FlushLog()
 	}
 	return 200, Reply{
 		Code: code,
