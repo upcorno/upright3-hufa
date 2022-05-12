@@ -18,6 +18,11 @@ type User struct {
 }
 
 func (user *User) Insert() (err error) {
+	if user.AppId == "" || user.Openid == "" {
+		err = errors.New("AppId、Openid不可以为空值")
+		return
+	}
+	user.CreateTime = int(time.Now().Unix())
 	_, err = Db.InsertOne(user)
 	return
 }

@@ -70,13 +70,13 @@ func testReply(consultationId int, t *testing.T) {
 
 func testSetStatus(consultationId int, t *testing.T) {
 	consul := &Consultation{Id: consultationId}
-	newStatus := enum.DONE
-	consul.SetStatus(newStatus)
+	consul.Status = enum.DONE
+	consul.Update("status")
 	consulWithUserInfo, err := ConsultationGetWithUserInfo(consul.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if consulWithUserInfo == nil || consulWithUserInfo.Status != newStatus {
+	if consulWithUserInfo == nil || consulWithUserInfo.Status != consul.Status {
 		t.Fatal("修改Consultation状态失败")
 	}
 }

@@ -19,8 +19,13 @@ type Consultation struct {
 }
 
 //创建咨询
-func (consul *Consultation) Create() error {
-	_, err := Db.InsertOne(consul)
+func (consul *Consultation) Create() (err error) {
+	if consul.Question == "" || consul.ConsultantUid == 0 || consul.Status == "" {
+		err = errors.New("Question、ConsultantUid、Status不可以为空值")
+		return
+	}
+	consul.CreateTime = int(time.Now().Unix())
+	_, err = Db.InsertOne(consul)
 	return err
 }
 
@@ -34,17 +39,13 @@ func (consul *Consultation) delete() error {
 	return err
 }
 
-//设置咨询状态
-func (consul *Consultation) SetStatus(status string) error {
+func (consul *Consultation) Update(columns ...string) (err error) {
 	if consul.Id == 0 {
 		err := errors.New("model:必须指定id值")
 		return err
 	}
-	_, err := Db.Cols("status").Update(
-		Consultation{Status: status},
-		Consultation{Id: consul.Id},
-	)
-	return err
+	_, err = Db.Cols(columns...).Update(consul, &Consultation{Id: consul.Id})
+	return
 }
 
 //用户历史咨询记录列表

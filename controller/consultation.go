@@ -31,9 +31,8 @@ func ConsultationSetStatus(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	consul := &model.Consultation{Id: consultationId}
 	status := ctx.QueryParam("status")
-	if err := consul.SetStatus(status); err != nil {
+	if err := service.Consultation.SetStatus(consultationId, status); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询状态设置失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", map[string]int{"consultation_id": consultationId}))

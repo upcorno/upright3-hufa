@@ -26,7 +26,6 @@ func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (c
 	}
 	consul.ConsultantUid = uid
 	consul.Status = enum.DOING
-	consul.CreateTime = int(time.Now().Unix())
 	if err = consul.Create(); err != nil {
 		return
 	}
@@ -44,6 +43,11 @@ func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (c
 	}
 	err = reply.Insert()
 	return
+}
+func (c *consultationSrv) SetStatus(consultationId int, status string) (err error) {
+	consul := &model.Consultation{Id: consultationId, Status: status}
+	err = consul.Update("status")
+	return err
 }
 
 type ConsultationReplyParams struct {
