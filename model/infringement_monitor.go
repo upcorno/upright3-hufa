@@ -8,9 +8,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-//“我要维权”用户提交信息
+//“我要监测”用户提交信息
 //CreatorUid字段具有唯一性约束。即一个用户只能有一个
-type RightsProtection struct {
+type InfringementMonitor struct {
 	Id              int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
 	Name            string    `xorm:"not null comment('姓名') VARCHAR(16)" json:"name"`
 	Phone           string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone"`
@@ -25,7 +25,7 @@ type RightsProtection struct {
 	UpdateTime      time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
-func (r *RightsProtection) Insert() (err error) {
+func (r *InfringementMonitor) Insert() (err error) {
 	if r.Name == "" || r.Phone == "" || r.CreatorUid == 0 {
 		err = errors.New("必须指定Name、Phone、CreatorUid字段")
 		return
@@ -39,10 +39,10 @@ func (r *RightsProtection) Insert() (err error) {
 	return
 }
 
-func (r *RightsProtection) Get() (has bool, err error) {
+func (r *InfringementMonitor) Get() (has bool, err error) {
 	if r.Id == 0 {
 		if r.CreatorUid == 0 {
-			err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
+			err = errors.New("需指定InfringementMonitor的Id或CreatorUid字段")
 			return
 		}
 	}
@@ -50,24 +50,24 @@ func (r *RightsProtection) Get() (has bool, err error) {
 	return
 }
 
-func (r *RightsProtection) Update(columns ...string) (err error) {
+func (r *InfringementMonitor) Update(columns ...string) (err error) {
 	if r.Id == 0 {
 		if r.CreatorUid == 0 {
-			err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
+			err = errors.New("需指定InfringementMonitor的Id或CreatorUid字段")
 			return
 		}
 	}
-	_, err = Db.Cols(columns...).Update(r, &RightsProtection{Id: r.Id, CreatorUid: r.CreatorUid})
+	_, err = Db.Cols(columns...).Update(r, &InfringementMonitor{Id: r.Id, CreatorUid: r.CreatorUid})
 	return
 }
 
-func (r *RightsProtection) delete() (err error) {
+func (r *InfringementMonitor) delete() (err error) {
 	if r.Id == 0 {
 		if r.CreatorUid == 0 {
-			err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
+			err = errors.New("需指定InfringementMonitor的Id或CreatorUid字段")
 			return
 		}
 	}
-	_, err = Db.Delete(&RightsProtection{Id: r.Id, CreatorUid: r.CreatorUid})
+	_, err = Db.Delete(&InfringementMonitor{Id: r.Id, CreatorUid: r.CreatorUid})
 	return
 }

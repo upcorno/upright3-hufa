@@ -11,7 +11,7 @@ import (
 
 //添加侵权监测
 func InfringementMonitorAdd(ctx echo.Context) error {
-	baseInfo := &service.InfringemetMonitorBaseInfo{}
+	baseInfo := &service.InfringementMonitorBaseInfo{}
 	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
@@ -46,7 +46,7 @@ func InfringementMonitorBgGet(ctx echo.Context) error {
 }
 
 func InfringementMonitorSetDealInfo(ctx echo.Context) error {
-	dealInfo := &service.InfringemetMonitorDealInfo{}
+	dealInfo := &service.InfringementMonitorDealInfo{}
 	beanIdStr := ctx.QueryParam("id")
 	beanId, err := strconv.Atoi(beanIdStr)
 	if err == nil {
@@ -62,7 +62,7 @@ func InfringementMonitorSetDealInfo(ctx echo.Context) error {
 }
 
 func InfringementMonitorUpdateBaseInfo(ctx echo.Context) error {
-	baseInfo := &service.InfringemetMonitorBaseInfo{}
+	baseInfo := &service.InfringementMonitorBaseInfo{}
 	if err := utils.BindAndValidate(ctx, baseInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
@@ -82,7 +82,7 @@ func InfringementMonitorBackendList(ctx echo.Context) error {
 	if err := ctx.Validate(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
 	}
-	search := &service.InfringemetMonitorSearchParams{}
+	search := &service.InfringementMonitorSearchParams{}
 	if err := ctx.Bind(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}

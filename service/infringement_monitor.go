@@ -8,85 +8,104 @@ import (
 	"xorm.io/xorm"
 )
 
-type monitor struct{}
+type monitorSrv struct{}
 
-var Monitor = &monitor{}
+var Monitor = &monitorSrv{}
 
-type InfringemetMonitorDealInfo struct {
-	Id              int     `json:"id" query:"id" form:"id" validate:"required,gt=0"`
-	DealResult      string  `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
-	CustomerAddress *string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"min=0,max=50"`
-	DealRemark      *string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"required"`
+type InfringementMonitorDealInfo struct {
+	Id              int    `json:"id" query:"id" form:"id" validate:"required,gt=0"`
+	DealResult      string `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
+	CustomerAddress string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"min=0,max=50"`
+	DealRemark      string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"min=0"`
 }
 
-func (m *monitor) SetDealInfo(id int, dealInfo *InfringemetMonitorDealInfo) error {
+func (p *monitorSrv) SetDealInfo(id int, dealInfo *InfringementMonitorDealInfo) (err error) {
 	bean := &model.InfringementMonitor{
+		Id:              id,
 		DealResult:      dealInfo.DealResult,
-		CustomerAddress: *dealInfo.CustomerAddress,
-		DealRemark:      *dealInfo.DealRemark,
+		CustomerAddress: dealInfo.CustomerAddress,
+		DealRemark:      dealInfo.DealRemark,
 	}
-	_, err := model.Db.Cols("deal_result", "customer_address", "deal_remark").Update(bean, &model.InfringementMonitor{Id: id})
-	return err
+	err = bean.Update(
+		"deal_result",
+		"customer_address",
+		"deal_remark",
+	)
+	return
 }
 
-type InfringemetMonitorBaseInfo struct {
-	Name         string  `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
-	Phone        string  `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
-	Organization *string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
-	Description  *string `json:"description" form:"description" query:"description" validate:"min=0"`
-	Resume       *string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
+type InfringementMonitorBaseInfo struct {
+	Name         string `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
+	Phone        string `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
+	Organization string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
+	Description  string `json:"description" form:"description" query:"description" validate:"min=0"`
+	Resume       string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func (m *monitor) UpdateBaseInfo(uid int, baseInfo *InfringemetMonitorBaseInfo) error {
+func (p *monitorSrv) UpdateBaseInfo(creatorUid int, baseInfo *InfringementMonitorBaseInfo) (err error) {
 	bean := &model.InfringementMonitor{
+		CreatorUid:   creatorUid,
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
-		Organization: *baseInfo.Organization,
-		Description:  *baseInfo.Description,
-		Resume:       *baseInfo.Resume,
+		Organization: baseInfo.Organization,
+		Description:  baseInfo.Description,
+		Resume:       baseInfo.Resume,
 	}
-	_, err := model.Db.Cols("name", "phone", "organization", "description", "resume").Update(bean, &model.InfringementMonitor{CreatorUid: uid})
-	return err
+	err = bean.Update("name", "phone", "organization", "description", "resume")
+	return
 }
 
-func (m *monitor) Add(baseInfo *InfringemetMonitorBaseInfo, creatorUid int) (id int, err error) {
-	has, err := model.Db.Exist(&model.InfringementMonitor{
-		CreatorUid: creatorUid,
-	})
+func (p *monitorSrv) Add(baseInfo *InfringementMonitorBaseInfo, creatorUid int) (id int, err error) {
+	bean := model.InfringementMonitor{CreatorUid: creatorUid}
+	has, err := bean.Get()
 	if err != nil {
 		return
 	}
 	if has {
-		err = errors.New("系统已添加您的侵权监测，请勿重复添加！")
+		err = errors.New("系统已存在记录，请勿重复添加！")
 		return
 	}
-	bean := model.InfringementMonitor{
+	bean = model.InfringementMonitor{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
-		Organization: *baseInfo.Organization,
-		Description:  *baseInfo.Description,
-		Resume:       *baseInfo.Resume,
+		Organization: baseInfo.Organization,
+		Description:  baseInfo.Description,
+		Resume:       baseInfo.Resume,
 		CreatorUid:   creatorUid,
 		CreateTime:   int(time.Now().Unix()),
 	}
-	_, err = model.Db.InsertOne(bean)
+	err = bean.Insert()
 	id = bean.Id
 	return
 }
 
-func (m *monitor) BgGet(beanId int) (model.InfringementMonitor, error) {
-	bean := model.InfringementMonitor{}
-	_, err := model.Db.Table("infringement_monitor").Where("id=?", beanId).Get(&bean)
-	return bean, err
+func (p *monitorSrv) BgGet(id int) (bean model.InfringementMonitor, err error) {
+	bean.Id = id
+	has, err := bean.Get()
+	if err != nil {
+		return
+	}
+	if !has {
+		err = errors.New("无查询的InfringementMonitor")
+		return
+	}
+	return
 }
 
-func (m *monitor) Get(creatorUid int) (model.InfringementMonitor, error) {
-	bean := model.InfringementMonitor{}
-	_, err := model.Db.Table("infringement_monitor").Where("creator_uid=?", creatorUid).Get(&bean)
-	return bean, err
+func (p *monitorSrv) Get(creatorUid int) (bean *model.InfringementMonitor, err error) {
+	bean = &model.InfringementMonitor{CreatorUid: creatorUid}
+	has, err := bean.Get()
+	if err != nil {
+		return
+	}
+	if !has {
+		bean = nil
+		return
+	}
+	return
 }
 
-type InfringemetMonitorSearchParams struct {
+type InfringementMonitorSearchParams struct {
 	DealResult      string `json:"deal_result" query:"deal_result"`
 	DealRemark      string `json:"deal_remark" query:"deal_remark"`
 	CustomerAddress string `json:"customer_address" query:"customer_address"`
@@ -94,7 +113,7 @@ type InfringemetMonitorSearchParams struct {
 	CreateTimeMax   int    `json:"create_time_max" query:"create_time_max"`
 }
 
-type infringemetMonitorInfo struct {
+type monitorInfo struct {
 	Id         int    `json:"id"`
 	Name       string `json:"name"`
 	Phone      string `json:"phone"`
@@ -102,10 +121,10 @@ type infringemetMonitorInfo struct {
 	DealResult string `json:"deal_result"`
 }
 
-func (m *monitor) BackendList(page *model.Page, search *InfringemetMonitorSearchParams) (*model.PageResult, error) {
-	searchInfo := []infringemetMonitorInfo{}
+func (p *monitorSrv) BackendList(page *model.Page, search *InfringementMonitorSearchParams) (*model.PageResult, error) {
+	searchInfo := []monitorInfo{}
 	sess := model.Db.NewSession()
-	sess.Table("infringement_monitor")
+	sess.Table("rights_monitor")
 	sess.Cols(
 		"id",
 		"name",
@@ -113,7 +132,7 @@ func (m *monitor) BackendList(page *model.Page, search *InfringemetMonitorSearch
 		"create_time",
 		"deal_result",
 	)
-	m.dealSearch(sess, search)
+	p.dealSearch(sess, search)
 	pageResult, err := page.GetResults(sess, &searchInfo)
 	if err != nil {
 		return nil, err
@@ -121,7 +140,7 @@ func (m *monitor) BackendList(page *model.Page, search *InfringemetMonitorSearch
 	return pageResult, err
 }
 
-func (m *monitor) dealSearch(sess *xorm.Session, search *InfringemetMonitorSearchParams) {
+func (p *monitorSrv) dealSearch(sess *xorm.Session, search *InfringementMonitorSearchParams) {
 	if search.DealResult != "" {
 		sess.Where("deal_result = ?", search.DealResult)
 	}

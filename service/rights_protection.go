@@ -62,7 +62,7 @@ func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) 
 		return
 	}
 	if has {
-		err = errors.New("系统已添加您的侵权监测，请勿重复添加！")
+		err = errors.New("系统已存在记录，请勿重复添加！")
 		return
 	}
 	bean = model.RightsProtection{
