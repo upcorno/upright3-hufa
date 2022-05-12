@@ -85,7 +85,8 @@ func testFavorite(issueId int, t *testing.T) {
 	if !has {
 		t.Fatal(errors.New("LegalIssue应该已添加收藏"))
 	}
-	err = issueFavorite.Delete()
+	tmpIssueFavorite := &LegalIssueFavorite{UserId: issueFavorite.UserId, IssueId: issueFavorite.IssueId}
+	err = tmpIssueFavorite.Delete()
 	if err != nil {
 		t.Fatal(err)
 	}
