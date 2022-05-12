@@ -18,14 +18,14 @@ func TestMain(m *testing.M) {
 	setNullLogger()
 	conf.Init()
 	Init()
-	addTestUser()
+	addTestUser(m)
 
 	m.Run()
 
 	deleteTestUser()
 }
 
-func addTestUser() {
+func addTestUser(m *testing.M) {
 	user := &User{
 		AppId:      "test_app_id",
 		Openid:     "test_openid",

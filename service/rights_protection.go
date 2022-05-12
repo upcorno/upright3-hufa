@@ -8,51 +8,56 @@ import (
 	"xorm.io/xorm"
 )
 
-type protection struct{}
+type protectionSrv struct{}
 
-var Protection = &protection{}
+var Protection = &protectionSrv{}
 
 type RightsProtectionDealInfo struct {
-	Id              int     `json:"id" query:"id" form:"id" validate:"required,gt=0"`
-	DealResult      string  `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
-	CustomerAddress *string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"min=0,max=50"`
-	DealRemark      *string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"min=0"`
+	Id              int    `json:"id" query:"id" form:"id" validate:"required,gt=0"`
+	DealResult      string `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
+	CustomerAddress string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"min=0,max=50"`
+	DealRemark      string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"min=0"`
 }
 
-func (p *protection) SetDealInfo(id int, dealInfo *RightsProtectionDealInfo) error {
+func (p *protectionSrv) SetDealInfo(id int, dealInfo *RightsProtectionDealInfo) (err error) {
 	bean := &model.RightsProtection{
+		Id:              id,
 		DealResult:      dealInfo.DealResult,
-		CustomerAddress: *dealInfo.CustomerAddress,
-		DealRemark:      *dealInfo.DealRemark,
+		CustomerAddress: dealInfo.CustomerAddress,
+		DealRemark:      dealInfo.DealRemark,
 	}
-	_, err := model.Db.Cols("deal_result", "customer_address", "deal_remark").Update(bean, &model.RightsProtection{Id: id})
-	return err
+	err = bean.Update(
+		"deal_result",
+		"customer_address",
+		"deal_remark",
+	)
+	return
 }
 
 type RightsProtectionBaseInfo struct {
-	Name         string  `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
-	Phone        string  `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
-	Organization *string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
-	Description  *string `json:"description" form:"description" query:"description" validate:"min=0"`
-	Resume       *string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
+	Name         string `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
+	Phone        string `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
+	Organization string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
+	Description  string `json:"description" form:"description" query:"description" validate:"min=0"`
+	Resume       string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func (p *protection) UpdateBaseInfo(uid int, baseInfo *RightsProtectionBaseInfo) error {
+func (p *protectionSrv) UpdateBaseInfo(creatorUid int, baseInfo *RightsProtectionBaseInfo) (err error) {
 	bean := &model.RightsProtection{
+		CreatorUid:   creatorUid,
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
-		Organization: *baseInfo.Organization,
-		Description:  *baseInfo.Description,
-		Resume:       *baseInfo.Resume,
+		Organization: baseInfo.Organization,
+		Description:  baseInfo.Description,
+		Resume:       baseInfo.Resume,
 	}
-	_, err := model.Db.Cols("name", "phone", "organization", "description", "resume").Update(bean, &model.RightsProtection{CreatorUid: uid})
-	return err
+	err = bean.Update("name", "phone", "organization", "description", "resume")
+	return
 }
 
-func (p *protection) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id int, err error) {
-	has, err := model.Db.Exist(&model.RightsProtection{
-		CreatorUid: creatorUid,
-	})
+func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id int, err error) {
+	bean := model.RightsProtection{CreatorUid: creatorUid}
+	has, err := bean.Get()
 	if err != nil {
 		return
 	}
@@ -60,30 +65,44 @@ func (p *protection) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id
 		err = errors.New("系统已添加您的侵权监测，请勿重复添加！")
 		return
 	}
-	bean := model.RightsProtection{
+	bean = model.RightsProtection{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
-		Organization: *baseInfo.Organization,
-		Description:  *baseInfo.Description,
-		Resume:       *baseInfo.Resume,
+		Organization: baseInfo.Organization,
+		Description:  baseInfo.Description,
+		Resume:       baseInfo.Resume,
 		CreatorUid:   creatorUid,
 		CreateTime:   int(time.Now().Unix()),
 	}
-	_, err = model.Db.InsertOne(bean)
+	err = bean.Insert()
 	id = bean.Id
 	return
 }
 
-func (p *protection) BgGet(beanId int) (model.RightsProtection, error) {
-	bean := model.RightsProtection{}
-	_, err := model.Db.Table("rights_protection").Where("id=?", beanId).Get(&bean)
-	return bean, err
+func (p *protectionSrv) BgGet(id int) (bean model.RightsProtection, err error) {
+	bean.Id = id
+	has, err := bean.Get()
+	if err != nil {
+		return
+	}
+	if !has {
+		err = errors.New("无查询的RightsProtection")
+		return
+	}
+	return
 }
 
-func (p *protection) Get(creatorUid int) (model.RightsProtection, error) {
-	bean := model.RightsProtection{}
-	_, err := model.Db.Table("rights_protection").Where("creator_uid=?", creatorUid).Get(&bean)
-	return bean, err
+func (p *protectionSrv) Get(creatorUid int) (bean *model.RightsProtection, err error) {
+	bean = &model.RightsProtection{CreatorUid: creatorUid}
+	has, err := bean.Get()
+	if err != nil {
+		return
+	}
+	if !has {
+		bean = nil
+		return
+	}
+	return
 }
 
 type RightsProtectionSearchParams struct {
@@ -102,7 +121,7 @@ type protectionInfo struct {
 	DealResult string `json:"deal_result"`
 }
 
-func (p *protection) BackendList(page *model.Page, search *RightsProtectionSearchParams) (*model.PageResult, error) {
+func (p *protectionSrv) BackendList(page *model.Page, search *RightsProtectionSearchParams) (*model.PageResult, error) {
 	searchInfo := []protectionInfo{}
 	sess := model.Db.NewSession()
 	sess.Table("rights_protection")
@@ -121,7 +140,7 @@ func (p *protection) BackendList(page *model.Page, search *RightsProtectionSearc
 	return pageResult, err
 }
 
-func (p *protection) dealSearch(sess *xorm.Session, search *RightsProtectionSearchParams) {
+func (p *protectionSrv) dealSearch(sess *xorm.Session, search *RightsProtectionSearchParams) {
 	if search.DealResult != "" {
 		sess.Where("deal_result = ?", search.DealResult)
 	}

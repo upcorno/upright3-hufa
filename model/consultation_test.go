@@ -32,7 +32,10 @@ func TestConsultation(t *testing.T) {
 	testSetStatus(consul.Id, t)
 	testConsultationGetWithUserInfo(consul.Id, t)
 	testGetUnexixtConsultation(consul.Id+1, t)
-	consul.delete()
+	err = consul.delete()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func testReply(consultationId int, t *testing.T) {

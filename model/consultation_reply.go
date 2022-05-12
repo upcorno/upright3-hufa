@@ -33,7 +33,7 @@ func (reply *ConsultationReply) delete() (err error) {
 		err = errors.New("model:必须指定id值")
 		return
 	}
-	_, err = Db.Delete(reply)
+	_, err = Db.Delete(&ConsultationReply{Id: reply.Id})
 	return
 }
 

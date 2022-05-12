@@ -44,6 +44,10 @@ func (f *LegalIssueFavorite) Delete() (err error) {
 			return
 		}
 	}
-	_, err = Db.Delete(f)
+	_, err = Db.Delete(&LegalIssueFavorite{
+		Id:      f.Id,
+		IssueId: f.IssueId,
+		UserId:  f.UserId,
+	})
 	return
 }

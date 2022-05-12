@@ -30,7 +30,7 @@ func (consul *Consultation) delete() error {
 		err := errors.New("model:必须指定id值")
 		return err
 	}
-	_, err := Db.Delete(consul)
+	_, err := Db.Delete(&Consultation{Id: consul.Id})
 	return err
 }
 

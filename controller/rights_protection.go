@@ -39,7 +39,7 @@ func RightsProtectionGet(ctx echo.Context) error {
 	uid := ctx.Get("uid").(int)
 	bean, err := service.Protection.Get(uid)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取侵权监测失败！", err.Error()))
+		return ctx.JSON(utils.ErrIpt("查询失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", bean))
 }
