@@ -37,6 +37,11 @@ func SetPhone(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", nil))
 }
 
+func WxNotify(ctx echo.Context) error {
+	service.WxSrv.WxNotify(ctx.Response().Writer, ctx.Request())
+	return nil
+}
+
 type nameAndAvatarUrl struct {
 	NickName  string `json:"nick_name" form:"nick_name" query:"nick_name" validate:"required"`
 	AvatarUrl string `json:"avatar_url" form:"avatar_url" query:"avatar_url" validate:"required,url"`

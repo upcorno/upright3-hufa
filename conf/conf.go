@@ -135,8 +135,12 @@ type oss struct {
 }
 
 type wxApp struct {
-	Appid  string `mapstructure:"appid"`
-	Secret string `mapstructure:"secret"`
+	Appid        string `mapstructure:"appid"`
+	Secret       string `mapstructure:"secret"`
+	NOtifyToken  string `mapstructure:"notify_token"`
+	NotifyAesKey string `mapstructure:"notify_aes_key"`
+	NotifyMchId  string `mapstructure:"notify_mch_id"`
+	NotifyApiKey string `mapstructure:"notify_api_key"`
 }
 
 type bgAccount struct {

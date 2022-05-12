@@ -6,9 +6,6 @@ import (
 	"law/model"
 	"law/utils"
 	"time"
-
-	"github.com/medivhzhan/weapp/v3"
-	"github.com/medivhzhan/weapp/v3/phonenumber"
 )
 
 type user struct{}
@@ -16,7 +13,7 @@ type user struct{}
 var User *user = &user{}
 
 func (u *user) Login(code string) (token string, err error) {
-	res, err := u.wxLogin(code)
+	res, err := WxSrv.wxLogin(code)
 	if err != nil {
 		return
 	}
@@ -58,7 +55,7 @@ func (u *user) getUid(openid string, unionID string) (uid int, err error) {
 }
 
 func (u *user) SetPhone(uid int, code string) (err error) {
-	res, err := u.getPhoneNumber(code)
+	res, err := WxSrv.getPhoneNumber(code)
 	if err != nil {
 		return
 	}
@@ -92,15 +89,4 @@ func (u *user) BackendLogin(account string, password string) (token string, err 
 	}
 	err = errors.New("帐号或密码不正确。")
 	return
-}
-
-func (u *user) wxLogin(code string) (*weapp.LoginResponse, error) {
-	sdk := weapp.NewClient(conf.App.WxApp.Appid, conf.App.WxApp.Secret)
-	return sdk.Login(code)
-}
-
-func (u *user) getPhoneNumber(code string) (*phonenumber.GetPhoneNumberResponse, error) {
-	sdk := weapp.NewClient(conf.App.WxApp.Appid, conf.App.WxApp.Secret)
-	cli := sdk.NewPhonenumber()
-	return cli.GetPhoneNumber(&phonenumber.GetPhoneNumberRequest{Code: code})
 }

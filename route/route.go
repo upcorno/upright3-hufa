@@ -55,6 +55,7 @@ func InitRouter(e *echo.Echo, bg *echo.Group) {
 	e.Add(http.MethodPost, "/user/set_phone", controller.SetPhone)
 	e.Add(http.MethodPost, "/user/set_name_and_avatar_url", controller.SetNameAndAvatarUrl)
 	e.Add(http.MethodGet, "/user/get_user_info", controller.GetUserInfo)
+	e.Add(http.MethodGet, "/wx/notify", controller.WxNotify)
 	//
 	bg.GET("/user/get_user_info", controller.GetUserInfo)
 	bg.POST("/user/login", controller.BackendLogin)
