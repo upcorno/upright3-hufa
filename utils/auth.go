@@ -8,10 +8,29 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var bgUids map[int]bool
+var nonAuthPath map[string]bool
+
+func initPublicVar() {
+	if bgUids == nil {
+		bgUids = map[int]bool{}
+		for _, bgAccountInfo := range *conf.App.BgAccounts {
+			bgUids[bgAccountInfo.Uid] = true
+		}
+	}
+	if nonAuthPath == nil {
+		nonAuthPath = map[string]bool{}
+		for _, path := range conf.App.Jwt.NonAuthPath {
+			nonAuthPath[path] = true
+		}
+	}
+}
+
 // midAuth 登录认证中间件
 func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	initPublicVar()
 	return func(ctx echo.Context) error {
-		if ctx.Request().URL.Path == conf.App.Jwt.LoginPath || ctx.Request().URL.Path == conf.App.Jwt.BackendLoginPath {
+		if _, ok := nonAuthPath[ctx.Request().URL.Path]; ok {
 			return next(ctx)
 		}
 		tokenRaw := ctx.Request().Header.Get("token")
@@ -32,12 +51,9 @@ func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 
 //后台接口权限验证
 func BackendAuth(next echo.HandlerFunc) echo.HandlerFunc {
-	bgUids := map[int]bool{}
-	for _, bgAccountInfo := range *conf.App.BgAccounts {
-		bgUids[bgAccountInfo.Uid] = true
-	}
+	initPublicVar()
 	return func(ctx echo.Context) error {
-		if ctx.Request().URL.Path == conf.App.Jwt.BackendLoginPath {
+		if _, ok := nonAuthPath[ctx.Request().URL.Path]; ok {
 			return next(ctx)
 		}
 		uid := ctx.Get("uid").(int)

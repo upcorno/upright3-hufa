@@ -22,7 +22,7 @@ func (w *wxSrv) WxNotify(repWriter http.ResponseWriter, request *http.Request) {
 		zlog.Info().Msgf("wechat notify: %v", req)
 		return nil
 	}
-	srv, err := sdk.NewServer(conf.App.WxApp.NOtifyToken, conf.App.WxApp.NotifyAesKey, conf.App.WxApp.NotifyMchId, conf.App.WxApp.NotifyApiKey, false, handler)
+	srv, err := sdk.NewServer(conf.App.WxApp.NotifyToken, conf.App.WxApp.NotifyAesKey, conf.App.WxApp.NotifyMchId, conf.App.WxApp.NotifyApiKey, false, handler)
 	if err != nil {
 		zlog.Error().Msgf("init wecat notify server error: %s", err)
 	}

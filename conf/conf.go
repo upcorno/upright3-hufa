@@ -73,11 +73,10 @@ func (app *Config) IsDev() bool {
 
 // jwt config
 type jwtConf struct {
-	LoginKey         string `mapstructure:"login_key"`
-	LoginPath        string `mapstructure:"login_path"`
-	BackendLoginPath string `mapstructure:"backend_login_path"`
-	AuthKey          string `mapstructure:"auth_key"`
-	AuthLifetime     int    `mapstructure:"auth_lifetime"`
+	LoginKey     string   `mapstructure:"login_key"`
+	AuthKey      string   `mapstructure:"auth_key"`
+	AuthLifetime int      `mapstructure:"auth_lifetime"`
+	NonAuthPath  []string `mapstructure:"non_auth_path"`
 }
 
 // http config
@@ -137,7 +136,7 @@ type oss struct {
 type wxApp struct {
 	Appid        string `mapstructure:"appid"`
 	Secret       string `mapstructure:"secret"`
-	NOtifyToken  string `mapstructure:"notify_token"`
+	NotifyToken  string `mapstructure:"notify_token"`
 	NotifyAesKey string `mapstructure:"notify_aes_key"`
 	NotifyMchId  string `mapstructure:"notify_mch_id"`
 	NotifyApiKey string `mapstructure:"notify_api_key"`
