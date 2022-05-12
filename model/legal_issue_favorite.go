@@ -39,8 +39,10 @@ func (f *LegalIssueFavorite) Exist() (has bool, err error) {
 
 func (f *LegalIssueFavorite) Delete() (err error) {
 	if f.Id == 0 {
-		err = errors.New("model:Id不可为空")
-		return
+		if !(f.IssueId != 0 && f.UserId != 0) {
+			err = errors.New("model:必须指定Id或同时指定IssueId、UserId。")
+			return
+		}
 	}
 	_, err = Db.Delete(f)
 	return
