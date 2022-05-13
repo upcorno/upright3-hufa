@@ -124,7 +124,7 @@ type monitorInfo struct {
 func (p *monitorSrv) BackendList(page *model.Page, search *InfringementMonitorSearchParams) (*model.PageResult, error) {
 	searchInfo := []monitorInfo{}
 	sess := model.Db.NewSession()
-	sess.Table("rights_monitor")
+	sess.Table("infringement_monitor")
 	sess.Cols(
 		"id",
 		"name",
