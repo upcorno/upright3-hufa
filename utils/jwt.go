@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"github.com/dgrijalva/jwt-go"
-)
+import "github.com/golang-jwt/jwt/v4"
 
 func CreateToken(claims jwt.Claims, jwtKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -10,7 +8,7 @@ func CreateToken(claims jwt.Claims, jwtKey string) (string, error) {
 	return tokenRaw, err
 }
 
-func ParseToken(tokenStr string, claims jwt.Claims, jwtKey string) (jwt.Claims, error) {
+func ParseAndValidToken(tokenStr string, claims jwt.Claims, jwtKey string) (jwt.Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtKey), nil
 	})

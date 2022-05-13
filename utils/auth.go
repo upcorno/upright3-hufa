@@ -4,7 +4,7 @@ import (
 	"law/conf"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -41,9 +41,6 @@ func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return ctx.JSON(ErrJwt("请重新登陆", err.Error()))
 		}
-		if err = claims.Valid(); err != nil {
-			return ctx.JSON(ErrJwt("登陆令牌验证失败。", err.Error()))
-		}
 		ctx.Set("uid", claims.Uid)
 		return next(ctx)
 	}
@@ -66,24 +63,24 @@ func BackendAuth(next echo.HandlerFunc) echo.HandlerFunc {
 
 type authClaims struct {
 	Uid int
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 func CreateAuthToken(uid int) (string, error) {
-	nowSecond := int64(time.Now().Unix())
-	expireAtSecond := nowSecond + int64(conf.App.Jwt.AuthLifetime)
+	now := time.Now().Local()
+	expireAt := now.Add(time.Second * time.Duration(conf.App.Jwt.AuthLifetime))
 	claims := &authClaims{
 		Uid: uid,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expireAtSecond,
-			NotBefore: nowSecond,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expireAt),
+			NotBefore: jwt.NewNumericDate(now),
 		},
 	}
 	return CreateToken(claims, conf.App.Jwt.AuthKey)
 }
 
 func parseAuthToken(tokenStr string) (*authClaims, error) {
-	claims, err := ParseToken(tokenStr, &authClaims{}, conf.App.Jwt.AuthKey)
+	claims, err := ParseAndValidToken(tokenStr, &authClaims{}, conf.App.Jwt.AuthKey)
 	if err != nil {
 		return nil, err
 	}

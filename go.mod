@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1528
 	github.com/dgraph-io/ristretto v0.1.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eko/gocache v1.2.0
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/medivhzhan/weapp/v3 v3.6.7
 	github.com/rs/zerolog v1.26.1
