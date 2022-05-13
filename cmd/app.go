@@ -32,7 +32,7 @@ func StartServer() {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 	e.HTTPErrorHandler = customHTTPErrorHandler
-	format := `remote_ip:${remote_ip},host:${host},method:${method},user_agent:${user_agent},status:${status},error:${error},latency_human:${latency_human},uri:${uri}`
+	format := `remote_ip:${remote_ip},host:${host},method:${method},user_agent:${user_agent},referer:${referer},uri:${uri},bytes_in:${bytes_in},bytes_out:${bytes_out},status:${status},error:${error},latency_human:${latency_human}`
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{Output: log.Logger, Format: format}))
 	e.Use(utils.MidAuth)
 	backendRouteGroup := e.Group("/backend")

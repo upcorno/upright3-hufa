@@ -4,6 +4,7 @@ import (
 	"io"
 	"law/conf"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -27,6 +28,12 @@ func InitLogger() *BufWriter {
 	}
 	lw := &LevelWriter{Writer: appBufFile, ErrorWriter: errFile}
 	log.Logger = log.Output(lw)
+	go func() {
+		for {
+			time.Sleep(time.Second * 5)
+			FlushLog()
+		}
+	}()
 	return appBufFile
 }
 
