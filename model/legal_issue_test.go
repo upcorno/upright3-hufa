@@ -58,6 +58,14 @@ func testLigalIssueList(t *testing.T) {
 	if result.Total < 1 {
 		t.Fatal(errors.New("至少应存在一个满足条件的LigalIssue"))
 	}
+	search = &LegalIssueSearch{BusinessCategory: "版权基础"}
+	result, err = LegalIssueList(page, search)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Total < 1 {
+		t.Fatal(errors.New("至少应存在一个满足条件的LigalIssue"))
+	}
 }
 
 func testLigalIssueCategoryList(t *testing.T) {

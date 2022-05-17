@@ -13,17 +13,18 @@ import (
 
 //常见知产问题
 type LegalIssue struct {
-	Id             int       `xorm:"not null pk autoincr INT" json:"id"`
-	CreatorUid     int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid"`
-	FirstCategory  string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category"`
-	SecondCategory string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category"`
-	Tags           string    `xorm:"not null comment('问题标签') index VARCHAR(255) default('')" json:"tags"`
-	Title          string    `xorm:"not null comment('标题') VARCHAR(60)" json:"title"`
-	Imgs           string    `xorm:"not null comment('普法问题关联图片') TEXT default('')" json:"imgs"`
-	Content        string    `xorm:"not null comment('内容') LONGTEXT" json:"content"`
-	SearchText     string    `xorm:"not null comment('全文检索字段') LONGTEXT default('')" json:"-"`
-	CreateTime     int       `xorm:"not null UNSIGNED INT default(1651383059)" json:"create_time"`
-	UpdateTime     time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
+	Id               int       `xorm:"not null pk autoincr INT" json:"id"`
+	CreatorUid       int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid"`
+	FirstCategory    string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category"`
+	SecondCategory   string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category"`
+	BusinessCategory string    `xorm:"not null comment('业务类别') index CHAR(25)" json:"business_category"`
+	Tags             string    `xorm:"not null comment('问题标签') index VARCHAR(255) default('')" json:"tags"`
+	Title            string    `xorm:"not null comment('标题') VARCHAR(60)" json:"title"`
+	Imgs             string    `xorm:"not null comment('普法问题关联图片') TEXT default('')" json:"imgs"`
+	Content          string    `xorm:"not null comment('内容') LONGTEXT" json:"content"`
+	SearchText       string    `xorm:"not null comment('全文检索字段') LONGTEXT default('')" json:"-"`
+	CreateTime       int       `xorm:"not null UNSIGNED INT default(1651383059)" json:"create_time"`
+	UpdateTime       time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
 func (issue *LegalIssue) Insert() (err error) {
@@ -49,10 +50,11 @@ func (issue *LegalIssue) Get() (has bool, err error) {
 }
 
 type LegalIssueSearch struct {
-	SearchText     string `json:"search_text" form:"search_text" query:"search_text"`
-	FirstCategory  string `json:"first_category" form:"first_category" query:"first_category"`
-	SecondCategory string `json:"second_category" form:"second_category" query:"second_category"`
-	FavoriteUid    int
+	SearchText       string `json:"search_text" form:"search_text" query:"search_text"`
+	FirstCategory    string `json:"first_category" form:"first_category" query:"first_category"`
+	SecondCategory   string `json:"second_category" form:"second_category" query:"second_category"`
+	BusinessCategory string `json:"business_category" form:"business_category" query:"business_category"`
+	FavoriteUid      int
 	//IsFavorite 命名有点问题。
 	//设计时考虑的语意是：判断是否仅搜索收藏的内容。
 	//而这个命名IsFavorite为false时，有从未收藏中搜索的含义。
@@ -92,6 +94,9 @@ func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
 	}
 	if search.SecondCategory != "" {
 		sess.Where("second_category = ?", search.SecondCategory)
+	}
+	if search.BusinessCategory != "" {
+		sess.Where("business_category like ?", fmt.Sprintf("%%%s%%", search.BusinessCategory))
 	}
 	if search.IsFavorite {
 		sess.
