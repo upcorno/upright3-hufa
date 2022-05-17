@@ -55,11 +55,8 @@ type LegalIssueSearch struct {
 	SecondCategory   string `json:"second_category" form:"second_category" query:"second_category"`
 	BusinessCategory string `json:"business_category" form:"business_category" query:"business_category"`
 	FavoriteUid      int
-	//IsFavorite 命名有点问题。
-	//设计时考虑的语意是：判断是否仅搜索收藏的内容。
-	//而这个命名IsFavorite为false时，有从未收藏中搜索的含义。
-	IsFavorite bool `json:"is_favorite" form:"is_favorite" query:"is_favorite"`
-	InSummary  bool `json:"in_summary" form:"in_summary" query:"in_summary"`
+	OnlyFavorite     bool `json:"only_favorite" form:"only_favorite" query:"only_favorite"`
+	InSummary        bool `json:"in_summary" form:"in_summary" query:"in_summary"`
 }
 
 func LegalIssueList(page *Page, search *LegalIssueSearch) (*PageResult, error) {
@@ -98,7 +95,7 @@ func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
 	if search.BusinessCategory != "" {
 		sess.Where("business_category like ?", fmt.Sprintf("%%%s%%", search.BusinessCategory))
 	}
-	if search.IsFavorite {
+	if search.OnlyFavorite {
 		sess.
 			Join("INNER", "legal_issue_favorite", "legal_issue_favorite.issue_id = legal_issue.id").
 			Where("legal_issue_favorite.user_id = ?", search.FavoriteUid)

@@ -4,8 +4,8 @@ import (
 	"law/conf"
 
 	"github.com/dgraph-io/ristretto"
-	"github.com/eko/gocache/cache"
-	"github.com/eko/gocache/store"
+	"github.com/eko/gocache/v2/cache"
+	"github.com/eko/gocache/v2/store"
 )
 
 var CacheManager cache.CacheInterface

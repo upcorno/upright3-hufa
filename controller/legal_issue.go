@@ -9,6 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+//由于问题列表接口内容几乎不会变化，因此进行了5min的缓存，
+//如果请求参数指定根据是否收藏参数检索，则不会使用缓存
 func LegalIssueList(ctx echo.Context) error {
 	page := &model.Page{PageIndex: 1, ItemNum: 5}
 	if err := ctx.Bind(page); err != nil {
@@ -18,11 +20,11 @@ func LegalIssueList(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	search := &model.LegalIssueSearch{FavoriteUid: uid, IsFavorite: false}
+	search := &model.LegalIssueSearch{FavoriteUid: uid, OnlyFavorite: false}
 	if err := utils.BindAndValidate(ctx, search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}
-	issues, err := model.LegalIssueList(page, search)
+	issues, err := service.LegalIssueSrv.LegalIssueList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取legal_issue list失败！", err.Error()))
 	}
