@@ -30,6 +30,10 @@ type legalIssueInfo struct {
 //由于问题列表接口内容几乎不会变化，因此进行了5min的缓存，
 //如果请求参数指定根据是否收藏参数检索，则不会使用缓存
 func (l *legalIssueSrv) LegalIssueList(page *model.Page, search *model.LegalIssueSearch) (issues *model.PageResult, err error) {
+	if search.IsFavorite {
+		//小程序正式发布后可删除此代码
+		search.OnlyFavorite = search.IsFavorite
+	}
 	if search.OnlyFavorite {
 		issues, err = model.LegalIssueList(page, search)
 		return

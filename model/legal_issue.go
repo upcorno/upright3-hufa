@@ -55,8 +55,10 @@ type LegalIssueSearch struct {
 	SecondCategory   string `json:"second_category" form:"second_category" query:"second_category"`
 	BusinessCategory string `json:"business_category" form:"business_category" query:"business_category"`
 	FavoriteUid      int
-	OnlyFavorite     bool `json:"only_favorite" form:"only_favorite" query:"only_favorite"`
-	InSummary        bool `json:"in_summary" form:"in_summary" query:"in_summary"`
+	//deprecated 小程序正式发布后可删除此字段
+	IsFavorite   bool `json:"is_favorite" form:"is_favorite" query:"is_favorite"`
+	OnlyFavorite bool `json:"only_favorite" form:"only_favorite" query:"only_favorite"`
+	InSummary    bool `json:"in_summary" form:"in_summary" query:"in_summary"`
 }
 
 func LegalIssueList(page *Page, search *LegalIssueSearch) (*PageResult, error) {
