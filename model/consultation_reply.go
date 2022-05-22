@@ -55,6 +55,7 @@ func ConsultationReplyList(consultationId int, minReplyId int) (replyInfoList []
 		err = errors.New("model:必须指定consultationId值")
 		return
 	}
+	replyInfoList = []replyInfo{}
 	err = Db.Table("consultation_reply").
 		Join("INNER", "user", "user.id = consultation_reply.communicator_uid").
 		Where("consultation_id=?", consultationId).

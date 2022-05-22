@@ -61,7 +61,7 @@ type LegalIssueSearch struct {
 	InSummary    bool `json:"in_summary" form:"in_summary" query:"in_summary"`
 }
 
-func LegalIssueList(page *Page, search *LegalIssueSearch) (*PageResult, error) {
+func LegalIssueList(page *Page, search *LegalIssueSearch) (pageResult *PageResult, err error) {
 	legalIssues := new([]LegalIssue)
 	sess := Db.NewSession()
 	sess.Table("legal_issue")
@@ -71,11 +71,8 @@ func LegalIssueList(page *Page, search *LegalIssueSearch) (*PageResult, error) {
 		sess.Cols("legal_issue.id", "creator_uid", "first_category", "second_category", "tags", "title", "imgs", "content")
 	}
 	dealSearch(sess, search)
-	pageResult, err := page.GetResults(sess, legalIssues)
-	if err != nil {
-		return nil, err
-	}
-	return pageResult, err
+	pageResult, err = page.GetResults(sess, legalIssues)
+	return
 }
 
 func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
