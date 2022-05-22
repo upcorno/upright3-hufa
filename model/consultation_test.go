@@ -50,7 +50,7 @@ func testReply(consultationId int, t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	replyInfoList, err := ConsultationReplyList(consultationId)
+	replyInfoList, err := ConsultationReplyList(consultationId, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func testReply(consultationId int, t *testing.T) {
 	}
 	reply.delete()
 
-	replyInfoList, err = ConsultationReplyList(consultationId)
+	replyInfoList, err = ConsultationReplyList(consultationId, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

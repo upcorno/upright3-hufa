@@ -19,10 +19,8 @@ func TestMain(m *testing.M) {
 	conf.Init()
 	Init()
 	addTestUser(m)
-
+	defer deleteTestUser()
 	m.Run()
-
-	deleteTestUser()
 }
 
 func addTestUser(m *testing.M) {

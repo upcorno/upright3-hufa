@@ -115,7 +115,15 @@ func ConsultationListReply(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	recordListInfo, err := model.ConsultationReplyList(consultationId)
+	minReplyId := 0
+	if ctx.QueryParams().Has("min_reply_id") {
+		minReplyIdStr := ctx.QueryParam("min_reply_id")
+		minReplyId, err = strconv.Atoi(minReplyIdStr)
+		if err != nil {
+			return ctx.JSON(utils.ErrIpt("获取min_reply_id失败！", err.Error()))
+		}
+	}
+	recordListInfo, err := model.ConsultationReplyList(consultationId, minReplyId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
 	}

@@ -50,7 +50,7 @@ type replyInfo struct {
 }
 
 //获取咨询沟通记录表
-func ConsultationReplyList(consultationId int) (replyInfoList []replyInfo, err error) {
+func ConsultationReplyList(consultationId int, minReplyId int) (replyInfoList []replyInfo, err error) {
 	if consultationId == 0 {
 		err = errors.New("model:必须指定consultationId值")
 		return
@@ -58,6 +58,7 @@ func ConsultationReplyList(consultationId int) (replyInfoList []replyInfo, err e
 	err = Db.Table("consultation_reply").
 		Join("INNER", "user", "user.id = consultation_reply.communicator_uid").
 		Where("consultation_id=?", consultationId).
+		Where("consultation_reply.id>?", minReplyId).
 		Cols(
 			"consultation_reply.id",
 			"consultation_id",
