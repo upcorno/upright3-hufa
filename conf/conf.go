@@ -1,7 +1,8 @@
 package conf
 
 import (
-	"flag"
+	"os"
+	"strings"
 	"time"
 
 	zlog "github.com/rs/zerolog/log"
@@ -10,20 +11,37 @@ import (
 
 var (
 	App           *Config           //运行配置实体
+	TestMode      bool              //是否处于go test状态
 	defConfigFile = "./config.toml" //配置文件路径，方便测试
 )
 
 type Config struct {
-	Mode       string         `mapstructure:"mode"`
-	Jwt        *jwtConf       `mapstructure:"jwt"`
-	Http       *httpConf      `mapstructure:"http"`
-	Orm        *ormConf       `mapstructure:"orm"`
-	Db         *dbConf        `mapstructure:"db"`
-	Rpc        *rpcConf       `mapstructure:"rpc"`
-	Ristretto  *ristrettoConf `mapstructure:"ristretto"`
-	Oss        *oss           `mapstructure:"oss"`
-	WxApp      *wxApp         `mapstructure:"wx_app"`
-	BgAccounts *[]bgAccount   `mapstructure:"bg_account"`
+	Mode        string         `mapstructure:"mode"`
+	ProjectName string         `mapstructure:"project_name"`
+	Jwt         *jwtConf       `mapstructure:"jwt"`
+	Http        *httpConf      `mapstructure:"http"`
+	Orm         *ormConf       `mapstructure:"orm"`
+	Db          *dbConf        `mapstructure:"db"`
+	Rpc         *rpcConf       `mapstructure:"rpc"`
+	Ristretto   *ristrettoConf `mapstructure:"ristretto"`
+	Oss         *oss           `mapstructure:"oss"`
+	Rdb         *rdbConf       `mapstructure:"rdb"`
+	WxApp       *wxApp         `mapstructure:"wx_app"`
+	BgAccounts  *[]bgAccount   `mapstructure:"bg_account"`
+	Mail        *mailConf      `mapstructure:"mail"`
+}
+type mailConf struct {
+	Account             string   `mapstructure:"account"`
+	Password            string   `mapstructure:"password"`
+	Host                string   `mapstructure:"host"`
+	NewBusinessRevivers []string `mapstructure:"new_business_revivers"`
+}
+type rdbConf struct {
+	RdbHost    string `mapstructure:"rdb_host"`    //redis数据库地址
+	RdbPort    int    `mapstructure:"rdb_port"`    //redis数据库端口
+	RdbPasswd  string `mapstructure:"rdb_passwd"`  //redis数据库密码
+	MaxRetries int    `mapstructure:"max_retries"` //redis最大重试次数
+	DbIndex    int    `mapstructure:"db_index"`    //redis数据库db名字
 }
 
 func NewConfig() *Config {
@@ -43,18 +61,24 @@ func NewConfig() *Config {
 	}
 }
 
-func Init() {
-	var cfgFile string
-	// 从启动命令中读取配置文件路径
-	flag.StringVar(&cfgFile, "c", defConfigFile, "path of config file.")
-	flag.Parse()
-	if cfgFile == "" {
-		viper.AddConfigPath(".")
-		viper.SetConfigName("config")
-		viper.SetConfigType("toml")
-	} else {
-		viper.SetConfigFile(cfgFile)
+func init() {
+	if strings.HasSuffix(os.Args[0], ".test") {
+		TestMode = true
+		defConfigFile = "config_test.toml"
 	}
+	cfgFile := defConfigFile
+	i := 0
+	for {
+		if fileExist(cfgFile) {
+			break
+		}
+		cfgFile = "../" + cfgFile
+		if i > 3 {
+			panic("无法找到配置文件")
+		}
+		i++
+	}
+	viper.SetConfigFile(cfgFile)
 	if err := viper.ReadInConfig(); err != nil {
 		zlog.Fatal().Msgf("config init while viper.ReadInConfig error.err:%s", err.Error())
 	}
@@ -64,6 +88,15 @@ func Init() {
 	}
 	App = cfg
 }
+
+func fileExist(path string) bool {
+	_, err := os.Stat(path) //os.Stat获取文件信息
+	if err != nil {
+		return os.IsExist(err)
+	}
+	return true
+}
+
 func (app *Config) IsProd() bool {
 	return app.Mode == "prod"
 }

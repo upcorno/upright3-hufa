@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"law/conf"
+	_ "law/utils"
 	"log"
 	"time"
 
@@ -25,7 +26,7 @@ func Dsn(config *conf.Config) string {
 	return fmt.Sprintf(_dsn, config.Db.DbUser, config.Db.DbPasswd, config.Db.DbHost, config.Db.DbPort, config.Db.DbName, config.Db.DbParams)
 }
 
-func Init() {
+func init() {
 	db, err := xorm.NewEngine("mysql", Dsn(conf.App))
 	if err != nil {
 		zlog.Fatal().Msgf("xorm.NewEngine初始化失败.err:%s", err.Error())
@@ -77,4 +78,23 @@ func Init() {
 	}
 	Db = db
 	zlog.Info().Msg("model init")
+}
+
+func CountNewItems(minId int, table string) (count int, maxId int, err error) {
+	ids := &[]map[string]int{}
+	err = Db.Table(table).
+		Cols("id").
+		Where("id > ?", minId).
+		Desc("id").
+		Find(ids)
+	if err != nil {
+		return
+	}
+	count = len(*ids)
+	if count > 0 {
+		maxId = (*ids)[0]["id"]
+	} else {
+		maxId = minId
+	}
+	return
 }

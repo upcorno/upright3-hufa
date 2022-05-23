@@ -3,9 +3,7 @@ package cmd
 import (
 	"context"
 	"law/conf"
-	"law/model"
 	"law/route"
-	"law/service"
 	"law/utils"
 	"net/http"
 	"os"
@@ -22,13 +20,8 @@ import (
 
 func StartServer() {
 	initTimezone()
-	c := make(chan os.Signal, 1)
-	conf.Init()
-	service.InitCacheManager()
-	utils.InitLogger()
 	defer utils.FlushLog()
-	model.Init()
-	//以上调用顺序不应随意改变,彼此存在依赖关系
+	c := make(chan os.Signal, 1)
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 	e.HTTPErrorHandler = customHTTPErrorHandler

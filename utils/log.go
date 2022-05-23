@@ -12,7 +12,11 @@ import (
 
 var appBufFile *BufWriter
 
-func InitLogger() *BufWriter {
+func init() {
+	if conf.TestMode {
+		setNullLogger()
+		return
+	}
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if conf.App.IsDev() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -34,7 +38,15 @@ func InitLogger() *BufWriter {
 			FlushLog()
 		}
 	}()
-	return appBufFile
+}
+
+func setNullLogger() {
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	logWriter, err := os.OpenFile(os.DevNull, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic("无法创建日志文件" + os.DevNull)
+	}
+	log.Logger = log.Output(logWriter)
 }
 
 //由于bufio会缓存日志,可在需要时主动将缓存刷出

@@ -10,7 +10,7 @@ import (
 
 var CacheManager cache.CacheInterface
 
-func InitCacheManager() {
+func init() {
 	ristrettoCache, err := ristretto.NewCache(&ristretto.Config{
 		NumCounters: conf.App.Ristretto.NumCounters,
 		MaxCost:     conf.App.Ristretto.MaxCost,
