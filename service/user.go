@@ -10,7 +10,7 @@ import (
 
 type user struct{}
 
-var User *user = &user{}
+var UserSrv *user = &user{}
 
 func (u *user) Login(code string) (token string, err error) {
 	res, err := WxSrv.wxLogin(code)
@@ -20,7 +20,7 @@ func (u *user) Login(code string) (token string, err error) {
 	if err = res.GetResponseError(); err != nil {
 		return
 	}
-	uid, err := u.getUid(res.OpenID, res.UnionID)
+	uid, err := u.GetUidAndSync(res.OpenID, res.UnionID)
 	if err != nil {
 		return
 	}
@@ -28,7 +28,7 @@ func (u *user) Login(code string) (token string, err error) {
 }
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
-func (u *user) getUid(openid string, unionID string) (uid int, err error) {
+func (u *user) GetUidAndSync(openid string, unionid string) (uid int, err error) {
 	user := &model.User{
 		AppId:  conf.App.WxApp.Appid,
 		Openid: openid,
@@ -39,13 +39,13 @@ func (u *user) getUid(openid string, unionID string) (uid int, err error) {
 	}
 	if has {
 		uid = user.Id
-		if user.Unionid != unionID {
+		if unionid != "" && user.Unionid != unionid {
 			//更新 unionid, unionid 可能从 null 变为由内容
 			err = user.Update()
 		}
 		return
 	}
-	user.Unionid = unionID
+	user.Unionid = unionid
 	user.CreateTime = int(time.Now().Unix())
 	if err = user.Insert(); err != nil {
 		return

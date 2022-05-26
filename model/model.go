@@ -67,6 +67,7 @@ func init() {
 			new(ConsultationReply),
 			new(InfringementMonitor),
 			new(RightsProtection),
+			new(TemplateMsgSubscribe),
 		)
 		if err != nil {
 			zlog.Fatal().Msgf("数据库 sync失败.err:%s", err.Error())
@@ -81,18 +82,21 @@ func init() {
 }
 
 func CountNewItems(minId int, table string) (count int, maxId int, err error) {
-	ids := &[]map[string]int{}
+	type id struct {
+		Id int `json:"id"`
+	}
+	ids := []id{}
 	err = Db.Table(table).
 		Cols("id").
 		Where("id > ?", minId).
 		Desc("id").
-		Find(ids)
+		Find(&ids)
 	if err != nil {
 		return
 	}
-	count = len(*ids)
+	count = len(ids)
 	if count > 0 {
-		maxId = (*ids)[0]["id"]
+		maxId = ids[0].Id
 	} else {
 		maxId = minId
 	}

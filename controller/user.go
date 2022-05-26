@@ -17,7 +17,7 @@ func Login(ctx echo.Context) error {
 	if err := utils.BindAndValidate(ctx, credential); err != nil {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
 	}
-	token, err := service.User.Login(credential.Code)
+	token, err := service.UserSrv.Login(credential.Code)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("登录失败！", err.Error()))
 	}
@@ -30,7 +30,7 @@ func SetPhone(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	err := service.User.SetPhone(uid, credential.Code)
+	err := service.UserSrv.SetPhone(uid, credential.Code)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("设置手机号失败！", err.Error()))
 	}
@@ -53,7 +53,7 @@ func SetNameAndAvatarUrl(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("参数解析失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	err := service.User.SetNameAndAvatarUrl(uid, nameAndUrl.NickName, nameAndUrl.AvatarUrl)
+	err := service.UserSrv.SetNameAndAvatarUrl(uid, nameAndUrl.NickName, nameAndUrl.AvatarUrl)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("设置昵称和头像失败！", err.Error()))
 	}
@@ -83,7 +83,7 @@ func BackendLogin(ctx echo.Context) error {
 	if err := utils.BindAndValidate(ctx, accountAndPassWord); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
-	token, err := service.User.BackendLogin(accountAndPassWord.Account, accountAndPassWord.Password)
+	token, err := service.UserSrv.BackendLogin(accountAndPassWord.Account, accountAndPassWord.Password)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("登录失败！", err.Error()))
 	}

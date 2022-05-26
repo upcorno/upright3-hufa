@@ -7,7 +7,6 @@ import (
 
 var TestUid int
 
-//model包内单元测试命令：go test -v -args -c ../config_test.toml
 func TestMain(m *testing.M) {
 	//setup
 	addTestUser(m)
@@ -21,11 +20,17 @@ func addTestUser(m *testing.M) {
 		Openid:     "test_openid",
 		CreateTime: int(time.Now().Unix()),
 	}
-	user.Insert()
+	err := user.Insert()
+	if err != nil {
+		panic(err)
+	}
 	TestUid = user.Id
 }
 
 func deleteTestUser() {
-	user := &User{Id: TestUid}
+	user := &User{
+		AppId:  "test_app_id",
+		Openid: "test_openid",
+	}
 	Db.Delete(user)
 }
