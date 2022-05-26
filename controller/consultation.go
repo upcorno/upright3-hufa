@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"law/model"
+	dao "law/dao"
 	"law/service"
 	"law/utils"
 	"strconv"
@@ -41,7 +41,7 @@ func ConsultationSetStatus(ctx echo.Context) error {
 //用户历史咨询记录
 func ConsultationList(ctx echo.Context) error {
 	uid := ctx.Get("uid").(int)
-	consultationList, err := model.ConsultationList(uid)
+	consultationList, err := dao.ConsultationList(uid)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取历史咨询列表失败！", err.Error()))
 	}
@@ -55,7 +55,7 @@ func ConsultationGet(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	consultationInfo, err := model.ConsultationGetWithUserInfo(consultationId)
+	consultationInfo, err := dao.ConsultationGetWithUserInfo(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
 	}
@@ -67,7 +67,7 @@ func ConsultationGet(ctx echo.Context) error {
 
 //咨询后台列表检索
 func ConsultationBackendList(ctx echo.Context) error {
-	page := &model.Page{PageIndex: 1, ItemNum: 10}
+	page := &dao.Page{PageIndex: 1, ItemNum: 10}
 	if err := ctx.Bind(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
 	}
@@ -123,7 +123,7 @@ func ConsultationListReply(ctx echo.Context) error {
 			return ctx.JSON(utils.ErrIpt("获取min_reply_id失败！", err.Error()))
 		}
 	}
-	recordListInfo, err := model.ConsultationReplyList(consultationId, minReplyId)
+	recordListInfo, err := dao.ConsultationReplyList(consultationId, minReplyId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
 	}

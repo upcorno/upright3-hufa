@@ -1,4 +1,4 @@
-package model
+package dao
 
 import (
 	"errors"
@@ -43,7 +43,7 @@ func (issue *LegalIssue) Insert() (err error) {
 
 func (issue *LegalIssue) Get() (has bool, err error) {
 	if issue.Id < 1 {
-		err = errors.New("model:legal_issue_id must be greater than 1")
+		err = errors.New("dao:legal_issue_id must be greater than 1")
 		return
 	}
 	return Db.Get(issue)

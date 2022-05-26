@@ -2,8 +2,8 @@ package service
 
 import (
 	"encoding/json"
+	dao "law/dao"
 	"law/enum"
-	"law/model"
 	"time"
 
 	"xorm.io/xorm"
@@ -20,7 +20,7 @@ type ConsultationCreateInfo struct {
 }
 
 func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (consultationId int, err error) {
-	consul := &model.Consultation{
+	consul := &dao.Consultation{
 		Question: createInfo.Question,
 		Imgs:     createInfo.Imgs,
 	}
@@ -34,7 +34,7 @@ func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (c
 	if err != nil {
 		return
 	}
-	reply := &model.ConsultationReply{
+	reply := &dao.ConsultationReply{
 		ConsultationId:  consultationId,
 		Type:            enum.QUERY,
 		Content:         string(consultationData),
@@ -45,7 +45,7 @@ func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (c
 	return
 }
 func (c *consultationSrv) SetStatus(consultationId int, status string) (err error) {
-	consul := &model.Consultation{Id: consultationId, Status: status}
+	consul := &dao.Consultation{Id: consultationId, Status: status}
 	err = consul.Update("status")
 	return err
 }
@@ -57,7 +57,7 @@ type ConsultationReplyParams struct {
 }
 
 func (c *consultationSrv) AddReply(replyParams *ConsultationReplyParams, uid int) (err error) {
-	reply := &model.ConsultationReply{
+	reply := &dao.ConsultationReply{
 		ConsultationId:  replyParams.ConsultationId,
 		Type:            replyParams.Type,
 		Content:         replyParams.Content,
@@ -74,7 +74,7 @@ type ConsultationSearchParams struct {
 	CreateTimeMax int    `json:"create_time_max" query:"create_time_max"`
 }
 
-func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSearchParams) (pageResult *model.PageResult, err error) {
+func (c *consultationSrv) BackendList(page *dao.Page, search *ConsultationSearchParams) (pageResult *dao.PageResult, err error) {
 	type listInfo struct {
 		Id       int    `json:"id"`
 		Question string `json:"question"`
@@ -83,7 +83,7 @@ func (c *consultationSrv) BackendList(page *model.Page, search *ConsultationSear
 		Status   string `json:"status"`
 	}
 	consultationInfoList := []listInfo{}
-	sess := model.Db.NewSession()
+	sess := dao.Db.NewSession()
 	sess.Table("consultation")
 	sess.Join("INNER", "user", "user.id = consultation.consultant_uid")
 	sess.Cols(

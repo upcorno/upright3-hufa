@@ -1,4 +1,4 @@
-package model
+package dao
 
 import (
 	"errors"
@@ -30,7 +30,7 @@ func (user *User) Insert() (err error) {
 func (user *User) Get() (has bool, err error) {
 	if user.Id == 0 {
 		if !(user.AppId != "" && user.Openid != "") {
-			err = errors.New("model:查询用户时须指定id值或通过appid、openid获取。")
+			err = errors.New("dao:查询用户时须指定id值或通过appid、openid获取。")
 			return
 		}
 	}
@@ -39,7 +39,7 @@ func (user *User) Get() (has bool, err error) {
 
 func (user *User) Update() (err error) {
 	if user.Id == 0 {
-		err = errors.New("model:必须指定id值")
+		err = errors.New("dao:必须指定id值")
 		return
 	}
 	_, err = Db.Update(user, User{Id: user.Id})

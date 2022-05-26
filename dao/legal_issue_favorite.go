@@ -1,4 +1,4 @@
-package model
+package dao
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ type LegalIssueFavorite struct {
 
 func (f *LegalIssueFavorite) Insert() (err error) {
 	if f.IssueId == 0 || f.UserId == 0 {
-		err = errors.New("model:IssueId、UserId不可为空")
+		err = errors.New("dao:IssueId、UserId不可为空")
 		return
 	}
 	f.CreateTime = int(time.Now().Unix())
@@ -29,7 +29,7 @@ func (f *LegalIssueFavorite) Insert() (err error) {
 func (f *LegalIssueFavorite) Exist() (has bool, err error) {
 	if f.Id == 0 {
 		if f.IssueId == 0 || f.UserId == 0 {
-			err = errors.New("model:Id为空时，IssueId、UserId不能为空")
+			err = errors.New("dao:Id为空时，IssueId、UserId不能为空")
 			return
 		}
 	}
@@ -40,7 +40,7 @@ func (f *LegalIssueFavorite) Exist() (has bool, err error) {
 func (f *LegalIssueFavorite) Delete() (err error) {
 	if f.Id == 0 {
 		if !(f.IssueId != 0 && f.UserId != 0) {
-			err = errors.New("model:必须指定Id或同时指定IssueId、UserId。")
+			err = errors.New("dao:必须指定Id或同时指定IssueId、UserId。")
 			return
 		}
 	}

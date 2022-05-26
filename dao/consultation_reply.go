@@ -1,4 +1,4 @@
-package model
+package dao
 
 import (
 	"errors"
@@ -19,7 +19,7 @@ type ConsultationReply struct {
 //创建咨询回复记录
 func (reply *ConsultationReply) Insert() (err error) {
 	if reply.ConsultationId == 0 || reply.CommunicatorUid == 0 || reply.Type == "" || reply.Content == "" {
-		err = errors.New("model-ConsultationReply:ConsultationId、CommunicatorUid、Type、Content cannot be empty")
+		err = errors.New("dao-ConsultationReply:ConsultationId、CommunicatorUid、Type、Content cannot be empty")
 		return
 	}
 	reply.CreateTime = int(time.Now().Unix())
@@ -30,7 +30,7 @@ func (reply *ConsultationReply) Insert() (err error) {
 //删除咨询回复记录
 func (reply *ConsultationReply) delete() (err error) {
 	if reply.Id == 0 {
-		err = errors.New("model:必须指定id值")
+		err = errors.New("dao:必须指定id值")
 		return
 	}
 	_, err = Db.Delete(&ConsultationReply{Id: reply.Id})
@@ -52,7 +52,7 @@ type replyInfo struct {
 //获取咨询沟通记录表
 func ConsultationReplyList(consultationId int, minReplyId int) (replyInfoList []replyInfo, err error) {
 	if consultationId == 0 {
-		err = errors.New("model:必须指定consultationId值")
+		err = errors.New("dao:必须指定consultationId值")
 		return
 	}
 	replyInfoList = []replyInfo{}

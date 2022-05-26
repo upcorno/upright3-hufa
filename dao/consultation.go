@@ -1,4 +1,4 @@
-package model
+package dao
 
 import (
 	"errors"
@@ -32,7 +32,7 @@ func (consul *Consultation) Create() (err error) {
 //删除咨询
 func (consul *Consultation) delete() error {
 	if consul.Id == 0 {
-		err := errors.New("model:必须指定id值")
+		err := errors.New("dao:必须指定id值")
 		return err
 	}
 	_, err := Db.Delete(&Consultation{Id: consul.Id})
@@ -41,7 +41,7 @@ func (consul *Consultation) delete() error {
 
 func (consul *Consultation) Update(columns ...string) (err error) {
 	if consul.Id == 0 {
-		err := errors.New("model:必须指定id值")
+		err := errors.New("dao:必须指定id值")
 		return err
 	}
 	_, err = Db.Cols(columns...).Update(consul, &Consultation{Id: consul.Id})

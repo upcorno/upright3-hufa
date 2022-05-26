@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"law/model"
+	dao "law/dao"
 	"law/service"
 	"law/utils"
 
@@ -62,7 +62,7 @@ func SetNameAndAvatarUrl(ctx echo.Context) error {
 
 func GetUserInfo(ctx echo.Context) error {
 	uid := ctx.Get("uid").(int)
-	user := model.User{Id: uid}
+	user := dao.User{Id: uid}
 	has, err := user.Get()
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取用户信息失败！", err.Error()))

@@ -1,4 +1,4 @@
-package model
+package dao
 
 import (
 	"fmt"
@@ -78,7 +78,7 @@ func init() {
 		zlog.Fatal().Msgf("创建全文索引失败：.err:%s", err.Error())
 	}
 	Db = db
-	zlog.Info().Msg("model init")
+	zlog.Info().Msg("dao init")
 }
 
 func CountNewItems(minId int, table string) (count int, maxId int, err error) {

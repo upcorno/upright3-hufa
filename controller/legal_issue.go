@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"law/model"
+	dao "law/dao"
 	"law/service"
 	"law/utils"
 	"strconv"
@@ -12,7 +12,7 @@ import (
 //由于问题列表接口内容几乎不会变化，因此进行了5min的缓存，
 //如果请求参数指定根据是否收藏参数检索，则不会使用缓存
 func LegalIssueList(ctx echo.Context) error {
-	page := &model.Page{PageIndex: 1, ItemNum: 5}
+	page := &dao.Page{PageIndex: 1, ItemNum: 5}
 	if err := ctx.Bind(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
 	}
@@ -20,7 +20,7 @@ func LegalIssueList(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	search := &model.LegalIssueSearch{FavoriteUid: uid, OnlyFavorite: false}
+	search := &dao.LegalIssueSearch{FavoriteUid: uid, OnlyFavorite: false}
 	if err := utils.BindAndValidate(ctx, search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}
@@ -45,7 +45,7 @@ func LegalIssueGet(ctx echo.Context) error {
 }
 
 func LegalIssueCategoryList(ctx echo.Context) error {
-	categoryList, err := model.LegalIssueCategoryList()
+	categoryList, err := dao.LegalIssueCategoryList()
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取问题分类列表失败！", err.Error()))
 	}

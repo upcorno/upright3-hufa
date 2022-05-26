@@ -5,7 +5,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"law/model"
+	dao "law/dao"
 	"time"
 
 	"github.com/eko/gocache/v2/store"
@@ -29,23 +29,23 @@ type legalIssueInfo struct {
 
 //由于问题列表接口内容几乎不会变化，因此进行了5min的缓存，
 //如果请求参数指定根据是否收藏参数检索，则不会使用缓存
-func (l *legalIssueSrv) LegalIssueList(page *model.Page, search *model.LegalIssueSearch) (issues *model.PageResult, err error) {
+func (l *legalIssueSrv) LegalIssueList(page *dao.Page, search *dao.LegalIssueSearch) (issues *dao.PageResult, err error) {
 	if search.IsFavorite {
 		//小程序正式发布后可删除此代码
 		search.OnlyFavorite = search.IsFavorite
 	}
 	if search.OnlyFavorite {
-		issues, err = model.LegalIssueList(page, search)
+		issues, err = dao.LegalIssueList(page, search)
 		return
 	}
 	signStr := fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%v%v", page, search))))
 	ctx := context.TODO()
 	cache, err := CacheManager.Get(ctx, signStr)
 	if err == nil {
-		issues = cache.(*model.PageResult)
+		issues = cache.(*dao.PageResult)
 		return
 	}
-	issues, err = model.LegalIssueList(page, search)
+	issues, err = dao.LegalIssueList(page, search)
 	if err == nil {
 		CacheManager.Set(ctx, signStr, issues, &store.Options{Expiration: time.Second * 300})
 	}
@@ -53,7 +53,7 @@ func (l *legalIssueSrv) LegalIssueList(page *model.Page, search *model.LegalIssu
 }
 
 func (l *legalIssueSrv) GetLegalIssue(legalIssueId int) (issueInfo *legalIssueInfo, err error) {
-	issue := &model.LegalIssue{Id: legalIssueId}
+	issue := &dao.LegalIssue{Id: legalIssueId}
 	issue.Get()
 	has, err := issue.Get()
 	if err != nil {
@@ -78,7 +78,7 @@ func (l *legalIssueSrv) GetLegalIssue(legalIssueId int) (issueInfo *legalIssueIn
 }
 
 func (l *legalIssueSrv) AddFavorite(uid int, issueId int) (err error) {
-	favorite := &model.LegalIssueFavorite{
+	favorite := &dao.LegalIssueFavorite{
 		IssueId: issueId,
 		UserId:  uid,
 	}
@@ -94,7 +94,7 @@ func (l *legalIssueSrv) AddFavorite(uid int, issueId int) (err error) {
 }
 
 func (l *legalIssueSrv) CancelFavorite(uid int, issueId int) (err error) {
-	favorite := &model.LegalIssueFavorite{
+	favorite := &dao.LegalIssueFavorite{
 		IssueId: issueId,
 		UserId:  uid,
 	}
@@ -103,7 +103,7 @@ func (l *legalIssueSrv) CancelFavorite(uid int, issueId int) (err error) {
 }
 
 func (l *legalIssueSrv) IsFavorite(uid int, issueId int) (has bool, err error) {
-	favorite := &model.LegalIssueFavorite{
+	favorite := &dao.LegalIssueFavorite{
 		IssueId: issueId,
 		UserId:  uid,
 	}

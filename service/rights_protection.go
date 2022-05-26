@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"law/model"
+	dao "law/dao"
 	"time"
 
 	"xorm.io/xorm"
@@ -20,7 +20,7 @@ type RightsProtectionDealInfo struct {
 }
 
 func (p *protectionSrv) SetDealInfo(id int, dealInfo *RightsProtectionDealInfo) (err error) {
-	bean := &model.RightsProtection{
+	bean := &dao.RightsProtection{
 		Id:              id,
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: dealInfo.CustomerAddress,
@@ -43,7 +43,7 @@ type RightsProtectionBaseInfo struct {
 }
 
 func (p *protectionSrv) UpdateBaseInfo(creatorUid int, baseInfo *RightsProtectionBaseInfo) (err error) {
-	bean := &model.RightsProtection{
+	bean := &dao.RightsProtection{
 		CreatorUid:   creatorUid,
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
@@ -56,7 +56,7 @@ func (p *protectionSrv) UpdateBaseInfo(creatorUid int, baseInfo *RightsProtectio
 }
 
 func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id int, err error) {
-	bean := model.RightsProtection{CreatorUid: creatorUid}
+	bean := dao.RightsProtection{CreatorUid: creatorUid}
 	has, err := bean.Get()
 	if err != nil {
 		return
@@ -65,7 +65,7 @@ func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) 
 		err = errors.New("系统已存在记录，请勿重复添加！")
 		return
 	}
-	bean = model.RightsProtection{
+	bean = dao.RightsProtection{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
 		Organization: baseInfo.Organization,
@@ -79,7 +79,7 @@ func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) 
 	return
 }
 
-func (p *protectionSrv) BgGet(id int) (bean model.RightsProtection, err error) {
+func (p *protectionSrv) BgGet(id int) (bean dao.RightsProtection, err error) {
 	bean.Id = id
 	has, err := bean.Get()
 	if err != nil {
@@ -92,8 +92,8 @@ func (p *protectionSrv) BgGet(id int) (bean model.RightsProtection, err error) {
 	return
 }
 
-func (p *protectionSrv) Get(creatorUid int) (bean *model.RightsProtection, err error) {
-	bean = &model.RightsProtection{CreatorUid: creatorUid}
+func (p *protectionSrv) Get(creatorUid int) (bean *dao.RightsProtection, err error) {
+	bean = &dao.RightsProtection{CreatorUid: creatorUid}
 	has, err := bean.Get()
 	if err != nil {
 		return
@@ -121,9 +121,9 @@ type protectionInfo struct {
 	DealResult string `json:"deal_result"`
 }
 
-func (p *protectionSrv) BackendList(page *model.Page, search *RightsProtectionSearchParams) (*model.PageResult, error) {
+func (p *protectionSrv) BackendList(page *dao.Page, search *RightsProtectionSearchParams) (*dao.PageResult, error) {
 	searchInfo := []protectionInfo{}
-	sess := model.Db.NewSession()
+	sess := dao.Db.NewSession()
 	sess.Table("rights_protection")
 	sess.Cols(
 		"id",

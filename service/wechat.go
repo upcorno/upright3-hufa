@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"law/conf"
-	"law/model"
+	dao "law/dao"
 	"log"
 	"net/http"
 	"os"
@@ -75,7 +75,7 @@ func (w *wxSrv) WxNotify(request *http.Request, repWriter http.ResponseWriter) {
 			for _, ev := range msg.GetSubscribeMsgPopupEvents() {
 				if ev.SubscribeStatusString == "accept" {
 					templateId := ev.TemplateID
-					err = model.TMsgSubDao.IncrSubscribeNum(uid, templateId)
+					err = dao.TMsgSubDao.IncrSubscribeNum(uid, templateId)
 					if err != nil {
 						zlog.Error().Msgf("wechat notify server serving error: %s", err.Error())
 						break

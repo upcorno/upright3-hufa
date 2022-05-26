@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"law/conf"
-	"law/model"
+	dao "law/dao"
 	"law/utils"
 	"time"
 )
@@ -26,7 +26,7 @@ func (u *user) Login(code string) (token string, err error) {
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
 func (u *user) getUidAndSync(openid string, unionid string) (uid int, err error) {
-	user := &model.User{
+	user := &dao.User{
 		AppId:  conf.App.WxApp.Appid,
 		Openid: openid,
 	}
@@ -56,14 +56,14 @@ func (u *user) SetPhone(uid int, code string) (err error) {
 	if err != nil {
 		return
 	}
-	user := model.User{Id: uid}
+	user := dao.User{Id: uid}
 	user.Phone = phoneNumber
 	err = user.Update()
 	return
 }
 
 func (u *user) SetNameAndAvatarUrl(uid int, nickName string, avatarUrl string) (err error) {
-	user := model.User{Id: uid}
+	user := dao.User{Id: uid}
 	user.NickName = nickName
 	user.AvatarUrl = avatarUrl
 	err = user.Update()

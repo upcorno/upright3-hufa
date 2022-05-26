@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"law/model"
+	dao "law/dao"
 	"law/service"
 	"law/utils"
 	"strconv"
@@ -75,7 +75,7 @@ func InfringementMonitorUpdateBaseInfo(ctx echo.Context) error {
 
 //侵权监测列表检索
 func InfringementMonitorBackendList(ctx echo.Context) error {
-	page := &model.Page{PageIndex: 1, ItemNum: 10}
+	page := &dao.Page{PageIndex: 1, ItemNum: 10}
 	if err := ctx.Bind(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
 	}

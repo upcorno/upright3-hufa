@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"law/model"
+	dao "law/dao"
 	"time"
 
 	"xorm.io/xorm"
@@ -20,7 +20,7 @@ type InfringementMonitorDealInfo struct {
 }
 
 func (p *monitorSrv) SetDealInfo(id int, dealInfo *InfringementMonitorDealInfo) (err error) {
-	bean := &model.InfringementMonitor{
+	bean := &dao.InfringementMonitor{
 		Id:              id,
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: dealInfo.CustomerAddress,
@@ -43,7 +43,7 @@ type InfringementMonitorBaseInfo struct {
 }
 
 func (p *monitorSrv) UpdateBaseInfo(creatorUid int, baseInfo *InfringementMonitorBaseInfo) (err error) {
-	bean := &model.InfringementMonitor{
+	bean := &dao.InfringementMonitor{
 		CreatorUid:   creatorUid,
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
@@ -56,7 +56,7 @@ func (p *monitorSrv) UpdateBaseInfo(creatorUid int, baseInfo *InfringementMonito
 }
 
 func (p *monitorSrv) Add(baseInfo *InfringementMonitorBaseInfo, creatorUid int) (id int, err error) {
-	bean := model.InfringementMonitor{CreatorUid: creatorUid}
+	bean := dao.InfringementMonitor{CreatorUid: creatorUid}
 	has, err := bean.Get()
 	if err != nil {
 		return
@@ -65,7 +65,7 @@ func (p *monitorSrv) Add(baseInfo *InfringementMonitorBaseInfo, creatorUid int) 
 		err = errors.New("系统已存在记录，请勿重复添加！")
 		return
 	}
-	bean = model.InfringementMonitor{
+	bean = dao.InfringementMonitor{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
 		Organization: baseInfo.Organization,
@@ -79,7 +79,7 @@ func (p *monitorSrv) Add(baseInfo *InfringementMonitorBaseInfo, creatorUid int) 
 	return
 }
 
-func (p *monitorSrv) BgGet(id int) (bean model.InfringementMonitor, err error) {
+func (p *monitorSrv) BgGet(id int) (bean dao.InfringementMonitor, err error) {
 	bean.Id = id
 	has, err := bean.Get()
 	if err != nil {
@@ -92,8 +92,8 @@ func (p *monitorSrv) BgGet(id int) (bean model.InfringementMonitor, err error) {
 	return
 }
 
-func (p *monitorSrv) Get(creatorUid int) (bean *model.InfringementMonitor, err error) {
-	bean = &model.InfringementMonitor{CreatorUid: creatorUid}
+func (p *monitorSrv) Get(creatorUid int) (bean *dao.InfringementMonitor, err error) {
+	bean = &dao.InfringementMonitor{CreatorUid: creatorUid}
 	has, err := bean.Get()
 	if err != nil {
 		return
@@ -121,9 +121,9 @@ type monitorInfo struct {
 	DealResult string `json:"deal_result"`
 }
 
-func (p *monitorSrv) BackendList(page *model.Page, search *InfringementMonitorSearchParams) (*model.PageResult, error) {
+func (p *monitorSrv) BackendList(page *dao.Page, search *InfringementMonitorSearchParams) (*dao.PageResult, error) {
 	searchInfo := []monitorInfo{}
-	sess := model.Db.NewSession()
+	sess := dao.Db.NewSession()
 	sess.Table("infringement_monitor")
 	sess.Cols(
 		"id",
