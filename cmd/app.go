@@ -19,7 +19,6 @@ import (
 )
 
 func StartServer() {
-	initTimezone()
 	defer utils.FlushLog()
 	c := make(chan os.Signal, 1)
 	e := echo.New()
@@ -78,9 +77,4 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 		return err
 	}
 	return nil
-}
-
-func initTimezone() {
-	loc, _ := time.LoadLocation("Asia/Shanghai") //加载时区
-	time.Local = loc
 }

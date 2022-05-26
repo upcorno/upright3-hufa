@@ -13,6 +13,8 @@ import (
 var appBufFile *BufWriter
 
 func init() {
+	//因为log会被很早加载，所以将时区设置放在这里
+	initTimezone()
 	if conf.TestMode {
 		setNullLogger()
 		return
@@ -68,4 +70,9 @@ func (lw *LevelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) 
 		w = lw.ErrorWriter
 	}
 	return w.Write(p)
+}
+
+func initTimezone() {
+	loc, _ := time.LoadLocation("Asia/Shanghai") //加载时区
+	time.Local = loc
 }
