@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+	"fmt"
 	"law/conf"
 	"law/model"
 	"log"
@@ -8,11 +10,13 @@ import (
 	"os"
 
 	zlog "github.com/rs/zerolog/log"
-
-	"github.com/medivhzhan/weapp/v3"
-	"github.com/medivhzhan/weapp/v3/logger"
-	"github.com/medivhzhan/weapp/v3/phonenumber"
-	"github.com/medivhzhan/weapp/v3/server"
+	"github.com/silenceper/wechat/v2"
+	"github.com/silenceper/wechat/v2/cache"
+	"github.com/silenceper/wechat/v2/miniprogram"
+	miniConfig "github.com/silenceper/wechat/v2/miniprogram/config"
+	"github.com/silenceper/wechat/v2/officialaccount"
+	offConfig "github.com/silenceper/wechat/v2/officialaccount/config"
+	"github.com/silenceper/wechat/v2/officialaccount/message"
 )
 
 type wxSrv struct {
@@ -20,51 +24,95 @@ type wxSrv struct {
 
 var WxSrv *wxSrv = &wxSrv{}
 
-var wxServer *server.Server
-var wxClient *weapp.Client
+var mini *miniprogram.MiniProgram
+var official *officialaccount.OfficialAccount
 
 func init() {
-	wechatFile, err := os.OpenFile("logs/wechat.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	wechatLogFile, err := os.OpenFile("logs/wechat.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic("无法创建日志文件logs/wechat.log")
 	}
-	lgr := logger.NewLogger(log.New(wechatFile, "\r\n", log.LstdFlags), logger.Info, true)
-	wxClient = weapp.NewClient(conf.App.WxApp.Appid, conf.App.WxApp.Secret, weapp.WithLogger(lgr))
-	handler := func(req map[string]interface{}) map[string]interface{} {
-		//暂时没有需要处理的微信通知，先日志记录
-		zlog.Info().Msgf("wechat notify: %v", req)
-		return nil
+	log.SetOutput(wechatLogFile)
+	wc := wechat.NewWechat()
+	redisOpts := &cache.RedisOpts{
+		Host:        conf.App.Rdb.RdbHost + ":" + fmt.Sprint(conf.App.Rdb.RdbPort),
+		Database:    conf.App.Rdb.DbIndex,
+		Password:    conf.App.Rdb.RdbPasswd,
+		MaxActive:   10,
+		MaxIdle:     10,
+		IdleTimeout: 60, //second
 	}
-	wxServer, err = wxClient.NewServer(conf.App.WxApp.NotifyToken, conf.App.WxApp.NotifyAesKey, conf.App.WxApp.NotifyMchId, conf.App.WxApp.NotifyApiKey, true, handler)
-	if err != nil {
-		zlog.Error().Msgf("init wecat notify server error: %s", err)
+	redisCache := cache.NewRedis(context.Background(), redisOpts)
+	cfg := &miniConfig.Config{
+		AppID:     conf.App.WxApp.Appid,
+		AppSecret: conf.App.WxApp.Secret,
+		Cache:     redisCache,
 	}
-	wxServer.OnSubscribeMsgPopup(func(popupEv *server.SubscribeMsgPopupEvent) {
-		openid := popupEv.FromUserName
-		uid, err := UserSrv.GetUidAndSync(openid, "")
-		if err != nil {
-			return
-		}
-		for _, v := range popupEv.SubscribeMsgPopupEvent {
-			if v.SubscribeStatusString == "accept" {
-				templateId := v.TemplateId
-				model.TMsgSubDao.IncrSubscribeNum(uid, templateId)
+	mini = wc.GetMiniProgram(cfg)
+
+	officialAccountCfg := &offConfig.Config{
+		AppID:          conf.App.WxApp.Appid,
+		AppSecret:      conf.App.WxApp.Secret,
+		Token:          conf.App.WxApp.NotifyToken,
+		EncodingAESKey: conf.App.WxApp.NotifyAesKey,
+		Cache:          redisCache,
+	}
+	official = wc.GetOfficialAccount(officialAccountCfg)
+}
+
+func (w *wxSrv) WxNotify(request *http.Request, repWriter http.ResponseWriter) {
+	server := official.GetServer(request, repWriter)
+	//设置接收消息的处理方法
+	server.SetMessageHandler(func(msg *message.MixMessage) *message.Reply {
+		switch msg.Event {
+		case message.EventSubscribeMsgPopupEvent:
+			openid := string(msg.FromUserName)
+			uid, err := UserSrv.getUidAndSync(openid, "")
+			if err != nil {
+				zlog.Error().Msgf("wechat notify server serving error: %s", err.Error())
+				break
+			}
+			for _, ev := range msg.GetSubscribeMsgPopupEvents() {
+				if ev.SubscribeStatusString == "accept" {
+					templateId := ev.TemplateID
+					err = model.TMsgSubDao.IncrSubscribeNum(uid, templateId)
+					if err != nil {
+						zlog.Error().Msgf("wechat notify server serving error: %s", err.Error())
+						break
+					}
+				}
 			}
 		}
+		text := message.NewText("success")
+		return &message.Reply{MsgType: message.MsgTypeText, MsgData: text}
 	})
-}
-
-func (w *wxSrv) WxNotify(repWriter http.ResponseWriter, request *http.Request) {
-	if err := wxServer.Serve(repWriter, request); err != nil {
-		zlog.Error().Msgf("wecat notify server serving error: %s", err)
+	err := server.Serve()
+	if err != nil {
+		zlog.Error().Msgf("wechat notify server serving error: %s", err.Error())
+		return
+	}
+	server.Send()
+	if err != nil {
+		zlog.Error().Msgf("wechat notify server serving error: %s", err.Error())
+		return
 	}
 }
 
-func (w *wxSrv) wxLogin(code string) (*weapp.LoginResponse, error) {
-	return wxClient.Login(code)
+func (w *wxSrv) wxLogin(code string) (openid string, unionid string, err error) {
+	res, err := mini.GetAuth().Code2Session(code)
+	if err != nil {
+		return
+	}
+	openid = res.OpenID
+	unionid = res.UnionID
+	return
 }
 
-func (w *wxSrv) getPhoneNumber(code string) (*phonenumber.GetPhoneNumberResponse, error) {
-	return wxClient.NewPhonenumber().GetPhoneNumber(
-		&phonenumber.GetPhoneNumberRequest{Code: code})
+func (w *wxSrv) getPhoneNumber(code string) (phoneNumber string, err error) {
+	rep, err := mini.GetAuth().GetPhoneNumber(code)
+	if err != nil {
+		return
+	}
+	phoneNumber = rep.PhoneInfo.PurePhoneNumber
+	return
 }

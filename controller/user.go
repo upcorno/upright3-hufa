@@ -38,7 +38,7 @@ func SetPhone(ctx echo.Context) error {
 }
 
 func WxNotify(ctx echo.Context) error {
-	service.WxSrv.WxNotify(ctx.Response().Writer, ctx.Request())
+	service.WxSrv.WxNotify(ctx.Request(), ctx.Response().Writer)
 	return nil
 }
 

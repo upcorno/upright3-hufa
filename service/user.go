@@ -13,14 +13,11 @@ type user struct{}
 var UserSrv *user = &user{}
 
 func (u *user) Login(code string) (token string, err error) {
-	res, err := WxSrv.wxLogin(code)
+	openid, unionid, err := WxSrv.wxLogin(code)
 	if err != nil {
 		return
 	}
-	if err = res.GetResponseError(); err != nil {
-		return
-	}
-	uid, err := u.GetUidAndSync(res.OpenID, res.UnionID)
+	uid, err := u.getUidAndSync(openid, unionid)
 	if err != nil {
 		return
 	}
@@ -28,7 +25,7 @@ func (u *user) Login(code string) (token string, err error) {
 }
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
-func (u *user) GetUidAndSync(openid string, unionid string) (uid int, err error) {
+func (u *user) getUidAndSync(openid string, unionid string) (uid int, err error) {
 	user := &model.User{
 		AppId:  conf.App.WxApp.Appid,
 		Openid: openid,
@@ -55,15 +52,12 @@ func (u *user) GetUidAndSync(openid string, unionid string) (uid int, err error)
 }
 
 func (u *user) SetPhone(uid int, code string) (err error) {
-	res, err := WxSrv.getPhoneNumber(code)
+	phoneNumber, err := WxSrv.getPhoneNumber(code)
 	if err != nil {
 		return
 	}
-	if err = res.GetResponseError(); err != nil {
-		return
-	}
 	user := model.User{Id: uid}
-	user.Phone = res.Data.PhoneNumber
+	user.Phone = phoneNumber
 	err = user.Update()
 	return
 }
