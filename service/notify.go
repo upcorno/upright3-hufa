@@ -62,7 +62,7 @@ func (n *NotifySrv) NewBusinessNotifyByEmail() {
 	if countConsultation == 0 && countProtect == 0 && countMonitor == 0 {
 		return
 	}
-	subject := fmt.Sprintf("有新的待回复内容。咨询： %d 个，维权： %d 个，监测： %d 个", countConsultation, countProtect, countMonitor)
+	subject := fmt.Sprintf("【沪盾】有新的待回复内容。咨询： %d 个，维权： %d 个，监测： %d 个", countConsultation, countProtect, countMonitor)
 	body := fmt.Sprintf("<html><body>您好！<br> %s <br> 后台地址： %s  </body></html>", subject, `<a class="resource_target" href="https://legal-consulting.youshangjiao.com.cn/" target="_blank">点击前往后台</a>`)
 	sendEmail(subject, body, conf.App.Mail.NewBusinessRevivers...)
 }
