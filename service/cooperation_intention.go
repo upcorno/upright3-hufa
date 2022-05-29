@@ -6,25 +6,26 @@ import (
 	"time"
 )
 
-type protectionSrv struct{}
+type cooperationSrv struct{}
 
-var Protection = &protectionSrv{}
+var CooperationSrv = &cooperationSrv{}
 
-type RightsProtectionDealInfo struct {
+type CooperationDealInfo struct {
 	Id              int    `json:"id" query:"id" form:"id" validate:"required,gt=0"`
 	DealResult      string `json:"deal_result" query:"deal_result" form:"deal_result" validate:"required,oneof=未回访 有合作意向 无合作意向 已合作"`
 	CustomerAddress string `json:"customer_address" form:"customer_address" query:"customer_address" validate:"min=0,max=50"`
 	DealRemark      string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"min=0"`
 }
 
-func (p *protectionSrv) SetDealInfo(id int, dealInfo *RightsProtectionDealInfo) (err error) {
-	bean := &dao.RightsProtection{
+func (p *cooperationSrv) SetDealInfo(id int, dealInfo *CooperationDealInfo) (err error) {
+	bean := &dao.CooperationIntention{
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: dealInfo.CustomerAddress,
 		DealRemark:      dealInfo.DealRemark,
 	}
-	err = dao.RightsProtectionDao.Update(
+	err = dao.CooperationDao.Update(
 		id,
+		"",
 		0,
 		bean,
 		"deal_result",
@@ -34,7 +35,7 @@ func (p *protectionSrv) SetDealInfo(id int, dealInfo *RightsProtectionDealInfo) 
 	return
 }
 
-type RightsProtectionBaseInfo struct {
+type CooperationBaseInfo struct {
 	Name         string `json:"name" form:"name" query:"name" validate:"min=1,max=16"`
 	Phone        string `json:"phone" form:"phone" query:"phone" validate:"min=3,max=20"`
 	Organization string `json:"organization" form:"organization" query:"organization" validate:"min=0,max=60"`
@@ -42,20 +43,20 @@ type RightsProtectionBaseInfo struct {
 	Resume       string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func (p *protectionSrv) UpdateBaseInfo(creatorUid int, baseInfo *RightsProtectionBaseInfo) (err error) {
-	bean := &dao.RightsProtection{
+func (p *cooperationSrv) UpdateBaseInfo(category string, creatorUid int, baseInfo *CooperationBaseInfo) (err error) {
+	bean := &dao.CooperationIntention{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
 		Organization: baseInfo.Organization,
 		Description:  baseInfo.Description,
 		Resume:       baseInfo.Resume,
 	}
-	err = dao.RightsProtectionDao.Update(0, creatorUid, bean, "name", "phone", "organization", "description", "resume")
+	err = dao.CooperationDao.Update(0, category, creatorUid, bean, "name", "phone", "organization", "description", "resume")
 	return
 }
 
-func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id int, err error) {
-	has, bean, err := dao.RightsProtectionDao.Get(0, creatorUid)
+func (p *cooperationSrv) Add(baseInfo *CooperationBaseInfo, category string, creatorUid int) (id int, err error) {
+	has, _, err := dao.CooperationDao.Get(0, category, creatorUid)
 	if err != nil {
 		return
 	}
@@ -63,7 +64,8 @@ func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) 
 		err = errors.New("系统已存在记录，请勿重复添加！")
 		return
 	}
-	bean = &dao.RightsProtection{
+	bean := &dao.CooperationIntention{
+		Category:     category,
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
 		Organization: baseInfo.Organization,
@@ -72,23 +74,23 @@ func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) 
 		CreatorUid:   creatorUid,
 		CreateTime:   int(time.Now().Unix()),
 	}
-	id, err = dao.RightsProtectionDao.Insert(bean)
+	id, err = dao.CooperationDao.Insert(bean)
 	return
 }
 
-func (p *protectionSrv) BgGet(id int) (bean *dao.RightsProtection, err error) {
-	has, bean, err := dao.RightsProtectionDao.Get(id, 0)
+func (p *cooperationSrv) BgGet(id int) (bean *dao.CooperationIntention, err error) {
+	has, bean, err := dao.CooperationDao.Get(id, "", 0)
 	if err != nil {
 		return
 	}
 	if !has {
-		err = errors.New("无查询的RightsProtection")
+		err = errors.New("无查询的 CooperationIntention")
 		return
 	}
 	return
 }
 
-func (p *protectionSrv) Get(creatorUid int) (bean *dao.RightsProtection, err error) {
-	_, bean, err = dao.RightsProtectionDao.Get(0, creatorUid)
+func (p *cooperationSrv) Get(category string, creatorUid int) (bean *dao.CooperationIntention, err error) {
+	_, bean, err = dao.CooperationDao.Get(0, category, creatorUid)
 	return
 }

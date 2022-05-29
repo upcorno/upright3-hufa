@@ -65,8 +65,7 @@ func init() {
 			new(LegalIssueFavorite),
 			new(Consultation),
 			new(ConsultationReply),
-			new(InfringementMonitor),
-			new(RightsProtection),
+			new(CooperationIntention),
 			new(TemplateMsgSubscribe),
 		)
 		if err != nil {
@@ -79,26 +78,4 @@ func init() {
 	}
 	Db = db
 	zlog.Info().Msg("dao init")
-}
-
-func CountNewItems(minId int, table string) (count int, maxId int, err error) {
-	type id struct {
-		Id int `json:"id"`
-	}
-	ids := []id{}
-	err = Db.Table(table).
-		Cols("id").
-		Where("id > ?", minId).
-		Desc("id").
-		Find(&ids)
-	if err != nil {
-		return
-	}
-	count = len(ids)
-	if count > 0 {
-		maxId = ids[0].Id
-	} else {
-		maxId = minId
-	}
-	return
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"law/conf"
 	dao "law/dao"
+	"law/enum"
 	"law/utils"
 	"net/smtp"
 	"time"
@@ -68,15 +69,15 @@ func (n *NotifySrv) NewBusinessNotifyByEmail() {
 }
 
 func countNewItems() (countConsultation int, countProtect int, countMonitor int, err error) {
-	countConsultation, lastConsultationId, err = dao.CountNewItems(lastConsultationId, "consultation")
+	countConsultation, lastConsultationId, err = dao.ConsulDao.CountNewItems(lastConsultationId)
 	if err != nil {
 		return
 	}
-	countProtect, lastProtectId, err = dao.CountNewItems(lastProtectId, "rights_protection")
+	countProtect, lastProtectId, err = dao.CooperationDao.CountNewItems(lastProtectId, enum.PROTECT)
 	if err != nil {
 		return
 	}
-	countMonitor, lastMonitorId, err = dao.CountNewItems(lastMonitorId, "infringement_monitor")
+	countMonitor, lastMonitorId, err = dao.CooperationDao.CountNewItems(lastMonitorId, enum.MONITOR)
 	if err != nil {
 		return
 	}

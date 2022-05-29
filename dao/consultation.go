@@ -150,3 +150,24 @@ func (c *consulDao) dealSearch(sess *xorm.Session, search *ConsultationSearchPar
 		sess.Where("consultation.create_time < ?", search.CreateTimeMax)
 	}
 }
+func (c *consulDao) CountNewItems(minId int) (count int, maxId int, err error) {
+	type id struct {
+		Id int `json:"id"`
+	}
+	ids := []id{}
+	err = Db.Table("consultation").
+		Cols("id").
+		Where("id > ?", minId).
+		Desc("id").
+		Find(&ids)
+	if err != nil {
+		return
+	}
+	count = len(ids)
+	if count > 0 {
+		maxId = ids[0].Id
+	} else {
+		maxId = minId
+	}
+	return
+}
