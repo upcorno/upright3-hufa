@@ -35,7 +35,7 @@ func (l *legalIssueSrv) LegalIssueList(page *dao.Page, search *dao.LegalIssueSea
 		search.OnlyFavorite = search.IsFavorite
 	}
 	if search.OnlyFavorite {
-		issues, err = dao.LegalIssueList(page, search)
+		issues, err = dao.LegalIssueDao.List(page, search)
 		return
 	}
 	signStr := fmt.Sprintf("%x", md5.Sum([]byte(fmt.Sprintf("%v%v", page, search))))
@@ -45,7 +45,7 @@ func (l *legalIssueSrv) LegalIssueList(page *dao.Page, search *dao.LegalIssueSea
 		issues = cache.(*dao.PageResult)
 		return
 	}
-	issues, err = dao.LegalIssueList(page, search)
+	issues, err = dao.LegalIssueDao.List(page, search)
 	if err == nil {
 		CacheManager.Set(ctx, signStr, issues, &store.Options{Expiration: time.Second * 300})
 	}
@@ -53,9 +53,7 @@ func (l *legalIssueSrv) LegalIssueList(page *dao.Page, search *dao.LegalIssueSea
 }
 
 func (l *legalIssueSrv) GetLegalIssue(legalIssueId int) (issueInfo *legalIssueInfo, err error) {
-	issue := &dao.LegalIssue{Id: legalIssueId}
-	issue.Get()
-	has, err := issue.Get()
+	has, issue, err := dao.LegalIssueDao.Get(legalIssueId)
 	if err != nil {
 		return
 	}
@@ -78,35 +76,27 @@ func (l *legalIssueSrv) GetLegalIssue(legalIssueId int) (issueInfo *legalIssueIn
 }
 
 func (l *legalIssueSrv) AddFavorite(uid int, issueId int) (err error) {
-	favorite := &dao.LegalIssueFavorite{
-		IssueId: issueId,
-		UserId:  uid,
-	}
-	has, err := favorite.Exist()
+	has, err := dao.LegalIssueFavoriteDao.Exist(issueId, uid)
 	if err != nil {
 		return
 	}
 	if has {
 		return nil
 	}
-	err = favorite.Insert()
+	favorite := &dao.LegalIssueFavorite{
+		IssueId: issueId,
+		UserId:  uid,
+	}
+	err = dao.LegalIssueFavoriteDao.Insert(favorite)
 	return
 }
 
 func (l *legalIssueSrv) CancelFavorite(uid int, issueId int) (err error) {
-	favorite := &dao.LegalIssueFavorite{
-		IssueId: issueId,
-		UserId:  uid,
-	}
-	err = favorite.Delete()
+	err = dao.LegalIssueFavoriteDao.Delete(issueId, uid)
 	return
 }
 
 func (l *legalIssueSrv) IsFavorite(uid int, issueId int) (has bool, err error) {
-	favorite := &dao.LegalIssueFavorite{
-		IssueId: issueId,
-		UserId:  uid,
-	}
-	has, err = favorite.Exist()
+	has, err = dao.LegalIssueFavoriteDao.Exist(issueId, uid)
 	return
 }

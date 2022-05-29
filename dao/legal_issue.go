@@ -26,8 +26,11 @@ type LegalIssue struct {
 	CreateTime       int       `xorm:"not null UNSIGNED INT default(1651383059)" json:"create_time"`
 	UpdateTime       time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
+type legalIssueDao struct{}
 
-func (issue *LegalIssue) Insert() (err error) {
+var LegalIssueDao *legalIssueDao
+
+func (l *legalIssueDao) Insert(issue *LegalIssue) (issueId int, err error) {
 	if issue.CreatorUid < 1 || issue.FirstCategory == "" || issue.SecondCategory == "" || issue.Title == "" || issue.Content == "" {
 		err = errors.New("CreatorUid、FirstCategory、SecondCategory、Title、Content不可为空")
 		return
@@ -36,17 +39,24 @@ func (issue *LegalIssue) Insert() (err error) {
 		err = errors.New("FirstCategory长度不可超过6、SecondCategory长度不可超过25、Tags长度不可超过255、Title长度不可超过60")
 		return
 	}
-	issue.CreateTime = int(time.Now().Unix())
+	if issue.CreateTime == 0 {
+		issue.CreateTime = int(time.Now().Unix())
+	}
 	_, err = Db.InsertOne(issue)
+	if err == nil {
+		issueId = issue.Id
+	}
 	return
 }
 
-func (issue *LegalIssue) Get() (has bool, err error) {
+func (l *legalIssueDao) Get(issueId int) (has bool, issue *LegalIssue, err error) {
+	issue = &LegalIssue{Id: issueId}
 	if issue.Id < 1 {
 		err = errors.New("dao:legal_issue_id must be greater than 1")
 		return
 	}
-	return Db.Get(issue)
+	has, err = Db.Get(issue)
+	return
 }
 
 type LegalIssueSearch struct {
@@ -61,7 +71,7 @@ type LegalIssueSearch struct {
 	InSummary    bool `json:"in_summary" form:"in_summary" query:"in_summary"`
 }
 
-func LegalIssueList(page *Page, search *LegalIssueSearch) (pageResult *PageResult, err error) {
+func (l *legalIssueDao) List(page *Page, search *LegalIssueSearch) (pageResult *PageResult, err error) {
 	legalIssues := new([]LegalIssue)
 	sess := Db.NewSession()
 	sess.Table("legal_issue")
@@ -101,7 +111,7 @@ func dealSearch(sess *xorm.Session, search *LegalIssueSearch) {
 	}
 }
 
-func LegalIssueCategoryList() ([]map[string][]string, error) {
+func (l *legalIssueDao) CategoryList() ([]map[string][]string, error) {
 	sql := "SELECT distinct second_category,first_category FROM legal_issue order by first_category desc"
 	//希望著作权在前面，所以sql中排了序
 	results, err := Db.QueryString(sql)

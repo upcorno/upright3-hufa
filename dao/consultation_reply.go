@@ -16,24 +16,37 @@ type ConsultationReply struct {
 	UpdateTime      time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
+type consulReplyDao struct{}
+
+var ConsulReplyDao *consulReplyDao
+
 //创建咨询回复记录
-func (reply *ConsultationReply) Insert() (err error) {
+func (c *consulReplyDao) Insert(consulId int, category string, content string, communicatorUid int) (replyId int, err error) {
+	reply := &ConsultationReply{
+		ConsultationId:  consulId,
+		Type:            category,
+		Content:         content,
+		CommunicatorUid: communicatorUid,
+		CreateTime:      int(time.Now().Unix()),
+	}
 	if reply.ConsultationId == 0 || reply.CommunicatorUid == 0 || reply.Type == "" || reply.Content == "" {
 		err = errors.New("dao-ConsultationReply:ConsultationId、CommunicatorUid、Type、Content cannot be empty")
 		return
 	}
-	reply.CreateTime = int(time.Now().Unix())
 	_, err = Db.InsertOne(reply)
+	if err == nil {
+		replyId = reply.Id
+	}
 	return
 }
 
 //删除咨询回复记录
-func (reply *ConsultationReply) delete() (err error) {
-	if reply.Id == 0 {
-		err = errors.New("dao:必须指定id值")
+func (c *consulReplyDao) delete(replyId int) (err error) {
+	if replyId == 0 {
+		err = errors.New("replyId不可为0")
 		return
 	}
-	_, err = Db.Delete(&ConsultationReply{Id: reply.Id})
+	_, err = Db.Delete(&ConsultationReply{Id: replyId})
 	return
 }
 
@@ -50,15 +63,15 @@ type replyInfo struct {
 }
 
 //获取咨询沟通记录表
-func ConsultationReplyList(consultationId int, minReplyId int) (replyInfoList []replyInfo, err error) {
-	if consultationId == 0 {
+func (c *consulReplyDao) List(consulId int, minReplyId int) (replyInfoList []replyInfo, err error) {
+	if consulId == 0 {
 		err = errors.New("dao:必须指定consultationId值")
 		return
 	}
 	replyInfoList = []replyInfo{}
 	err = Db.Table("consultation_reply").
 		Join("INNER", "user", "user.id = consultation_reply.communicator_uid").
-		Where("consultation_id=?", consultationId).
+		Where("consultation_id=?", consulId).
 		Where("consultation_reply.id>?", minReplyId).
 		Cols(
 			"consultation_reply.id",

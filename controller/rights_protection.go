@@ -80,14 +80,14 @@ func RightsProtectionBackendList(ctx echo.Context) error {
 	if err := ctx.Validate(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
 	}
-	search := &service.RightsProtectionSearchParams{}
+	search := &dao.RightsProtectionSearchParams{}
 	if err := ctx.Bind(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	beans, err := service.Protection.BackendList(page, search)
+	beans, err := dao.RightsProtectionDao.BackendList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrSvr("获取rights_protection list失败", err.Error()))
 	}

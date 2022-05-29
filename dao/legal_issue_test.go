@@ -8,10 +8,7 @@ import (
 func TestLigalIssue(t *testing.T) {
 	issue := addLegalIssue(t)
 	issueId := issue.Id
-	newIssue := &LegalIssue{
-		Id: issueId,
-	}
-	has, err := newIssue.Get()
+	has, newIssue, err := LegalIssueDao.Get(issueId)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +27,7 @@ var secondCategory string = "二级分类"
 
 func addLegalIssue(t *testing.T) (issue *LegalIssue) {
 	issue = &LegalIssue{
-		CreatorUid:     TestUid,
+		CreatorUid:     TestUserId,
 		FirstCategory:  "一级分类",
 		SecondCategory: secondCategory,
 		Tags:           "string",
@@ -38,11 +35,11 @@ func addLegalIssue(t *testing.T) (issue *LegalIssue) {
 		Title:          "biaoti内容",
 		Content:        "内容",
 	}
-	err := issue.Insert()
+	issueId, err := LegalIssueDao.Insert(issue)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if issue.Id < 1 {
+	if issueId < 1 {
 		t.Fatal(errors.New("issue未添加成功"))
 	}
 	return
@@ -51,7 +48,7 @@ func addLegalIssue(t *testing.T) (issue *LegalIssue) {
 func testLigalIssueList(t *testing.T) {
 	page := &Page{ItemNum: 5, PageIndex: 1}
 	search := &LegalIssueSearch{SecondCategory: secondCategory}
-	result, err := LegalIssueList(page, search)
+	result, err := LegalIssueDao.List(page, search)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +56,7 @@ func testLigalIssueList(t *testing.T) {
 		t.Fatal(errors.New("至少应存在一个满足条件的LigalIssue"))
 	}
 	search = &LegalIssueSearch{BusinessCategory: "版权基础"}
-	result, err = LegalIssueList(page, search)
+	result, err = LegalIssueDao.List(page, search)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +66,7 @@ func testLigalIssueList(t *testing.T) {
 }
 
 func testLigalIssueCategoryList(t *testing.T) {
-	list, err := LegalIssueCategoryList()
+	list, err := LegalIssueDao.CategoryList()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,25 +77,24 @@ func testLigalIssueCategoryList(t *testing.T) {
 func testFavorite(issueId int, t *testing.T) {
 	issueFavorite := &LegalIssueFavorite{
 		IssueId: issueId,
-		UserId:  TestUid,
+		UserId:  TestUserId,
 	}
-	err := issueFavorite.Insert()
+	err := LegalIssueFavoriteDao.Insert(issueFavorite)
 	if err != nil {
 		t.Fatal(err)
 	}
-	has, err := issueFavorite.Exist()
+	has, err := LegalIssueFavoriteDao.Exist(issueId, TestUserId)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !has {
 		t.Fatal(errors.New("LegalIssue应该已添加收藏"))
 	}
-	tmpIssueFavorite := &LegalIssueFavorite{UserId: issueFavorite.UserId, IssueId: issueFavorite.IssueId}
-	err = tmpIssueFavorite.Delete()
+	err = LegalIssueFavoriteDao.Delete(issueId, TestUserId)
 	if err != nil {
 		t.Fatal(err)
 	}
-	has, err = issueFavorite.Exist()
+	has, err = LegalIssueFavoriteDao.Exist(issueId, TestUserId)
 	if err != nil {
 		t.Fatal(err)
 	}

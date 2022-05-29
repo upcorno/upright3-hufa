@@ -45,7 +45,7 @@ func LegalIssueGet(ctx echo.Context) error {
 }
 
 func LegalIssueCategoryList(ctx echo.Context) error {
-	categoryList, err := dao.LegalIssueCategoryList()
+	categoryList, err := dao.LegalIssueDao.CategoryList()
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取问题分类列表失败！", err.Error()))
 	}

@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	dao "law/dao"
 	"law/enum"
-	"time"
-
-	"xorm.io/xorm"
 )
 
 type consultationSrv struct {
@@ -19,34 +16,26 @@ type ConsultationCreateInfo struct {
 	Imgs     string `json:"imgs"`
 }
 
-func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, uid int) (consultationId int, err error) {
-	consul := &dao.Consultation{
-		Question: createInfo.Question,
-		Imgs:     createInfo.Imgs,
-	}
-	consul.ConsultantUid = uid
-	consul.Status = enum.DOING
-	if err = consul.Create(); err != nil {
+func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, consultantUid int) (consulId int, err error) {
+	if consulId, err = dao.ConsulDao.Insert(createInfo.Question, createInfo.Imgs, consultantUid, enum.DOING); err != nil {
 		return
 	}
-	consultationId = consul.Id
 	consultationData, err := json.Marshal(createInfo)
 	if err != nil {
 		return
 	}
-	reply := &dao.ConsultationReply{
-		ConsultationId:  consultationId,
-		Type:            enum.QUERY,
-		Content:         string(consultationData),
-		CommunicatorUid: uid,
-		CreateTime:      int(time.Now().Unix()),
+	replyParams := &ConsultationReplyParams{
+		ConsultationId: consulId,
+		Type:           enum.QUERY,
+		Content:        string(consultationData),
 	}
-	err = reply.Insert()
+	err = c.AddReply(replyParams, consultantUid)
 	return
 }
-func (c *consultationSrv) SetStatus(consultationId int, status string) (err error) {
-	consul := &dao.Consultation{Id: consultationId, Status: status}
-	err = consul.Update("status")
+
+func (c *consultationSrv) SetStatus(consulId int, status string) (err error) {
+	consul := &dao.Consultation{Status: status}
+	err = dao.ConsulDao.Update(consulId, consul, "status")
 	return err
 }
 
@@ -57,55 +46,11 @@ type ConsultationReplyParams struct {
 }
 
 func (c *consultationSrv) AddReply(replyParams *ConsultationReplyParams, uid int) (err error) {
-	reply := &dao.ConsultationReply{
-		ConsultationId:  replyParams.ConsultationId,
-		Type:            replyParams.Type,
-		Content:         replyParams.Content,
-		CommunicatorUid: uid,
-		CreateTime:      int(time.Now().Unix()),
-	}
-	err = reply.Insert()
-	return
-}
-
-type ConsultationSearchParams struct {
-	Status        string `json:"status" query:"status"`
-	CreateTimeMin int    `json:"create_time_min" query:"create_time_min"`
-	CreateTimeMax int    `json:"create_time_max" query:"create_time_max"`
-}
-
-func (c *consultationSrv) BackendList(page *dao.Page, search *ConsultationSearchParams) (pageResult *dao.PageResult, err error) {
-	type listInfo struct {
-		Id       int    `json:"id"`
-		Question string `json:"question"`
-		NickName string `json:"nick_name"`
-		Phone    string `json:"phone"`
-		Status   string `json:"status"`
-	}
-	consultationInfoList := []listInfo{}
-	sess := dao.Db.NewSession()
-	sess.Table("consultation")
-	sess.Join("INNER", "user", "user.id = consultation.consultant_uid")
-	sess.Cols(
-		"consultation.id",
-		"consultation.question",
-		"user.nick_name",
-		"user.phone",
-		"consultation.status",
+	_, err = dao.ConsulReplyDao.Insert(
+		replyParams.ConsultationId,
+		replyParams.Type,
+		replyParams.Content,
+		uid,
 	)
-	c.dealSearch(sess, search)
-	pageResult, err = page.GetResults(sess, &consultationInfoList)
 	return
-}
-
-func (c *consultationSrv) dealSearch(sess *xorm.Session, search *ConsultationSearchParams) {
-	if search.Status != "" {
-		sess.Where("consultation.status = ?", search.Status)
-	}
-	if search.CreateTimeMin != 0 {
-		sess.Where("consultation.create_time > ?", search.CreateTimeMin)
-	}
-	if search.CreateTimeMax != 0 {
-		sess.Where("consultation.create_time < ?", search.CreateTimeMax)
-	}
 }

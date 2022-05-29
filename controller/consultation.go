@@ -41,7 +41,7 @@ func ConsultationSetStatus(ctx echo.Context) error {
 //用户历史咨询记录
 func ConsultationList(ctx echo.Context) error {
 	uid := ctx.Get("uid").(int)
-	consultationList, err := dao.ConsultationList(uid)
+	consultationList, err := dao.ConsulDao.List(uid)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取历史咨询列表失败！", err.Error()))
 	}
@@ -55,7 +55,7 @@ func ConsultationGet(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_id失败！", err.Error()))
 	}
-	consultationInfo, err := dao.ConsultationGetWithUserInfo(consultationId)
+	consultationInfo, err := dao.ConsulDao.GetWithUserInfo(consultationId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取咨询信息失败！", err.Error()))
 	}
@@ -74,14 +74,14 @@ func ConsultationBackendList(ctx echo.Context) error {
 	if err := ctx.Validate(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页数据输入校验失败！", err.Error()))
 	}
-	search := &service.ConsultationSearchParams{}
+	search := &dao.ConsultationSearchParams{}
 	if err := ctx.Bind(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}
 	if err := ctx.Validate(search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索输入校验失败！", err.Error()))
 	}
-	consultations, err := service.Consultation.BackendList(page, search)
+	consultations, err := dao.ConsulDao.BackendList(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrSvr("获取consultation list失败", err.Error()))
 	}
@@ -123,11 +123,11 @@ func ConsultationListReply(ctx echo.Context) error {
 			return ctx.JSON(utils.ErrIpt("获取min_reply_id失败！", err.Error()))
 		}
 	}
-	recordListInfo, err := dao.ConsultationReplyList(consultationId, minReplyId)
+	replyListInfo, err := dao.ConsulReplyDao.List(consultationId, minReplyId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
 	}
-	return ctx.JSON(utils.Succ("success", recordListInfo))
+	return ctx.JSON(utils.Succ("success", replyListInfo))
 }
 
 //后台咨询回复文件上传

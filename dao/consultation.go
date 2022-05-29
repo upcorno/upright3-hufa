@@ -5,6 +5,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"xorm.io/xorm"
 )
 
 // 问题“咨询”
@@ -18,38 +19,52 @@ type Consultation struct {
 	UpdateTime    time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
+type consulDao struct{}
+
+var ConsulDao *consulDao
+
 //创建咨询
-func (consul *Consultation) Create() (err error) {
+func (c *consulDao) Insert(question string, imgs string, consultantUid int, status string) (consulId int, err error) {
+	consul := &Consultation{
+		Question:      question,
+		Imgs:          imgs,
+		ConsultantUid: consultantUid,
+		Status:        status,
+		CreateTime:    int(time.Now().Unix()),
+	}
 	if consul.Question == "" || consul.ConsultantUid == 0 || consul.Status == "" {
 		err = errors.New("Question、ConsultantUid、Status不可以为空值")
 		return
 	}
 	consul.CreateTime = int(time.Now().Unix())
 	_, err = Db.InsertOne(consul)
-	return err
+	if err == nil {
+		consulId = consul.Id
+	}
+	return
 }
 
 //删除咨询
-func (consul *Consultation) delete() error {
-	if consul.Id == 0 {
-		err := errors.New("dao:必须指定id值")
-		return err
+func (c *consulDao) delete(consulId int) (err error) {
+	if consulId == 0 {
+		err = errors.New("consulId不可为0")
+		return
 	}
-	_, err := Db.Delete(&Consultation{Id: consul.Id})
-	return err
+	_, err = Db.Delete(&Consultation{Id: consulId})
+	return
 }
 
-func (consul *Consultation) Update(columns ...string) (err error) {
-	if consul.Id == 0 {
-		err := errors.New("dao:必须指定id值")
-		return err
+func (c *consulDao) Update(consulId int, consul *Consultation, columns ...string) (err error) {
+	if consulId == 0 {
+		err = errors.New("consulId不可为0")
+		return
 	}
-	_, err = Db.Cols(columns...).Update(consul, &Consultation{Id: consul.Id})
+	_, err = Db.Cols(columns...).Update(consul, &Consultation{Id: consulId})
 	return
 }
 
 //用户历史咨询记录列表
-func ConsultationList(uid int) (consultationList []Consultation, err error) {
+func (c *consulDao) List(uid int) (consultationList []Consultation, err error) {
 	consultationList = []Consultation{}
 	err = Db.Table("consultation").
 		Where("consultation.consultant_uid = ?", uid).
@@ -71,7 +86,7 @@ type consultationWithUserInfo struct {
 }
 
 //获取咨询信息
-func ConsultationGetWithUserInfo(consultationId int) (*consultationWithUserInfo, error) {
+func (c *consulDao) GetWithUserInfo(consultationId int) (*consultationWithUserInfo, error) {
 	consultationInfo := &consultationWithUserInfo{}
 	_, err := Db.Table("consultation").
 		Join("INNER", "user", "user.id = consultation.consultant_uid").
@@ -92,4 +107,46 @@ func ConsultationGetWithUserInfo(consultationId int) (*consultationWithUserInfo,
 		consultationInfo = nil
 	}
 	return consultationInfo, err
+}
+
+type ConsultationSearchParams struct {
+	Status        string `json:"status" query:"status"`
+	CreateTimeMin int    `json:"create_time_min" query:"create_time_min"`
+	CreateTimeMax int    `json:"create_time_max" query:"create_time_max"`
+}
+
+func (c *consulDao) BackendList(page *Page, search *ConsultationSearchParams) (pageResult *PageResult, err error) {
+	type listInfo struct {
+		Id       int    `json:"id"`
+		Question string `json:"question"`
+		NickName string `json:"nick_name"`
+		Phone    string `json:"phone"`
+		Status   string `json:"status"`
+	}
+	consultationInfoList := []listInfo{}
+	sess := Db.NewSession()
+	sess.Table("consultation")
+	sess.Join("INNER", "user", "user.id = consultation.consultant_uid")
+	sess.Cols(
+		"consultation.id",
+		"consultation.question",
+		"user.nick_name",
+		"user.phone",
+		"consultation.status",
+	)
+	c.dealSearch(sess, search)
+	pageResult, err = page.GetResults(sess, &consultationInfoList)
+	return
+}
+
+func (c *consulDao) dealSearch(sess *xorm.Session, search *ConsultationSearchParams) {
+	if search.Status != "" {
+		sess.Where("consultation.status = ?", search.Status)
+	}
+	if search.CreateTimeMin != 0 {
+		sess.Where("consultation.create_time > ?", search.CreateTimeMin)
+	}
+	if search.CreateTimeMax != 0 {
+		sess.Where("consultation.create_time < ?", search.CreateTimeMax)
+	}
 }

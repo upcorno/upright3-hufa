@@ -5,27 +5,29 @@ import (
 	"testing"
 )
 
-var testRightsProtection RightsProtection
+var testRightsProtection *RightsProtection
 
 func TestRightsProtection(t *testing.T) {
+	defer testDeleteRightsProtection(t)
 	testRightsProtection = testAddRightsProtection(t)
 	testGetAndUpdateInfo(t)
-	testDeleteRightsProtection(t)
 }
 
-func testAddRightsProtection(t *testing.T) (r RightsProtection) {
-	r.Name = "name"
-	r.CreatorUid = TestUid
-	err := r.Insert()
+func testAddRightsProtection(t *testing.T) (r *RightsProtection) {
+	r = &RightsProtection{
+		Name:       "name",
+		CreatorUid: TestUserId,
+	}
+	_, err := RightsProtectionDao.Insert(r)
 	if err == nil {
 		t.Fatal(errors.New("Name、Phone、CreatorUid三者为必填字段"))
 	}
 	r.Phone = "ddddd"
-	err = r.Insert()
+	_, err = RightsProtectionDao.Insert(r)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = r.Insert()
+	_, err = RightsProtectionDao.Insert(r)
 	if err == nil {
 		t.Fatal(errors.New("一个用户只能填一个维权意向"))
 	}
@@ -33,8 +35,7 @@ func testAddRightsProtection(t *testing.T) (r RightsProtection) {
 }
 
 func testGetAndUpdateInfo(t *testing.T) {
-	tmp := &RightsProtection{Id: testRightsProtection.Id}
-	has, err := tmp.Get()
+	has, tmp, err := RightsProtectionDao.Get(testRightsProtection.Id, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,9 +44,8 @@ func testGetAndUpdateInfo(t *testing.T) {
 	}
 	tmp.CustomerAddress = "new ppp"
 	tmp.Name = "new name"
-	tmp.Update("name")
-	newTmp := &RightsProtection{Id: testRightsProtection.Id}
-	has, err = newTmp.Get()
+	RightsProtectionDao.Update(testRightsProtection.Id, 0, tmp, "name")
+	has, newTmp, err := RightsProtectionDao.Get(testRightsProtection.Id, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,14 +55,13 @@ func testGetAndUpdateInfo(t *testing.T) {
 	if newTmp.CustomerAddress == tmp.CustomerAddress {
 		t.Fatal(errors.New("RightsProtection.CustomerAddress不应该被改变"))
 	}
-	if newTmp.Name == testRightsProtection.Name {
+	if newTmp.Name != tmp.Name {
 		t.Fatal(errors.New("RightsProtection.Name 应该被改变"))
 	}
-	testRightsProtection.Update()
 }
 
 func testDeleteRightsProtection(t *testing.T) {
-	err := testRightsProtection.delete()
+	err := RightsProtectionDao.delete(testRightsProtection.Id, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

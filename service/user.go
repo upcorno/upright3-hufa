@@ -5,7 +5,6 @@ import (
 	"law/conf"
 	dao "law/dao"
 	"law/utils"
-	"time"
 )
 
 type user struct{}
@@ -25,48 +24,43 @@ func (u *user) Login(code string) (token string, err error) {
 }
 
 // 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
-func (u *user) getUidAndSync(openid string, unionid string) (uid int, err error) {
-	user := &dao.User{
-		AppId:  conf.App.WxApp.Appid,
-		Openid: openid,
-	}
-	has, err := user.Get()
+func (u *user) getUidAndSync(openid string, unionid string) (userId int, err error) {
+	has, user, err := dao.UserDao.Get(0, conf.App.WxApp.Appid, openid)
 	if err != nil {
 		return
 	}
 	if has {
-		uid = user.Id
+		userId = user.Id
 		if unionid != "" && user.Unionid != unionid {
 			//更新 unionid, unionid 可能从 null 变为由内容
-			err = user.Update()
+			user.Unionid = unionid
+			err = dao.UserDao.Update(user.Id, user)
 		}
 		return
 	}
-	user.Unionid = unionid
-	user.CreateTime = int(time.Now().Unix())
-	if err = user.Insert(); err != nil {
+	user = &dao.User{
+		AppId:   conf.App.WxApp.Appid,
+		Openid:  openid,
+		Unionid: unionid,
+	}
+	if userId, err = dao.UserDao.Insert(user); err != nil {
 		return
 	}
-	uid = user.Id
 	return
 }
 
-func (u *user) SetPhone(uid int, code string) (err error) {
+func (u *user) SetPhone(userId int, code string) (err error) {
 	phoneNumber, err := WxSrv.getPhoneNumber(code)
 	if err != nil {
 		return
 	}
-	user := dao.User{Id: uid}
-	user.Phone = phoneNumber
-	err = user.Update()
+	err = dao.UserDao.Update(userId, &dao.User{Phone: phoneNumber})
 	return
 }
 
-func (u *user) SetNameAndAvatarUrl(uid int, nickName string, avatarUrl string) (err error) {
-	user := dao.User{Id: uid}
-	user.NickName = nickName
-	user.AvatarUrl = avatarUrl
-	err = user.Update()
+func (u *user) SetNameAndAvatarUrl(userId int, nickName string, avatarUrl string) (err error) {
+	user := &dao.User{NickName: nickName, AvatarUrl: avatarUrl}
+	err = dao.UserDao.Update(userId, user)
 	return
 }
 

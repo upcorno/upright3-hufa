@@ -15,39 +15,44 @@ type LegalIssueFavorite struct {
 	CreateTime int       `xorm:"not null UNSIGNED INT" json:"create_time"`
 	UpdateTime time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
+type legalIssueFavoriteDao struct{}
 
-func (f *LegalIssueFavorite) Insert() (err error) {
+var LegalIssueFavoriteDao *legalIssueFavoriteDao
+
+func (l *legalIssueFavoriteDao) Insert(f *LegalIssueFavorite) (err error) {
 	if f.IssueId == 0 || f.UserId == 0 {
 		err = errors.New("dao:IssueId、UserId不可为空")
 		return
 	}
-	f.CreateTime = int(time.Now().Unix())
+	if f.CreateTime == 0 {
+		f.CreateTime = int(time.Now().Unix())
+	}
 	_, err = Db.InsertOne(f)
 	return
 }
 
-func (f *LegalIssueFavorite) Exist() (has bool, err error) {
-	if f.Id == 0 {
-		if f.IssueId == 0 || f.UserId == 0 {
-			err = errors.New("dao:Id为空时，IssueId、UserId不能为空")
-			return
-		}
+func (l *legalIssueFavoriteDao) Exist(issueId int, userId int) (has bool, err error) {
+	f := &LegalIssueFavorite{
+		IssueId: issueId,
+		UserId:  userId,
+	}
+	if f.IssueId == 0 || f.UserId == 0 {
+		err = errors.New("dao:Id为空时，IssueId、UserId不能为空")
+		return
 	}
 	has, err = Db.Exist(f)
 	return
 }
 
-func (f *LegalIssueFavorite) Delete() (err error) {
-	if f.Id == 0 {
-		if !(f.IssueId != 0 && f.UserId != 0) {
-			err = errors.New("dao:必须指定Id或同时指定IssueId、UserId。")
-			return
-		}
+func (l *legalIssueFavoriteDao) Delete(issueId int, userId int) (err error) {
+	f := &LegalIssueFavorite{
+		IssueId: issueId,
+		UserId:  userId,
 	}
-	_, err = Db.Delete(&LegalIssueFavorite{
-		Id:      f.Id,
-		IssueId: f.IssueId,
-		UserId:  f.UserId,
-	})
+	if f.IssueId == 0 || f.UserId == 0 {
+		err = errors.New("dao:必须同时指定IssueId、UserId。")
+		return
+	}
+	_, err = Db.Delete(f)
 	return
 }

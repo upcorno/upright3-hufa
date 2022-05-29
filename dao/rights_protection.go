@@ -6,6 +6,7 @@ import (
 	"unicode/utf8"
 
 	_ "github.com/go-sql-driver/mysql"
+	"xorm.io/xorm"
 )
 
 //“我要维权”用户提交信息
@@ -25,7 +26,11 @@ type RightsProtection struct {
 	UpdateTime      time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
-func (r *RightsProtection) Insert() (err error) {
+type rightsProtectionDao struct{}
+
+var RightsProtectionDao *rightsProtectionDao
+
+func (d *rightsProtectionDao) Insert(r *RightsProtection) (id int, err error) {
 	if r.Name == "" || r.Phone == "" || r.CreatorUid == 0 {
 		err = errors.New("必须指定Name、Phone、CreatorUid字段")
 		return
@@ -34,40 +39,104 @@ func (r *RightsProtection) Insert() (err error) {
 		err = errors.New("Name不可超过16个字符、且Phone不超过20个字符")
 		return
 	}
-	r.CreateTime = int(time.Now().Unix())
+	if r.CreateTime == 0 {
+		r.CreateTime = int(time.Now().Unix())
+	}
 	_, err = Db.InsertOne(r)
+	if err == nil {
+		id = r.Id
+	}
 	return
 }
 
-func (r *RightsProtection) Get() (has bool, err error) {
-	if r.Id == 0 {
-		if r.CreatorUid == 0 {
-			err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
-			return
-		}
+func (d *rightsProtectionDao) Get(id int, creatorUid int) (has bool, r *RightsProtection, err error) {
+	condiBean := &RightsProtection{
+		Id:         id,
+		CreatorUid: creatorUid,
 	}
-	has, err = Db.Get(r)
+	if condiBean.Id == 0 && condiBean.CreatorUid == 0 {
+		err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
+		return
+	}
+	has, err = Db.Get(condiBean)
+	if condiBean.CreateTime != 0 {
+		r = condiBean
+	}
 	return
 }
 
-func (r *RightsProtection) Update(columns ...string) (err error) {
-	if r.Id == 0 {
-		if r.CreatorUid == 0 {
-			err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
-			return
-		}
+func (d *rightsProtectionDao) Update(id int, creatorUid int, r *RightsProtection, columns ...string) (err error) {
+	condiBean := &RightsProtection{
+		Id:         id,
+		CreatorUid: creatorUid,
 	}
-	_, err = Db.Cols(columns...).Update(r, &RightsProtection{Id: r.Id, CreatorUid: r.CreatorUid})
+	if condiBean.Id == 0 && condiBean.CreatorUid == 0 {
+		err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
+		return
+	}
+	_, err = Db.Cols(columns...).Update(r, condiBean)
 	return
 }
 
-func (r *RightsProtection) delete() (err error) {
-	if r.Id == 0 {
-		if r.CreatorUid == 0 {
-			err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
-			return
-		}
+func (d *rightsProtectionDao) delete(id int, creatorUid int) (err error) {
+	condiBean := &RightsProtection{
+		Id:         id,
+		CreatorUid: creatorUid,
 	}
-	_, err = Db.Delete(&RightsProtection{Id: r.Id, CreatorUid: r.CreatorUid})
+	if condiBean.Id == 0 && condiBean.CreatorUid == 0 {
+		err = errors.New("需指定RightsProtection的Id或CreatorUid字段")
+		return
+	}
+	_, err = Db.Delete(condiBean)
 	return
+}
+
+type RightsProtectionSearchParams struct {
+	DealResult      string `json:"deal_result" query:"deal_result"`
+	DealRemark      string `json:"deal_remark" query:"deal_remark"`
+	CustomerAddress string `json:"customer_address" query:"customer_address"`
+	CreateTimeMin   int    `json:"create_time_min" query:"create_time_min"`
+	CreateTimeMax   int    `json:"create_time_max" query:"create_time_max"`
+}
+
+type protectionInfo struct {
+	Id         int    `json:"id"`
+	Name       string `json:"name"`
+	Phone      string `json:"phone"`
+	CreateTime int    `json:"create_time"`
+	DealResult string `json:"deal_result"`
+}
+
+func (d *rightsProtectionDao) BackendList(page *Page, search *RightsProtectionSearchParams) (*PageResult, error) {
+	searchInfo := []protectionInfo{}
+	sess := Db.NewSession()
+	sess.Table("rights_protection")
+	sess.Cols(
+		"id",
+		"name",
+		"phone",
+		"create_time",
+		"deal_result",
+	)
+	d.dealSearch(sess, search)
+	pageResult, err := page.GetResults(sess, &searchInfo)
+	if err != nil {
+		return nil, err
+	}
+	return pageResult, err
+}
+
+func (d *rightsProtectionDao) dealSearch(sess *xorm.Session, search *RightsProtectionSearchParams) {
+	if search.DealResult != "" {
+		sess.Where("deal_result = ?", search.DealResult)
+	}
+	if search.CustomerAddress != "" {
+		sess.Where("customer_address like ?", "%"+search.CustomerAddress+"%")
+	}
+	if search.CreateTimeMin != 0 {
+		sess.Where("create_time >= ?", search.CreateTimeMin)
+	}
+	if search.CreateTimeMax != 0 {
+		sess.Where("create_time <= ?", search.CreateTimeMax)
+	}
 }

@@ -17,31 +17,62 @@ type User struct {
 	UpdateTime time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
 }
 
-func (user *User) Insert() (err error) {
+type userDao struct{}
+
+var UserDao *userDao
+
+func (u *userDao) Insert(user *User) (userId int, err error) {
 	if user.AppId == "" || user.Openid == "" {
 		err = errors.New("AppId、Openid不可以为空值")
 		return
 	}
-	user.CreateTime = int(time.Now().Unix())
+	if user.CreateTime == 0 {
+		user.CreateTime = int(time.Now().Unix())
+	}
 	_, err = Db.InsertOne(user)
+	if err == nil {
+		userId = user.Id
+	}
 	return
 }
 
-func (user *User) Get() (has bool, err error) {
+func (u *userDao) Get(userId int, appId string, openid string) (has bool, user *User, err error) {
+	user = &User{
+		Id:     userId,
+		AppId:  appId,
+		Openid: openid,
+	}
 	if user.Id == 0 {
 		if !(user.AppId != "" && user.Openid != "") {
 			err = errors.New("dao:查询用户时须指定id值或通过appid、openid获取。")
 			return
 		}
 	}
-	return Db.Get(user)
+	has, err = Db.Get(user)
+	return
 }
 
-func (user *User) Update() (err error) {
+func (u *userDao) delete(userId int, appId string, openid string) (err error) {
+	user := &User{
+		Id:     userId,
+		AppId:  appId,
+		Openid: openid,
+	}
 	if user.Id == 0 {
-		err = errors.New("dao:必须指定id值")
+		if !(user.AppId != "" && user.Openid != "") {
+			err = errors.New("dao:查询用户时须指定id值或通过appid、openid获取。")
+			return
+		}
+	}
+	_, err = Db.Delete(user)
+	return
+}
+
+func (u *userDao) Update(userId int, user *User) (err error) {
+	if userId == 0 {
+		err = errors.New("userId不可为0值")
 		return
 	}
-	_, err = Db.Update(user, User{Id: user.Id})
+	_, err = Db.Update(user, User{Id: userId})
 	return
 }

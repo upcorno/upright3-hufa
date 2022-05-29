@@ -4,8 +4,6 @@ import (
 	"errors"
 	dao "law/dao"
 	"time"
-
-	"xorm.io/xorm"
 )
 
 type protectionSrv struct{}
@@ -21,12 +19,14 @@ type RightsProtectionDealInfo struct {
 
 func (p *protectionSrv) SetDealInfo(id int, dealInfo *RightsProtectionDealInfo) (err error) {
 	bean := &dao.RightsProtection{
-		Id:              id,
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: dealInfo.CustomerAddress,
 		DealRemark:      dealInfo.DealRemark,
 	}
-	err = bean.Update(
+	err = dao.RightsProtectionDao.Update(
+		id,
+		0,
+		bean,
 		"deal_result",
 		"customer_address",
 		"deal_remark",
@@ -44,20 +44,18 @@ type RightsProtectionBaseInfo struct {
 
 func (p *protectionSrv) UpdateBaseInfo(creatorUid int, baseInfo *RightsProtectionBaseInfo) (err error) {
 	bean := &dao.RightsProtection{
-		CreatorUid:   creatorUid,
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
 		Organization: baseInfo.Organization,
 		Description:  baseInfo.Description,
 		Resume:       baseInfo.Resume,
 	}
-	err = bean.Update("name", "phone", "organization", "description", "resume")
+	err = dao.RightsProtectionDao.Update(0, creatorUid, bean, "name", "phone", "organization", "description", "resume")
 	return
 }
 
 func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) (id int, err error) {
-	bean := dao.RightsProtection{CreatorUid: creatorUid}
-	has, err := bean.Get()
+	has, bean, err := dao.RightsProtectionDao.Get(0, creatorUid)
 	if err != nil {
 		return
 	}
@@ -65,7 +63,7 @@ func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) 
 		err = errors.New("系统已存在记录，请勿重复添加！")
 		return
 	}
-	bean = dao.RightsProtection{
+	bean = &dao.RightsProtection{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
 		Organization: baseInfo.Organization,
@@ -74,14 +72,12 @@ func (p *protectionSrv) Add(baseInfo *RightsProtectionBaseInfo, creatorUid int) 
 		CreatorUid:   creatorUid,
 		CreateTime:   int(time.Now().Unix()),
 	}
-	err = bean.Insert()
-	id = bean.Id
+	id, err = dao.RightsProtectionDao.Insert(bean)
 	return
 }
 
-func (p *protectionSrv) BgGet(id int) (bean dao.RightsProtection, err error) {
-	bean.Id = id
-	has, err := bean.Get()
+func (p *protectionSrv) BgGet(id int) (bean *dao.RightsProtection, err error) {
+	has, bean, err := dao.RightsProtectionDao.Get(id, 0)
 	if err != nil {
 		return
 	}
@@ -93,64 +89,6 @@ func (p *protectionSrv) BgGet(id int) (bean dao.RightsProtection, err error) {
 }
 
 func (p *protectionSrv) Get(creatorUid int) (bean *dao.RightsProtection, err error) {
-	bean = &dao.RightsProtection{CreatorUid: creatorUid}
-	has, err := bean.Get()
-	if err != nil {
-		return
-	}
-	if !has {
-		bean = nil
-		return
-	}
+	_, bean, err = dao.RightsProtectionDao.Get(0, creatorUid)
 	return
-}
-
-type RightsProtectionSearchParams struct {
-	DealResult      string `json:"deal_result" query:"deal_result"`
-	DealRemark      string `json:"deal_remark" query:"deal_remark"`
-	CustomerAddress string `json:"customer_address" query:"customer_address"`
-	CreateTimeMin   int    `json:"create_time_min" query:"create_time_min"`
-	CreateTimeMax   int    `json:"create_time_max" query:"create_time_max"`
-}
-
-type protectionInfo struct {
-	Id         int    `json:"id"`
-	Name       string `json:"name"`
-	Phone      string `json:"phone"`
-	CreateTime int    `json:"create_time"`
-	DealResult string `json:"deal_result"`
-}
-
-func (p *protectionSrv) BackendList(page *dao.Page, search *RightsProtectionSearchParams) (*dao.PageResult, error) {
-	searchInfo := []protectionInfo{}
-	sess := dao.Db.NewSession()
-	sess.Table("rights_protection")
-	sess.Cols(
-		"id",
-		"name",
-		"phone",
-		"create_time",
-		"deal_result",
-	)
-	p.dealSearch(sess, search)
-	pageResult, err := page.GetResults(sess, &searchInfo)
-	if err != nil {
-		return nil, err
-	}
-	return pageResult, err
-}
-
-func (p *protectionSrv) dealSearch(sess *xorm.Session, search *RightsProtectionSearchParams) {
-	if search.DealResult != "" {
-		sess.Where("deal_result = ?", search.DealResult)
-	}
-	if search.CustomerAddress != "" {
-		sess.Where("customer_address like ?", "%"+search.CustomerAddress+"%")
-	}
-	if search.CreateTimeMin != 0 {
-		sess.Where("create_time >= ?", search.CreateTimeMin)
-	}
-	if search.CreateTimeMax != 0 {
-		sess.Where("create_time <= ?", search.CreateTimeMax)
-	}
 }

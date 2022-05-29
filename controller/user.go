@@ -61,14 +61,13 @@ func SetNameAndAvatarUrl(ctx echo.Context) error {
 }
 
 func GetUserInfo(ctx echo.Context) error {
-	uid := ctx.Get("uid").(int)
-	user := dao.User{Id: uid}
-	has, err := user.Get()
+	userId := ctx.Get("uid").(int)
+	has, user, err := dao.UserDao.Get(userId, "", "")
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取用户信息失败！", err.Error()))
 	}
 	if !has {
-		return ctx.JSON(utils.ErrIpt("用户 id 不存在！", uid))
+		return ctx.JSON(utils.ErrIpt("用户 id 不存在！", userId))
 	}
 	return ctx.JSON(utils.Succ("success", user))
 }
