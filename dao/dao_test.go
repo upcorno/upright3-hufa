@@ -8,7 +8,7 @@ var TestUserId int
 
 func TestMain(m *testing.M) {
 	//setup
-	defer deleteTestUser()
+	deleteTestUser()
 	addTestUser(m)
 	m.Run()
 }

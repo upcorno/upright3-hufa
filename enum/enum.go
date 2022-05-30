@@ -22,7 +22,9 @@ const (
 	COOPERATED    = "已合作"
 )
 
+type Cooperation string
+
 const (
-	MONITOR = "monitor"
-	PROTECT = "protect"
+	MONITOR Cooperation = "monitor"
+	PROTECT Cooperation = "protect"
 )

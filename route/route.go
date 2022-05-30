@@ -33,22 +33,10 @@ func InitRouter(e *echo.Echo, bg *echo.Group) {
 	bg.GET("/consultation/list", controller.ConsultationBackendList)
 	///
 	///侵权监测
-	e.Add(http.MethodPost, "/infringement_monitor/add", controller.InfringementMonitorAdd)
-	e.Add(http.MethodGet, "/infringement_monitor/get", controller.InfringementMonitorGet)
-	e.Add(http.MethodPost, "/infringement_monitor/update_base_info", controller.InfringementMonitorUpdateBaseInfo)
-	//
-	bg.GET("/infringement_monitor/get", controller.InfringementMonitorBgGet)
-	bg.POST("/infringement_monitor/set_deal_info", controller.InfringementMonitorSetDealInfo)
-	bg.GET("/infringement_monitor/list", controller.InfringementMonitorBackendList)
+	addCooperationRoute(e, bg, "/infringement_monitor/")
 	///
 	///我要维权
-	e.Add(http.MethodPost, "/rights_protection/add", controller.RightsProtectionAdd)
-	e.Add(http.MethodGet, "/rights_protection/get", controller.RightsProtectionGet)
-	e.Add(http.MethodPost, "/rights_protection/update_base_info", controller.RightsProtectionUpdateBaseInfo)
-	//
-	bg.GET("/rights_protection/get", controller.RightsProtectionBgGet)
-	bg.POST("/rights_protection/set_deal_info", controller.RightsProtectionSetDealInfo)
-	bg.GET("/rights_protection/list", controller.RightsProtectionBackendList)
+	addCooperationRoute(e, bg, "/rights_protection/")
 	///
 	///用户
 	e.Add(http.MethodPost, "/user/login", controller.Login)
@@ -61,4 +49,14 @@ func InitRouter(e *echo.Echo, bg *echo.Group) {
 	bg.GET("/user/get_user_info", controller.GetUserInfo)
 	bg.POST("/user/login", controller.BackendLogin)
 	///
+}
+
+func addCooperationRoute(e *echo.Echo, bg *echo.Group, prefix string) {
+	e.Add(http.MethodPost, prefix+"add", controller.CooperationController.Add)
+	e.Add(http.MethodGet, prefix+"get", controller.CooperationController.Get)
+	e.Add(http.MethodPost, prefix+"update_base_info", controller.CooperationController.UpdateBaseInfo)
+	//
+	bg.GET(prefix+"get", controller.CooperationController.BgGet)
+	bg.POST(prefix+"set_deal_info", controller.CooperationController.SetDealInfo)
+	bg.GET(prefix+"list", controller.CooperationController.BackendList)
 }

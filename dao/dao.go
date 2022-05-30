@@ -65,7 +65,8 @@ func init() {
 			new(LegalIssueFavorite),
 			new(Consultation),
 			new(ConsultationReply),
-			new(CooperationIntention),
+			new(rightsProtection),
+			new(infringementMonitor),
 			new(TemplateMsgSubscribe),
 		)
 		if err != nil {

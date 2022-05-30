@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	dao "law/dao"
+	"law/enum"
 	"time"
 )
 
@@ -17,15 +18,15 @@ type CooperationDealInfo struct {
 	DealRemark      string `json:"deal_remark" form:"deal_remark" query:"deal_remark" validate:"min=0"`
 }
 
-func (p *cooperationSrv) SetDealInfo(id int, dealInfo *CooperationDealInfo) (err error) {
+func (p *cooperationSrv) SetDealInfo(category enum.Cooperation, id int, dealInfo *CooperationDealInfo) (err error) {
 	bean := &dao.CooperationIntention{
 		DealResult:      dealInfo.DealResult,
 		CustomerAddress: dealInfo.CustomerAddress,
 		DealRemark:      dealInfo.DealRemark,
 	}
 	err = dao.CooperationDao.Update(
+		category,
 		id,
-		"",
 		0,
 		bean,
 		"deal_result",
@@ -43,7 +44,7 @@ type CooperationBaseInfo struct {
 	Resume       string `json:"resume" form:"resume" query:"resume" validate:"min=0"`
 }
 
-func (p *cooperationSrv) UpdateBaseInfo(category string, creatorUid int, baseInfo *CooperationBaseInfo) (err error) {
+func (p *cooperationSrv) UpdateBaseInfo(category enum.Cooperation, creatorUid int, baseInfo *CooperationBaseInfo) (err error) {
 	bean := &dao.CooperationIntention{
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
@@ -51,12 +52,12 @@ func (p *cooperationSrv) UpdateBaseInfo(category string, creatorUid int, baseInf
 		Description:  baseInfo.Description,
 		Resume:       baseInfo.Resume,
 	}
-	err = dao.CooperationDao.Update(0, category, creatorUid, bean, "name", "phone", "organization", "description", "resume")
+	err = dao.CooperationDao.Update(category, 0, creatorUid, bean, "name", "phone", "organization", "description", "resume")
 	return
 }
 
-func (p *cooperationSrv) Add(baseInfo *CooperationBaseInfo, category string, creatorUid int) (id int, err error) {
-	has, _, err := dao.CooperationDao.Get(0, category, creatorUid)
+func (p *cooperationSrv) Add(baseInfo *CooperationBaseInfo, category enum.Cooperation, creatorUid int) (id int, err error) {
+	has, _, err := dao.CooperationDao.Get(category, 0, creatorUid)
 	if err != nil {
 		return
 	}
@@ -65,7 +66,6 @@ func (p *cooperationSrv) Add(baseInfo *CooperationBaseInfo, category string, cre
 		return
 	}
 	bean := &dao.CooperationIntention{
-		Category:     category,
 		Name:         baseInfo.Name,
 		Phone:        baseInfo.Phone,
 		Organization: baseInfo.Organization,
@@ -74,12 +74,12 @@ func (p *cooperationSrv) Add(baseInfo *CooperationBaseInfo, category string, cre
 		CreatorUid:   creatorUid,
 		CreateTime:   int(time.Now().Unix()),
 	}
-	id, err = dao.CooperationDao.Insert(bean)
+	id, err = dao.CooperationDao.Insert(category, bean)
 	return
 }
 
-func (p *cooperationSrv) BgGet(id int) (bean *dao.CooperationIntention, err error) {
-	has, bean, err := dao.CooperationDao.Get(id, "", 0)
+func (p *cooperationSrv) BgGet(category enum.Cooperation, id int) (bean *dao.CooperationIntention, err error) {
+	has, bean, err := dao.CooperationDao.Get(category, id, 0)
 	if err != nil {
 		return
 	}
@@ -90,7 +90,7 @@ func (p *cooperationSrv) BgGet(id int) (bean *dao.CooperationIntention, err erro
 	return
 }
 
-func (p *cooperationSrv) Get(category string, creatorUid int) (bean *dao.CooperationIntention, err error) {
-	_, bean, err = dao.CooperationDao.Get(0, category, creatorUid)
+func (p *cooperationSrv) Get(category enum.Cooperation, creatorUid int) (bean *dao.CooperationIntention, err error) {
+	_, bean, err = dao.CooperationDao.Get(category, 0, creatorUid)
 	return
 }

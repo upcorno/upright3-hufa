@@ -15,21 +15,21 @@ func TestCooperationIntention(t *testing.T) {
 }
 
 func testAddCooperationIntention(t *testing.T) (r *CooperationIntention) {
+	category := enum.PROTECT
 	r = &CooperationIntention{
 		Name:       "name",
-		Category:   enum.PROTECT,
 		CreatorUid: TestUserId,
 	}
-	_, err := CooperationDao.Insert(r)
+	_, err := CooperationDao.Insert(category, r)
 	if err == nil {
 		t.Fatal(errors.New("Name、Phone、CreatorUid三者为必填字段"))
 	}
-	r.Phone = "ddddd"
-	_, err = CooperationDao.Insert(r)
+	r.Phone = "d333ddss66dd11g2122号"
+	_, err = CooperationDao.Insert(category, r)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = CooperationDao.Insert(r)
+	_, err = CooperationDao.Insert(category, r)
 	if err == nil {
 		t.Fatal(errors.New("一个用户只能填一个维权意向"))
 	}
@@ -37,7 +37,7 @@ func testAddCooperationIntention(t *testing.T) (r *CooperationIntention) {
 }
 
 func testGetAndUpdate(t *testing.T) {
-	has, tmp, err := CooperationDao.Get(testCooperationIntention.Id, enum.PROTECT, 0)
+	has, tmp, err := CooperationDao.Get(enum.PROTECT, testCooperationIntention.Id, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,8 +46,8 @@ func testGetAndUpdate(t *testing.T) {
 	}
 	tmp.CustomerAddress = "new ppp"
 	tmp.Name = "new name"
-	CooperationDao.Update(testCooperationIntention.Id, enum.PROTECT, 0, tmp, "name")
-	has, newTmp, err := CooperationDao.Get(testCooperationIntention.Id, enum.PROTECT, 0)
+	CooperationDao.Update(enum.PROTECT, testCooperationIntention.Id, 0, tmp, "name")
+	has, newTmp, err := CooperationDao.Get(enum.PROTECT, testCooperationIntention.Id, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func testGetAndUpdate(t *testing.T) {
 }
 
 func testDeleteCooperationIntention(t *testing.T) {
-	err := CooperationDao.delete(testCooperationIntention.Id, enum.PROTECT, 0)
+	err := CooperationDao.delete(enum.PROTECT, testCooperationIntention.Id, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
