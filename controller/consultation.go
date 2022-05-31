@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	dao "law/dao"
+	"law/enum"
 	"law/service"
 	"law/utils"
 	"strconv"
@@ -102,7 +103,11 @@ func ConsultationAddReply(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("输入解析失败！", err.Error()))
 	}
 	uid := ctx.Get("uid").(int)
-	if err := service.Consultation.AddReply(replyParams, uid); err != nil {
+	isMannerReply := enum.NO
+	if ctx.Get("is_backend") == enum.YES {
+		isMannerReply = enum.YES
+	}
+	if err := service.Consultation.AddReply(replyParams, uid, isMannerReply); err != nil {
 		return ctx.JSON(utils.ErrIpt("法律咨询回复添加失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success"))
@@ -123,7 +128,7 @@ func ConsultationListReply(ctx echo.Context) error {
 			return ctx.JSON(utils.ErrIpt("获取min_reply_id失败！", err.Error()))
 		}
 	}
-	replyListInfo, err := dao.ConsulReplyDao.List(consultationId, minReplyId)
+	replyListInfo, err := dao.ConsulReplyDao.List(consultationId, minReplyId, false)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取consultation_reply_info list失败！", err.Error()))
 	}

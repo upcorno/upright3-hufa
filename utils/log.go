@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	standardLog "log"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -34,6 +36,8 @@ func init() {
 	}
 	lw := &LevelWriter{Writer: appBufFile, ErrorWriter: errFile}
 	log.Logger = log.Output(lw)
+	///初始化标准日志组件
+	initStandardLog()
 	go func() {
 		for {
 			time.Sleep(time.Second * 5)
@@ -75,4 +79,13 @@ func (lw *LevelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) 
 func initTimezone() {
 	loc, _ := time.LoadLocation("Asia/Shanghai") //加载时区
 	time.Local = loc
+}
+
+func initStandardLog() {
+	standardLogFilePath := "logs/standard.log"
+	logFile, err := os.OpenFile(standardLogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic("无法创建日志文件" + standardLogFilePath)
+	}
+	standardLog.SetOutput(logFile)
 }

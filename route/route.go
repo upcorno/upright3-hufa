@@ -2,12 +2,18 @@ package route
 
 import (
 	"law/controller"
+	"law/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func InitRouter(e *echo.Echo, bg *echo.Group) {
+var backenPrefix string = "/backend"
+
+func InitRouter(e *echo.Echo) {
+	e.Use(utils.MidAuth)
+	bg := e.Group(backenPrefix)
+	bg.Use(utils.BackendAuth)
 	///法律问题
 	e.Add(http.MethodGet, "/legal_issue/list", controller.LegalIssueList)
 	e.Add(http.MethodGet, "/legal_issue/category_list", controller.LegalIssueCategoryList)

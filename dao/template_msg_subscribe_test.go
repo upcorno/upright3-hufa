@@ -25,7 +25,7 @@ func TestTemplateMsgSubscribe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = TMsgSubDao.DecrSubscribeNum(TestUserId, templateId)
+	_, err = TMsgSubDao.DecrSubscribeNum(TestUserId, templateId)
 	if err != nil {
 		t.Fatal(err)
 	}

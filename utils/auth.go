@@ -2,6 +2,7 @@ package utils
 
 import (
 	"law/conf"
+	"law/enum"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -26,10 +27,13 @@ func initPublicVar() {
 	}
 }
 
+var IsBackend enum.YesOrNo = enum.NO
+
 // midAuth 登录认证中间件
 func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	initPublicVar()
 	return func(ctx echo.Context) error {
+		IsBackend = enum.YES
 		if _, ok := nonAuthPath[ctx.Request().URL.Path]; ok {
 			return next(ctx)
 		}
@@ -50,6 +54,7 @@ func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 func BackendAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	initPublicVar()
 	return func(ctx echo.Context) error {
+		ctx.Set("is_backend", enum.YES)
 		if _, ok := nonAuthPath[ctx.Request().URL.Path]; ok {
 			return next(ctx)
 		}

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	dao "law/dao"
 	"law/enum"
+
+	zlog "github.com/rs/zerolog/log"
 )
 
 type consultationSrv struct {
@@ -29,7 +31,7 @@ func (c *consultationSrv) Create(createInfo *ConsultationCreateInfo, consultantU
 		Type:           enum.QUERY,
 		Content:        string(consultationData),
 	}
-	err = c.AddReply(replyParams, consultantUid)
+	err = c.AddReply(replyParams, consultantUid, enum.NO)
 	return
 }
 
@@ -45,12 +47,30 @@ type ConsultationReplyParams struct {
 	Content        string `json:"content" validate:"required,min=1"`
 }
 
-func (c *consultationSrv) AddReply(replyParams *ConsultationReplyParams, uid int) (err error) {
+func (c *consultationSrv) AddReply(replyParams *ConsultationReplyParams, uid int, isMannerReply enum.YesOrNo) (err error) {
 	_, err = dao.ConsulReplyDao.Insert(
 		replyParams.ConsultationId,
 		replyParams.Type,
 		replyParams.Content,
 		uid,
+		isMannerReply,
 	)
+	go func() {
+		if isMannerReply == enum.YES {
+			mannerReplys, err := dao.ConsulReplyDao.List(replyParams.ConsultationId, 0, true)
+			if err != nil {
+				zlog.Error().Msg("查询人工回复记录失败。" + err.Error())
+				return
+			}
+			consul, err := dao.ConsulDao.GetWithUserInfo(replyParams.ConsultationId)
+			if err != nil {
+				zlog.Error().Msg("查询Consultation失败。" + err.Error())
+				return
+			}
+			if len(mannerReplys) == 1 {
+				WxSrv.SendConsulNotify(consul.ConsultantUid, replyParams.ConsultationId, consul.Question, consul.CreateTime)
+			}
+		}
+	}()
 	return
 }

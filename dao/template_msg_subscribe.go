@@ -100,7 +100,7 @@ func (t *templateMsgSubscribeDao) IncrSubscribeNum(userId int, templateId string
 }
 
 //DecrSubscribeNum 减少订阅次数
-func (t *templateMsgSubscribeDao) DecrSubscribeNum(userId int, templateId string) (err error) {
+func (t *templateMsgSubscribeDao) DecrSubscribeNum(userId int, templateId string) (result bool, err error) {
 	session := Db.NewSession()
 	defer session.Close()
 	err = session.Begin()
@@ -118,7 +118,6 @@ func (t *templateMsgSubscribeDao) DecrSubscribeNum(userId int, templateId string
 		return
 	}
 	if !has {
-		err = fmt.Errorf("未查询到用户模版消息订阅记录.userId:%d,templateId:%s", userId, templateId)
 		session.Rollback()
 		return
 	}
@@ -134,6 +133,7 @@ func (t *templateMsgSubscribeDao) DecrSubscribeNum(userId int, templateId string
 		session.Rollback()
 		return
 	}
+	result = true
 	err = session.Commit()
 	return
 }

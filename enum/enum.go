@@ -22,6 +22,13 @@ const (
 	COOPERATED    = "已合作"
 )
 
+type YesOrNo string
+
+const (
+	YES YesOrNo = "yes"
+	NO  YesOrNo = "no"
+)
+
 type Cooperation string
 
 const (

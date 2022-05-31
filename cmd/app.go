@@ -26,10 +26,7 @@ func StartServer() {
 	e.HTTPErrorHandler = customHTTPErrorHandler
 	format := `remote_ip:${remote_ip},host:${host},method:${method},user_agent:${user_agent},referer:${referer},uri:${uri},bytes_in:${bytes_in},bytes_out:${bytes_out},status:${status},error:${error},latency_human:${latency_human}`
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{Output: log.Logger, Format: format}))
-	e.Use(utils.MidAuth)
-	backendRouteGroup := e.Group("/backend")
-	backendRouteGroup.Use(utils.BackendAuth)
-	route.InitRouter(e, backendRouteGroup)
+	route.InitRouter(e)
 	go func() {
 		if err := e.Start(conf.App.Http.Address); err != nil {
 			println(err.Error())

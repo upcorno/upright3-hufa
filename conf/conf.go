@@ -167,12 +167,13 @@ type oss struct {
 }
 
 type wxApp struct {
-	Appid        string `mapstructure:"appid"`
-	Secret       string `mapstructure:"secret"`
-	NotifyToken  string `mapstructure:"notify_token"`
-	NotifyAesKey string `mapstructure:"notify_aes_key"`
-	NotifyMchId  string `mapstructure:"notify_mch_id"`
-	NotifyApiKey string `mapstructure:"notify_api_key"`
+	Appid            string `mapstructure:"appid"`
+	Secret           string `mapstructure:"secret"`
+	NotifyToken      string `mapstructure:"notify_token"`
+	NotifyAesKey     string `mapstructure:"notify_aes_key"`
+	NotifyMchId      string `mapstructure:"notify_mch_id"`
+	NotifyApiKey     string `mapstructure:"notify_api_key"`
+	TemplateIdConsul string `mapstructure:"template_id_consul"`
 }
 
 type bgAccount struct {

@@ -32,11 +32,11 @@ func TestConsultation(t *testing.T) {
 }
 
 func testReply(consulId int, t *testing.T) {
-	replyId, err := ConsulReplyDao.Insert(consulId, "answer", "单元测试", TestUserId)
+	replyId, err := ConsulReplyDao.Insert(consulId, "answer", "单元测试", TestUserId, enum.YES)
 	if err != nil {
 		t.Fatal(err)
 	}
-	replyInfoList, err := ConsulReplyDao.List(consulId, 0)
+	replyInfoList, err := ConsulReplyDao.List(consulId, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +45,7 @@ func testReply(consulId int, t *testing.T) {
 	}
 	ConsulReplyDao.delete(replyId)
 
-	replyInfoList, err = ConsulReplyDao.List(consulId, 0)
+	replyInfoList, err = ConsulReplyDao.List(consulId, 0, false)
 	if err != nil {
 		t.Fatal(err)
 	}
