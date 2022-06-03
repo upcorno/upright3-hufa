@@ -25,7 +25,7 @@ func init() {
 	})
 	_, err := Rdb.Ping(context.Background()).Result()
 	if err != nil {
-		zlog.Fatal().Msgf("redis ping失败.err:%s", err.Error())
+		zlog.Fatal().Err(err).Msgf("redis ping失败.err.")
 	}
 	zlog.Info().Msgf("成功连接redis")
 }

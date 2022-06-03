@@ -1,18 +1,20 @@
 package utils
 
 import (
+	"bufio"
 	"io"
 	"law/conf"
 	"os"
 	"time"
 
-	standardLog "log"
+	stdLog "log"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/sirupsen/logrus"
 )
 
-var appBufFile *BufWriter
+var appBufFile *bufio.Writer
 
 func init() {
 	//因为log会被很早加载，所以将时区设置放在这里
@@ -21,6 +23,16 @@ func init() {
 		setNullLogger()
 		return
 	}
+	//zerolog是本项目的主要日志库，
+	//其他日志组件用于记录部分依赖库的日志
+	initZerolog()
+	///初始化标准日志组件
+	initStdLog()
+	//初始化logrus日志组件
+	initLogrus()
+}
+
+func initZerolog() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if conf.App.IsDev() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -29,21 +41,20 @@ func init() {
 	if err != nil {
 		panic("无法创建日志文件app.log")
 	}
-	appBufFile = NewBufWriter(appFile)
+	appBufFile = bufio.NewWriter(appFile)
 	errFile, err := os.OpenFile("logs/error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic("无法创建日志文件error.log")
 	}
 	lw := &LevelWriter{Writer: appBufFile, ErrorWriter: errFile}
 	log.Logger = log.Output(lw)
-	///初始化标准日志组件
-	initStandardLog()
 	go func() {
 		for {
 			time.Sleep(time.Second * 5)
 			FlushLog()
 		}
 	}()
+
 }
 
 func setNullLogger() {
@@ -81,11 +92,20 @@ func initTimezone() {
 	time.Local = loc
 }
 
-func initStandardLog() {
+func initStdLog() {
 	standardLogFilePath := "logs/standard.log"
 	logFile, err := os.OpenFile(standardLogFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic("无法创建日志文件" + standardLogFilePath)
 	}
-	standardLog.SetOutput(logFile)
+	stdLog.SetOutput(logFile)
+}
+
+func initLogrus() {
+	logrusFilePath := "logs/logrus.log"
+	logFile, err := os.OpenFile(logrusFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic("无法创建日志文件" + logrusFilePath)
+	}
+	logrus.SetOutput(logFile)
 }
