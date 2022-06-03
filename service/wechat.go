@@ -96,7 +96,7 @@ func (w *wxSrv) WxNotify(request *http.Request, repWriter http.ResponseWriter) {
 		switch msg.Event {
 		case message.EventSubscribeMsgPopupEvent:
 			openid := string(msg.FromUserName)
-			uid, err := UserSrv.getUidAndSync(openid, "")
+			uid, err := UserSrv.sync(openid, "")
 			if err != nil {
 				zlog.Error().Err(err).Msg("wechat notify server serving error.")
 				break

@@ -16,15 +16,15 @@ func (u *user) Login(code string) (token string, err error) {
 	if err != nil {
 		return
 	}
-	uid, err := u.getUidAndSync(openid, unionid)
+	uid, err := u.sync(openid, unionid)
 	if err != nil {
 		return
 	}
 	return utils.CreateAuthToken(uid)
 }
 
-// 根据 openId 获取用户 id，不存在时创建新用户返回对应 id
-func (u *user) getUidAndSync(openid string, unionid string) (userId int, err error) {
+// 存储openid、unionid，并返回userId
+func (u *user) sync(openid string, unionid string) (userId int, err error) {
 	has, user, err := dao.UserDao.Get(0, conf.App.WxApp.Appid, openid)
 	if err != nil {
 		return

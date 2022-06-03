@@ -12,28 +12,20 @@ import (
 var bgUids map[int]bool
 var nonAuthPath map[string]bool
 
-func initPublicVar() {
-	if bgUids == nil {
-		bgUids = map[int]bool{}
-		for _, bgAccountInfo := range *conf.App.BgAccounts {
-			bgUids[bgAccountInfo.Uid] = true
-		}
+func init() {
+	bgUids = map[int]bool{}
+	for _, bgAccountInfo := range *conf.App.BgAccounts {
+		bgUids[bgAccountInfo.Uid] = true
 	}
-	if nonAuthPath == nil {
-		nonAuthPath = map[string]bool{}
-		for _, path := range conf.App.Jwt.NonAuthPath {
-			nonAuthPath[path] = true
-		}
+	nonAuthPath = map[string]bool{}
+	for _, path := range conf.App.Jwt.NonAuthPath {
+		nonAuthPath[path] = true
 	}
 }
 
-var IsBackend enum.YesOrNo = enum.NO
-
 // midAuth 登录认证中间件
-func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
-	initPublicVar()
+func BaseAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		IsBackend = enum.YES
 		if _, ok := nonAuthPath[ctx.Request().URL.Path]; ok {
 			return next(ctx)
 		}
@@ -52,7 +44,6 @@ func MidAuth(next echo.HandlerFunc) echo.HandlerFunc {
 
 //后台接口权限验证
 func BackendAuth(next echo.HandlerFunc) echo.HandlerFunc {
-	initPublicVar()
 	return func(ctx echo.Context) error {
 		ctx.Set("is_backend", enum.YES)
 		if _, ok := nonAuthPath[ctx.Request().URL.Path]; ok {

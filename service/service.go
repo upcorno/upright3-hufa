@@ -2,13 +2,14 @@ package service
 
 import (
 	"law/conf"
+	"time"
 
 	"github.com/dgraph-io/ristretto"
-	"github.com/eko/gocache/v2/cache"
-	"github.com/eko/gocache/v2/store"
+	"github.com/eko/gocache/v3/cache"
+	"github.com/eko/gocache/v3/store"
 )
 
-var CacheManager cache.CacheInterface
+var CacheManager *cache.Cache[any]
 
 func init() {
 	ristrettoCache, err := ristretto.NewCache(&ristretto.Config{
@@ -19,6 +20,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	ristrettoStore := store.NewRistretto(ristrettoCache, nil)
-	CacheManager = cache.New(ristrettoStore)
+	ristrettoStore := store.NewRistretto(ristrettoCache, store.WithExpiration(60*60*time.Second))
+	CacheManager = cache.New[any](ristrettoStore)
 }

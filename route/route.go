@@ -11,7 +11,7 @@ import (
 var backenPrefix string = "/backend"
 
 func InitRouter(e *echo.Echo) {
-	e.Use(utils.MidAuth)
+	e.Use(utils.BaseAuth)
 	bg := e.Group(backenPrefix)
 	bg.Use(utils.BackendAuth)
 	///法律问题

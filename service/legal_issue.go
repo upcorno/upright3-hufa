@@ -8,7 +8,7 @@ import (
 	dao "law/dao"
 	"time"
 
-	"github.com/eko/gocache/v2/store"
+	"github.com/eko/gocache/v3/store"
 )
 
 type legalIssueSrv struct{}
@@ -47,7 +47,7 @@ func (l *legalIssueSrv) LegalIssueList(page *dao.Page, search *dao.LegalIssueSea
 	}
 	issues, err = dao.LegalIssueDao.List(page, search)
 	if err == nil {
-		CacheManager.Set(ctx, signStr, issues, &store.Options{Expiration: time.Second * 300})
+		CacheManager.Set(ctx, signStr, issues, store.WithExpiration(5*60*time.Second))
 	}
 	return
 }
