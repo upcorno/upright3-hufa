@@ -134,6 +134,7 @@ func (c *consulDao) BackendList(page *Page, search *ConsultationSearchParams) (p
 		"user.phone",
 		"consultation.status",
 	)
+	sess.Desc("consultation.create_time")
 	c.dealSearch(sess, search)
 	pageResult, err = page.GetResults(sess, &consultationInfoList)
 	return
