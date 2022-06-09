@@ -88,9 +88,10 @@ func (c *cooperationController) SetDealInfo(ctx echo.Context) error {
 	dealInfo := &service.CooperationDealInfo{}
 	beanIdStr := ctx.QueryParam("id")
 	beanId, err := strconv.Atoi(beanIdStr)
-	if err == nil {
-		dealInfo.Id = beanId
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt(err.Error()))
 	}
+	dealInfo.Id = beanId
 	if err := utils.BindAndValidate(ctx, dealInfo); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}

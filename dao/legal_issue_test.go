@@ -7,6 +7,7 @@ import (
 
 func TestLigalIssue(t *testing.T) {
 	issue := addLegalIssue(t)
+	defer LegalIssueDao.Delete(issue.Id)
 	issueId := issue.Id
 	has, newIssue, err := LegalIssueDao.Get(issueId)
 	if err != nil {
@@ -27,13 +28,14 @@ var secondCategory string = "二级分类"
 
 func addLegalIssue(t *testing.T) (issue *LegalIssue) {
 	issue = &LegalIssue{
-		CreatorUid:     TestUserId,
-		FirstCategory:  "一级分类",
-		SecondCategory: secondCategory,
-		Tags:           "string",
-		Imgs:           "string",
-		Title:          "biaoti内容",
-		Content:        "内容",
+		CreatorUid:       TestUserId,
+		FirstCategory:    "一级分类",
+		SecondCategory:   secondCategory,
+		BusinessCategory: "基本问题",
+		Tags:             "string",
+		Imgs:             "string",
+		Title:            "biaoti内容",
+		Content:          "内容",
 	}
 	issueId, err := LegalIssueDao.Insert(issue)
 	if err != nil {
@@ -45,6 +47,29 @@ func addLegalIssue(t *testing.T) (issue *LegalIssue) {
 	return
 }
 
+func testUpdateLigalIssue(issueId int, t *testing.T) {
+	issue, err := LegalIssueDao.MustGet(issueId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	originTitle := issue.Title
+	originContent := issue.Content
+	issue.Title = issue.Title + "iii"
+	issue.Content = issue.Content + "iii"
+	LegalIssueDao.Update(issueId, issue, "title")
+	newIssue, err := LegalIssueDao.MustGet(issueId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if originTitle == newIssue.Title {
+		err = errors.New("title字段应该已经更新")
+		t.Fatal(err)
+	}
+	if originContent != newIssue.Content {
+		err = errors.New("Content字段不应该更新")
+		t.Fatal(err)
+	}
+}
 func testLigalIssueList(t *testing.T) {
 	page := &Page{ItemNum: 5, PageIndex: 1}
 	search := &LegalIssueSearch{SecondCategory: secondCategory}

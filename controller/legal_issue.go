@@ -9,9 +9,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type legalIssueContro struct{}
+
+var LegalIssueContro *legalIssueContro
+
 //由于问题列表接口内容几乎不会变化，因此进行了5min的缓存，
 //如果请求参数指定根据是否收藏参数检索，则不会使用缓存
-func LegalIssueList(ctx echo.Context) error {
+func (l *legalIssueContro) List(ctx echo.Context) error {
 	page := &dao.Page{PageIndex: 1, ItemNum: 5}
 	if err := ctx.Bind(page); err != nil {
 		return ctx.JSON(utils.ErrIpt("分页输入错误,请重试！", err.Error()))
@@ -24,27 +28,69 @@ func LegalIssueList(ctx echo.Context) error {
 	if err := utils.BindAndValidate(ctx, search); err != nil {
 		return ctx.JSON(utils.ErrIpt("检索数据输入错误,请重试！", err.Error()))
 	}
-	issues, err := service.LegalIssueSrv.LegalIssueList(page, search)
+	issues, err := service.LegalIssueSrv.List(page, search)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取legal_issue list失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", issues))
 }
 
-func LegalIssueGet(ctx echo.Context) error {
+func (l *legalIssueContro) Update(ctx echo.Context) error {
+	bean := &dao.LegalIssue{}
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt(err.Error()))
+	}
+	if err := utils.BindAndValidate(ctx, bean); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
+	}
+	err = service.LegalIssueSrv.Update(beanId, bean)
+	if err != nil {
+		return ctx.JSON(utils.ErrSvr(err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
+}
+
+func (l *legalIssueContro) Delete(ctx echo.Context) error {
+	beanIdStr := ctx.QueryParam("id")
+	beanId, err := strconv.Atoi(beanIdStr)
+	if err != nil {
+		return ctx.JSON(utils.ErrIpt(err.Error()))
+	}
+	err = service.LegalIssueSrv.Delete(beanId)
+	if err != nil {
+		return ctx.JSON(utils.ErrSvr(err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success"))
+}
+
+func (l *legalIssueContro) Create(ctx echo.Context) error {
+	bean := &dao.LegalIssue{}
+	if err := utils.BindAndValidate(ctx, bean); err != nil {
+		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
+	}
+	beanId, err := service.LegalIssueSrv.Create(bean)
+	if err != nil {
+		return ctx.JSON(utils.ErrSvr(err.Error()))
+	}
+	return ctx.JSON(utils.Succ("success", beanId))
+}
+
+func (l *legalIssueContro) Get(ctx echo.Context) error {
 	legalIssueIdStr := ctx.QueryParam("legal_issue_id")
 	legalIssueId, err := strconv.Atoi(legalIssueIdStr)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取legal_issue_id失败！", err.Error()))
 	}
-	issueInfo, err := service.LegalIssueSrv.GetLegalIssue(legalIssueId)
+	issueInfo, err := service.LegalIssueSrv.Get(legalIssueId)
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取LegalIssue失败！", err.Error()))
 	}
 	return ctx.JSON(utils.Succ("success", issueInfo))
 }
 
-func LegalIssueCategoryList(ctx echo.Context) error {
+func (l *legalIssueContro) CategoryList(ctx echo.Context) error {
 	categoryList, err := dao.LegalIssueDao.CategoryList()
 	if err != nil {
 		return ctx.JSON(utils.ErrIpt("获取问题分类列表失败！", err.Error()))
@@ -52,7 +98,7 @@ func LegalIssueCategoryList(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success", categoryList))
 }
 
-func LegalIssueFavorite(ctx echo.Context) error {
+func (l *legalIssueContro) Favorite(ctx echo.Context) error {
 	issueIdStr := ctx.QueryParam("issue_id")
 	issueId, err := strconv.Atoi(issueIdStr)
 	if err != nil {
@@ -65,7 +111,7 @@ func LegalIssueFavorite(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success"))
 }
 
-func LegalIssueCancelFavorite(ctx echo.Context) error {
+func (l *legalIssueContro) CancelFavorite(ctx echo.Context) error {
 	issueIdStr := ctx.QueryParam("issue_id")
 	issueId, err := strconv.Atoi(issueIdStr)
 	if err != nil {
@@ -78,7 +124,7 @@ func LegalIssueCancelFavorite(ctx echo.Context) error {
 	return ctx.JSON(utils.Succ("success"))
 }
 
-func LegalIssueIsFavorite(ctx echo.Context) error {
+func (l *legalIssueContro) IsFavorite(ctx echo.Context) error {
 	issueIdStr := ctx.QueryParam("issue_id")
 	issueId, err := strconv.Atoi(issueIdStr)
 	if err != nil {

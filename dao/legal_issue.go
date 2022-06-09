@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"time"
-	"unicode/utf8"
 
+	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"xorm.io/xorm"
 )
@@ -14,14 +14,14 @@ import (
 //常见知产问题
 type LegalIssue struct {
 	Id               int       `xorm:"not null pk autoincr INT" json:"id"`
-	CreatorUid       int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid"`
-	FirstCategory    string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category"`
-	SecondCategory   string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category"`
-	BusinessCategory string    `xorm:"not null comment('业务类别') index CHAR(25)" json:"business_category"`
-	Tags             string    `xorm:"not null comment('问题标签') index VARCHAR(255) default('')" json:"tags"`
-	Title            string    `xorm:"not null comment('标题') VARCHAR(60)" json:"title"`
+	CreatorUid       int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid" validate:"required,min=1"`
+	FirstCategory    string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category" validate:"required,min=1,max=6"`
+	SecondCategory   string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category" validate:"required,min=1,max=25"`
+	BusinessCategory string    `xorm:"not null comment('业务类别') index CHAR(60)" json:"business_category" validate:"required,min=1,max=60"`
+	Tags             string    `xorm:"not null comment('问题标签') index VARCHAR(255) default('')" json:"tags" validate:"max=255"`
+	Title            string    `xorm:"not null comment('标题') VARCHAR(60)" json:"title" validate:"required,min=1,max=60"`
 	Imgs             string    `xorm:"not null comment('普法问题关联图片') TEXT default('')" json:"imgs"`
-	Content          string    `xorm:"not null comment('内容') LONGTEXT" json:"content"`
+	Content          string    `xorm:"not null comment('内容') LONGTEXT" json:"content" validate:"required,min=1"`
 	SearchText       string    `xorm:"not null comment('全文检索字段') LONGTEXT default('')" json:"-"`
 	CreateTime       int       `xorm:"not null UNSIGNED INT default(1651383059)" json:"create_time"`
 	UpdateTime       time.Time `xorm:"not null updated DateTime default(CURRENT_TIMESTAMP)" json:"-"`
@@ -31,12 +31,8 @@ type legalIssueDao struct{}
 var LegalIssueDao *legalIssueDao
 
 func (l *legalIssueDao) Insert(issue *LegalIssue) (issueId int, err error) {
-	if issue.CreatorUid < 1 || issue.FirstCategory == "" || issue.SecondCategory == "" || issue.Title == "" || issue.Content == "" {
-		err = errors.New("CreatorUid、FirstCategory、SecondCategory、Title、Content不可为空")
-		return
-	}
-	if utf8.RuneCountInString(issue.FirstCategory) > 6 || utf8.RuneCountInString(issue.SecondCategory) > 25 || utf8.RuneCountInString(issue.Tags) > 255 || utf8.RuneCountInString(issue.Title) > 60 {
-		err = errors.New("FirstCategory长度不可超过6、SecondCategory长度不可超过25、Tags长度不可超过255、Title长度不可超过60")
+	err = validator.New().Struct(issue)
+	if err != nil {
 		return
 	}
 	if issue.CreateTime == 0 {
@@ -49,13 +45,39 @@ func (l *legalIssueDao) Insert(issue *LegalIssue) (issueId int, err error) {
 	return
 }
 
+func (l *legalIssueDao) Update(issueId int, issue *LegalIssue, columns ...string) (err error) {
+	if issueId == 0 {
+		err = errors.New("必须指定id。")
+		return
+	}
+	_, err = Db.Cols(columns...).Update(issue, &LegalIssue{Id: issueId})
+	return
+}
+
+func (l *legalIssueDao) Delete(issueId int) (err error) {
+	if issueId == 0 {
+		err = errors.New("必须指定id。")
+		return
+	}
+	_, err = Db.Delete(&LegalIssue{Id: issueId})
+	return
+}
+
 func (l *legalIssueDao) Get(issueId int) (has bool, issue *LegalIssue, err error) {
 	issue = &LegalIssue{Id: issueId}
 	if issue.Id < 1 {
-		err = errors.New("dao:legal_issue_id must be greater than 1")
+		err = errors.New("必须指定issueId")
 		return
 	}
 	has, err = Db.Get(issue)
+	return
+}
+
+func (l *legalIssueDao) MustGet(issueId int) (issue *LegalIssue, err error) {
+	has, issue, err := l.Get(issueId)
+	if err == nil && !has {
+		err = errors.New("此legalIssue不存在。")
+	}
 	return
 }
 
