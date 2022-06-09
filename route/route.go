@@ -25,6 +25,7 @@ func InitRouter(e *echo.Echo) {
 	bg.GET("/legal_issue/list", controller.LegalIssueContro.List)
 	bg.POST("/legal_issue/update", controller.LegalIssueContro.Update)
 	bg.POST("/legal_issue/create", controller.LegalIssueContro.Create)
+	bg.POST("/legal_issue/delete", controller.LegalIssueContro.Delete)
 	///
 	///咨询
 	e.POST("/consultation/create", controller.ConsultationCreate)

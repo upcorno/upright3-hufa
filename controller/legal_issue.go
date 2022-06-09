@@ -13,8 +13,6 @@ type legalIssueContro struct{}
 
 var LegalIssueContro *legalIssueContro
 
-//由于问题列表接口内容几乎不会变化，因此进行了5min的缓存，
-//如果请求参数指定根据是否收藏参数检索，则不会使用缓存
 func (l *legalIssueContro) List(ctx echo.Context) error {
 	page := &dao.Page{PageIndex: 1, ItemNum: 5}
 	if err := ctx.Bind(page); err != nil {
@@ -67,6 +65,8 @@ func (l *legalIssueContro) Delete(ctx echo.Context) error {
 
 func (l *legalIssueContro) Create(ctx echo.Context) error {
 	bean := &dao.LegalIssue{}
+	uid := ctx.Get("uid").(int)
+	bean.CreatorUid = uid
 	if err := utils.BindAndValidate(ctx, bean); err != nil {
 		return ctx.JSON(utils.ErrIpt("输入解析校验失败！", err.Error()))
 	}
@@ -81,7 +81,11 @@ func (l *legalIssueContro) Get(ctx echo.Context) error {
 	legalIssueIdStr := ctx.QueryParam("legal_issue_id")
 	legalIssueId, err := strconv.Atoi(legalIssueIdStr)
 	if err != nil {
-		return ctx.JSON(utils.ErrIpt("获取legal_issue_id失败！", err.Error()))
+		legalIssueIdStr = ctx.QueryParam("id")
+		legalIssueId, err = strconv.Atoi(legalIssueIdStr)
+		if err != nil {
+			return ctx.JSON(utils.ErrIpt("获取legal_issue_id失败！", err.Error()))
+		}
 	}
 	issueInfo, err := service.LegalIssueSrv.Get(legalIssueId)
 	if err != nil {

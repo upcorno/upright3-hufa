@@ -26,7 +26,7 @@ func (l *legalIssueSrv) Create(issue *dao.LegalIssue) (issueId int, err error) {
 }
 
 func (l *legalIssueSrv) Update(issueId int, issue *dao.LegalIssue) (err error) {
-	err = dao.LegalIssueDao.Update(issueId, issue)
+	err = dao.LegalIssueDao.Update(issueId, issue, "first_category", "second_category", "business_category", "tags", "title", "imgs", "content")
 	return
 }
 

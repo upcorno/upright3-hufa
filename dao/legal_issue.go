@@ -14,7 +14,7 @@ import (
 //常见知产问题
 type LegalIssue struct {
 	Id               int       `xorm:"not null pk autoincr INT" json:"id"`
-	CreatorUid       int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid" validate:"required,min=1"`
+	CreatorUid       int       `xorm:"not null comment('问题创建人id') index UNSIGNED INT" json:"creator_uid"`
 	FirstCategory    string    `xorm:"not null comment('一级类别') index CHAR(6)" json:"first_category" validate:"required,min=1,max=6"`
 	SecondCategory   string    `xorm:"not null comment('二级类别') index CHAR(25)" json:"second_category" validate:"required,min=1,max=25"`
 	BusinessCategory string    `xorm:"not null comment('业务类别') index CHAR(60)" json:"business_category" validate:"required,min=1,max=60"`
@@ -97,11 +97,11 @@ func (l *legalIssueDao) List(page *Page, search *LegalIssueSearch) (pageResult *
 	legalIssues := new([]LegalIssue)
 	sess := Db.NewSession()
 	sess.Table("legal_issue")
-	if search.InSummary {
-		sess.Cols("legal_issue.id", "creator_uid", "first_category", "second_category", "tags", "title")
-	} else {
-		sess.Cols("legal_issue.id", "creator_uid", "first_category", "second_category", "tags", "title", "imgs", "content")
+	cols := []string{"legal_issue.id", "creator_uid", "first_category", "second_category", "business_category", "tags", "title"}
+	if !search.InSummary {
+		cols = append(cols, "imgs", "content")
 	}
+	sess.Cols(cols...)
 	dealSearch(sess, search)
 	pageResult, err = page.GetResults(sess, legalIssues)
 	return
