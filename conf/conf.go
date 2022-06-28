@@ -29,13 +29,19 @@ type Config struct {
 	WxApp       *wxApp         `mapstructure:"wx_app"`
 	BgAccounts  *[]bgAccount   `mapstructure:"bg_account"`
 	Mail        *mailConf      `mapstructure:"mail"`
+	Mixed       *mixed         `mapstructure:"mixed"`
 }
 type mailConf struct {
-	Account             string   `mapstructure:"account"`
-	Password            string   `mapstructure:"password"`
-	Host                string   `mapstructure:"host"`
-	NewBusinessRevivers []string `mapstructure:"new_business_revivers"`
+	Account              string   `mapstructure:"account"`
+	Password             string   `mapstructure:"password"`
+	Host                 string   `mapstructure:"host"`
+	NewBusinessReceivers []string `mapstructure:"new_business_receivers"`
 }
+
+type mixed struct {
+	FundUsageUrl string `mapstructure:"protection_fund_usage_url"`
+}
+
 type rdbConf struct {
 	RdbHost    string `mapstructure:"rdb_host"`    //redis数据库地址
 	RdbPort    int    `mapstructure:"rdb_port"`    //redis数据库端口

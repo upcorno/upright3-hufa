@@ -1,13 +1,12 @@
-package utils
+package service
 
 import (
 	"context"
 	"fmt"
 	"law/conf"
 
-	zlog "github.com/rs/zerolog/log"
-
 	"github.com/go-redis/redis/v8"
+	zlog "github.com/rs/zerolog/log"
 )
 
 var Rdb *redis.Client

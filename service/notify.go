@@ -8,7 +8,6 @@ import (
 	"law/conf"
 	dao "law/dao"
 	"law/enum"
-	"law/utils"
 	"net/smtp"
 	"time"
 
@@ -47,7 +46,7 @@ func (n *NotifySrv) NewBusinessNotifyByEmail() {
 	min := time.Now().Minute()
 	min += min % int(timeInterval)
 	key := string(md5.New().Sum([]byte(conf.App.ProjectName + "notify-BusinessToReplyByEmail" + fmt.Sprint(min))))
-	ok, err := utils.Rdb.SetNX(context.Background(), key, true, time.Duration(timeInterval)*time.Minute).Result()
+	ok, err := Rdb.SetNX(context.Background(), key, true, time.Duration(timeInterval)*time.Minute).Result()
 	if err != nil {
 		zlog.Error()
 		return
@@ -65,7 +64,7 @@ func (n *NotifySrv) NewBusinessNotifyByEmail() {
 	}
 	subject := fmt.Sprintf("【沪盾】有新的待回复内容。咨询： %d 个，维权： %d 个，监测： %d 个", countConsultation, countProtect, countMonitor)
 	body := fmt.Sprintf("<html><body>您好！<br> %s <br> 后台地址： %s  </body></html>", subject, `<a class="resource_target" href="https://legal-consulting.youshangjiao.com.cn/" target="_blank">点击前往后台</a>`)
-	sendEmail(subject, body, conf.App.Mail.NewBusinessRevivers...)
+	sendEmail(subject, body, conf.App.Mail.NewBusinessReceivers...)
 }
 
 func countNewItems() (countConsultation int, countProtect int, countMonitor int, err error) {

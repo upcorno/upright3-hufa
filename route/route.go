@@ -13,6 +13,9 @@ func InitRouter(e *echo.Echo) {
 	e.Use(utils.BaseAuth)
 	bg := e.Group(backenPrefix)
 	bg.Use(utils.BackendAuth)
+	///杂项
+	e.GET("/rights_protection_fund/get_fund_usage", controller.MixedController.GetFundUsage)
+	///
 	///法律问题
 	e.GET("/legal_issue/list", controller.LegalIssueContro.List)
 	e.GET("/legal_issue/category_list", controller.LegalIssueContro.CategoryList)
