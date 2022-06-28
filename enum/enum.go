@@ -32,6 +32,7 @@ const (
 type Cooperation string
 
 const (
-	MONITOR Cooperation = "monitor"
-	PROTECT Cooperation = "protect"
+	MONITOR      Cooperation = "monitor"
+	PROTECT      Cooperation = "protect"
+	PROTECT_FUND Cooperation = "protect_fund"
 )

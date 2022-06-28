@@ -49,6 +49,9 @@ func InitRouter(e *echo.Echo) {
 	///我要维权
 	addCooperationRoute(e, bg, "/rights_protection/")
 	///
+	///维权基金
+	addCooperationRoute(e, bg, "/rights_protection_fund/")
+	///
 	///用户
 	e.POST("/user/login", controller.Login)
 	e.POST("/user/set_phone", controller.SetPhone)

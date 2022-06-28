@@ -15,14 +15,14 @@ import (
 type cooperationController struct{}
 
 var CooperationController *cooperationController
+var cooperationTypeUrlSigns map[string]enum.Cooperation = map[string]enum.Cooperation{"/infringement_monitor/": enum.MONITOR, "/rights_protection/": enum.PROTECT, "/rights_protection_fund/": enum.PROTECT_FUND}
 
 func (c *cooperationController) getCooperationType(path string) (category enum.Cooperation, err error) {
-	if strings.Contains(path, "/infringement_monitor/") {
-		category = enum.MONITOR
-		return
-	} else if strings.Contains(path, "/rights_protection/") {
-		category = enum.PROTECT
-		return
+	for k, v := range cooperationTypeUrlSigns {
+		if strings.Contains(path, k) {
+			category = v
+			return
+		}
 	}
 	err = errors.New("不支持的合作类型")
 	return
@@ -43,14 +43,6 @@ func (c *cooperationController) Add(ctx echo.Context) error {
 		return ctx.JSON(utils.ErrIpt("添加合作意向失败！", err.Error()))
 	}
 	data := map[string]int{"id": beanId}
-	///兼容旧版，以后可删除
-	if category == enum.MONITOR {
-		data["infringement_monitor_id"] = beanId
-	}
-	if category == enum.PROTECT {
-		data["rights_protection_id"] = beanId
-	}
-	///
 	return ctx.JSON(utils.Succ("success", data))
 }
 

@@ -16,7 +16,7 @@ type CooperationIntention struct {
 	Id              int       `xorm:"not null pk autoincr UNSIGNED INT" json:"id"`
 	Name            string    `xorm:"not null comment('姓名') CHAR(16)" json:"name" validate:"required,min=1,max=16"`
 	Phone           string    `xorm:"not null comment('电话号码') CHAR(20)" json:"phone" validate:"required,min=1,max=20"`
-	Organization    string    `xorm:"not null comment('组织结构') VARCHAR(60) default('')" json:"organization"`
+	Organization    string    `xorm:"not null comment('组织机构') VARCHAR(60) default('')" json:"organization"`
 	Description     string    `xorm:"not null comment('意向描述') TEXT default('')" json:"description"`
 	Resume          string    `xorm:"not null comment('权利概要') TEXT default('')" json:"resume"`
 	DealResult      string    `xorm:"not null comment('处理状态:未回访 有合作意向 无合作意向 已合作') VARCHAR(10) default('未回访')" json:"deal_result"`
@@ -29,11 +29,14 @@ type CooperationIntention struct {
 type rightsProtection struct {
 	CooperationIntention `xorm:"extends"`
 }
+type rightsProtectionFund struct {
+	CooperationIntention `xorm:"extends"`
+}
 type infringementMonitor struct {
 	CooperationIntention `xorm:"extends"`
 }
 
-var cooperationTableMap map[enum.Cooperation]string = map[enum.Cooperation]string{enum.PROTECT: "rights_protection", enum.MONITOR: "infringement_monitor"}
+var cooperationTableMap map[enum.Cooperation]string = map[enum.Cooperation]string{enum.PROTECT: "rights_protection", enum.PROTECT_FUND: "rights_protection_fund", enum.MONITOR: "infringement_monitor"}
 
 type cooperationIntentionDao struct{}
 
@@ -43,6 +46,8 @@ func (d *cooperationIntentionDao) convertToTarget(category enum.Cooperation, r *
 	switch category {
 	case enum.PROTECT:
 		bean = (*rightsProtection)(unsafe.Pointer(r))
+	case enum.PROTECT_FUND:
+		bean = (*rightsProtectionFund)(unsafe.Pointer(r))
 	case enum.MONITOR:
 		bean = (*infringementMonitor)(unsafe.Pointer(r))
 	default:
