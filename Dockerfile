@@ -1,4 +1,4 @@
-FROM golang:alpine AS build
+FROM golang:1.18 AS build
 
 RUN mkdir /source
 COPY . /source

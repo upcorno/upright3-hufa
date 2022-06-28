@@ -66,6 +66,7 @@ func init() {
 			new(Consultation),
 			new(ConsultationReply),
 			new(rightsProtection),
+			new(rightsProtectionFund),
 			new(infringementMonitor),
 			new(TemplateMsgSubscribe),
 		)
