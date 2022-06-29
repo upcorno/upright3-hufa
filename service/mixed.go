@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"law/conf"
@@ -10,9 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eko/gocache/v3/cache"
+	"github.com/eko/gocache/v3/marshaler"
 	"github.com/eko/gocache/v3/store"
-	"github.com/thedevsaddam/gojsonq/v2"
 )
 
 //放置不便于归类的服务
@@ -29,34 +29,35 @@ type fundUsage struct {
 	CaseNum         int
 }
 
-var usageCache *cache.Cache[fundUsage]
+var usageCache marshaler.Marshaler
 var usageMutex sync.Mutex
 
 func init() {
-	usageCache = cache.New[fundUsage](store.NewRedis(Rdb))
+	usageCache = *marshaler.New(store.NewRedis(Rdb))
 }
 
 //查询维权基金的使用情况
 func (c *mixed) GetFundUsage(obligeeProvince string) (usage *fundUsage, err error) {
-	key := string(md5.New().Sum([]byte(conf.App.ProjectName + "GetFundUsage" + obligeeProvince)))
-	cachedUsage, err := usageCache.Get(context.Background(), key)
+	usage, err = c.requestFundUsage(obligeeProvince)
+	h := md5.New()
+	h.Write([]byte(conf.App.ProjectName + "GetFundUsage" + obligeeProvince))
+	key := fmt.Sprintf("%x", h.Sum(nil))
+	_, err = usageCache.Get(context.Background(), key, &usage)
 	if err == nil {
-		usage = &cachedUsage
 		return
 	}
 	usageMutex.Lock()
 	defer usageMutex.Unlock()
 	//锁控制后再次检查缓存，减少从源端查询次数
-	cachedUsage, err = usageCache.Get(context.Background(), key)
+	_, err = usageCache.Get(context.Background(), key, &usage)
 	if err == nil {
-		usage = &cachedUsage
 		return
 	}
 	usage, err = c.requestFundUsage(obligeeProvince)
-	if err != nil {
+	if err == nil {
 		t := time.Now()
 		dur := time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 0, time.Local).Sub(t)
-		usageCache.Set(context.Background(), key, *usage, store.WithExpiration(dur))
+		err = usageCache.Set(context.Background(), key, usage, store.WithExpiration(dur))
 		return
 	}
 	return
@@ -74,37 +75,25 @@ func (c *mixed) requestFundUsage(obligeeProvince string) (usage *fundUsage, err 
 		return
 	}
 	body := string(bytes)
-	jsonObj := gojsonq.New().FromString(body)
-	codeV := jsonObj.Find("code")
-	if code, ok := codeV.(float64); !ok || code != 0 {
-		err = fmt.Errorf("查询维权基金的使用情况失败。 body: %#v ", body)
+	tmp := &struct {
+		Code int `json:"code"`
+		Data struct {
+			CaseNum                    int `json:"case_num"`
+			CaseExpenditureNum         int `json:"case_expenditure_num"`
+			CaseExpenditureTotalAmount int `json:"case_expenditure_total_amount"`
+		} `json:"data"`
+	}{}
+	err = json.Unmarshal(bytes, tmp)
+	if err != nil || tmp.Code != 0 {
+		err = fmt.Errorf("查询维权基金的使用情况失败。 body: %#v ,err:%#v ", body, err)
 		return
 	}
-	usage = &fundUsage{ObligeeProvince: obligeeProvince,
-		UpdateTimeStr: time.Now().Format("2006年01月02日")}
-	jsonObj.Reset()
-	caseNumV := jsonObj.Find("data.case_num")
-	if caseNum, ok := caseNumV.(float64); !ok {
-		err = fmt.Errorf("查询维权基金的使用情况-获取案件数失败。 body: %#v", body)
-		return
-	} else {
-		usage.CaseNum = int(caseNum)
-	}
-	jsonObj.Reset()
-	paymentNumV := jsonObj.Find("data.case_expenditure_num")
-	if paymentNum, ok := paymentNumV.(float64); !ok {
-		err = fmt.Errorf("查询维权基金的使用情况-获取支付笔数失败。 body: %#v", body)
-		return
-	} else {
-		usage.PaymentNum = int(paymentNum)
-	}
-	jsonObj.Reset()
-	amountV := jsonObj.Find("data.case_expenditure_total_amount")
-	if amount, ok := amountV.(float64); !ok {
-		err = fmt.Errorf("查询维权基金的使用情况-获取累计支付金额失败。 body: %#v", body)
-		return
-	} else {
-		usage.Amount = int(amount)
+	usage = &fundUsage{
+		ObligeeProvince: obligeeProvince,
+		UpdateTimeStr:   time.Now().Format("2006年01月02日"),
+		Amount:          tmp.Data.CaseExpenditureTotalAmount,
+		CaseNum:         tmp.Data.CaseNum,
+		PaymentNum:      tmp.Data.CaseExpenditureNum,
 	}
 	return
 }
